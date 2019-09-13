@@ -3,6 +3,8 @@ from django.db import models
 class Grupo(models.Model):
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
+    anfitrion=models.OneToOneField('Miembro',on_delete=models.CASCADE)
+    lider=models.OneToOneField('Miembro',on_delete=models.CASCADE)
 
 class Tipo_Reunion(models.Model):
     id =  models.AutoField(primary_key = True)
@@ -35,11 +37,12 @@ class Miembro(models.Model):
     trabaja = models.BooleanField('Trabaja')
     grupo=models.ForeignKey(Grupo, on_delete=models.CASCADE)
     domicilio=models.ForeignKey(Domicilio, on_delete=models.CASCADE)
-
+    correo=models.EmailField('e-mail', max_length=100)
 
 class Asistencia(models.Model):
     id_asistencia=models.AutoField(primary_key=True)
     presente=models.BooleanField('Presente')
+    justificacion=models.TextField('Justificacion',blank=False,null=False)
     miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
     reunion=models.ForeignKey(Reunion, on_delete=models.CASCADE)
 
@@ -55,7 +58,6 @@ class Telefono(models.Model):
     whatsapp=models.BooleanField('Whatsapp')
     miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
     tipo_telefono=models.ForeignKey(Tipo_Telefono, on_delete=models.CASCADE)
-
 
 class Horario_Disponible(models.Model):
     id_horario_disponible=models.AutoField(primary_key=True)
