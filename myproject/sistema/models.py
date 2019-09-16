@@ -1,18 +1,13 @@
 from django.db import models
 
-class Grupo(models.Model):
-    id_grupo=models.AutoField(primary_key=True)
-    nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
-    anfitrion=models.OneToOneField('Miembro',on_delete=models.CASCADE)
-    lider=models.OneToOneField('Miembro',on_delete=models.CASCADE)
 
 class Tipo_Reunion(models.Model):
-    id =  models.AutoField(primary_key = True)
+    id_tipo_reunion =  models.AutoField(primary_key = True)
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
-    Descripcion = models.CharField('Nombre',max_length=200,blank = False, null = False)
+    descripcion = models.CharField('Descripcion',max_length=200,blank = False, null = True)
 
 class Reunion(models.Model):
-    id=models.AutoField(primary_key=True)
+    id_reunion=models.AutoField(primary_key=True)
     fecha = models.DateField('Fecha', auto_now=False, auto_now_add=False)
     hora = models.TimeField('Horario', auto_now=False, auto_now_add=False)
     tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.CASCADE)
@@ -33,16 +28,21 @@ class Miembro(models.Model):
     nacionalidad = models.CharField('Nacionalidad', max_length=100,blank=False, null = False)
     fecha_nacimiento = models.DateField('Fecha de Nacimiento', auto_now=False, auto_now_add=False)
     estado_civil = models.CharField('Estado Civil', max_length=100,blank=False,null=False)
-    cant_hijo = models.IntegerField('Cantidad de Hijos')
+    cant_hijo = models.IntegerField('Cantidad de Hijos',null=True)
     trabaja = models.BooleanField('Trabaja')
-    grupo=models.ForeignKey(Grupo, on_delete=models.CASCADE)
     domicilio=models.ForeignKey(Domicilio, on_delete=models.CASCADE)
-    correo=models.EmailField('e-mail', max_length=100)
+    correo=models.EmailField('e-mail', max_length=100,null=True)
+
+class Grupo(models.Model):
+    id_grupo=models.AutoField(primary_key=True)
+    nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
+    miembro=models.ManyToManyField(Miembro)
+
 
 class Asistencia(models.Model):
     id_asistencia=models.AutoField(primary_key=True)
     presente=models.BooleanField('Presente')
-    justificacion=models.TextField('Justificacion',blank=False,null=False)
+    justificacion=models.TextField('Justificacion',blank=False,null=True)
     miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
     reunion=models.ForeignKey(Reunion, on_delete=models.CASCADE)
 
