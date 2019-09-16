@@ -1,0 +1,11 @@
+{% extends 'index.html'%}
+{% block titulo %}
+    Agregar Asistencia
+{% endblock titulo %}
+{% block body %}
+    <form method"POST">
+        {% csrf_token %}
+        {{asistencia_form.as_p}}
+        <button type = "submit">Crear</button>
+    </form>
+{% endblock body %}

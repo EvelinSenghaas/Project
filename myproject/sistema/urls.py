@@ -13,5 +13,5 @@ urlpatterns = [
     path('agregarEncuesta/',agregarEncuesta,name ='agregarEncuesta'),
     path('agregarPregunta/',agregarPregunta,name='agregarPregunta'),
     path('agregarRespuesta/',agregarRespuesta,name='agregarRespuesta'),
-    path("crearGrupo/",crearGrupo, name='crearGrupo')
+    path('crearGrupo/',crearGrupo, name='crearGrupo')
 ]

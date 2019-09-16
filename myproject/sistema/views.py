@@ -115,4 +115,4 @@ def agregarRespuesta(request):
             return redirect('home')
     else:
         respuesta_form=RespuestaForm()
-    return(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
+    return render(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
