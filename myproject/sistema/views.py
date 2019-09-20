@@ -1,8 +1,17 @@
 from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm
+from .models import Miembro
+
 def Home(request):
-    return render(request,'index.html')
+    return render(request,'sistema/index.html')
+
+def Asistencia(request):
+    if request.method == 'POST':
+        return redirect('home')
+    else:
+        return render(request,'sistema/index_asistencia.html')
+
 
 
 def crearGrupo(request):
@@ -15,6 +24,13 @@ def crearGrupo(request):
         grupo_form=GrupoForm()
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
+def listarMiembro(request):
+    if request.method == 'POST':
+        return redirect('home')
+    else:
+        miembros = Miembro.objects.all()
+    return render(request,'sistema/listarMiembro.html',{'miembros':miembros})
+
 def crearMiembro(request):
     if request.method == 'POST':
         miembro_form=MiembroForm(request.POST)
@@ -24,7 +40,6 @@ def crearMiembro(request):
     
     else:
         miembro_form=MiembroForm()
-
     return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form})
 
 def crearTipo_Reunion(request):

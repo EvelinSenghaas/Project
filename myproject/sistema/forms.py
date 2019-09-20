@@ -14,12 +14,12 @@ class Tipo_ReunionForm(forms.ModelForm):
 class ReunionForm(forms.ModelForm):
     class Meta:
         model=Reunion
-        fields=['fecha','hora','tipo_reunion']
+        fields=['nombre','fecha','hora','tipo_reunion']
 
 class DomicilioForm(forms.ModelForm):
     class Meta:
         model=Domicilio
-        fields=['calle','nro','barrio','localidad','provincia','reunion']
+        fields=['calle','nro','mz','barrio','localidad','provincia','reunion']
 
 class MiembroForm(forms.ModelForm):
     class Meta:
