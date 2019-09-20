@@ -31,7 +31,13 @@ class Domicilio(models.Model):
         
 
 class Miembro(models.Model):
-    #tipo_dni = models... quiero que sea un combito
+    TIPO=[
+        ('D.N.I','D.N.I.'),
+        ('CUIL','CUIL'),
+        ('CUIT','CUIT'),
+        ('PASAPORTE','PASAPORTE')
+        ]
+    tipo_dni = models.CharField('Tipo de DNI', max_length=20,choices=TIPO)
     dni=models.BigIntegerField(primary_key=True)
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     apellido = models.CharField('Apellido',max_length=200,blank = False, null = False)
