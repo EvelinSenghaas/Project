@@ -6,6 +6,11 @@
     <form method="POST">
         {% csrf_token %}
         {{grupo_form.as_p}}
-        <button type="submit">Crear</button>
+        <p> * mantenga apretado la tecla ctrl y presione los miembros que desee agregar/quitar</p>
+        <div class="card">
+            <div class="card-body">
+                <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+            </div>
+        </div>
     </form>
 {% endblock body%}

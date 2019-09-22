@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm
-from .models import Miembro
+from .models import Miembro,Grupo,Tipo_Reunion
 
 def Home(request):
     return render(request,'sistema/index.html')
@@ -22,6 +22,24 @@ def crearGrupo(request):
             return redirect('home')
     else:
         grupo_form=GrupoForm()
+    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
+
+def listarGrupo(request):
+    if request.method == 'POST':
+        return redirect('home')
+    else:
+        grupos = Grupo.objects.all()
+    return render(request,'sistema/listarGrupo.html',{'grupos':grupos})
+
+def editarGrupo(request,id_grupo):
+    grupo = Grupo.objects.get(id_grupo=id_grupo)
+    if request.method =='GET':
+        grupo_form=GrupoForm(instance=grupo)
+    else:
+        grupo_form=GrupoForm(request.POST,instance=grupo)
+        if grupo_form.is_valid():
+            grupo_form.save()
+        return redirect('home')
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
 def listarMiembro(request):
@@ -61,6 +79,17 @@ def crearTipo_Reunion(request):
             return redirect('home')
     else:
         tipo_reunion_form=Tipo_ReunionForm()
+    return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
+
+def editarTipo_Reunion(request):
+    tipo_reunion=Tipo_Reunion(id_tipo_reunion=id_tipo_reunion)
+    if request.method == 'GET':
+        tipo_reunion_form = Tipo_ReunionForm(instance = tipo_reunion)
+    else:
+        tipo_reunion_form=Tipo_ReunionForm(request.POST,instance=tipo_reunion)
+        if tipo_reunion_form.is_valid():
+            tipo_reunion_form.save()
+        return redirect('home')
     return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
 
 def crearReunion(request):

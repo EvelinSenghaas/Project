@@ -1,1 +1,92 @@
 {% extends 'sistema/base_site.html' %}
+{% load static %}
+{% block body %}
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-inner">
+                <div class="row m-0">
+                    <div class="col-sm-4">
+                        <div class="page-header float-left">
+                            <div class="page-title">
+                                <h1>Miembros</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="page-header float-right">
+                            <div class="page-title">
+                                <ol class="breadcrumb text-right">
+                                    <li><a href="#">Home</a></li>
+                                    <li><a href="#">Miembro</a></li>
+                                    <li class="active">Pagina Miembro</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="animated fadeIn">
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong class="card-title">Listado de Grupos</strong>
+                            </div>
+                            <div class="card-body">
+                                <table id="bootstrap-data-table" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Miembro</th>
+                                            <th> </th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if grupos %}
+                                            {% for grupo in grupos %}
+                                                <tr>
+                                                    <td>{{grupo.nombre}}</td>
+                                                    <td>{% for miembro in grupo.miembro.all %}
+                                                            {{miembro.nombre}}<br>
+                                                    {% endfor %}</td>
+                                                    <td> 
+                                                        <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        
+                                                        <button type="submit" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i></button>
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-o"></i></button>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- .animated -->
+        </div><!-- .content -->
+        
+    <script src="{% static 'assets/js/lib/data-table/datatables.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/dataTables.bootstrap.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/dataTables.buttons.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.bootstrap.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/jszip.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/vfs_fonts.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.html5.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.print.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.colVis.min.js'%}"></script>
+    <script src="{% static 'assets/js/init/datatables-init.js'%}"></script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $('#bootstrap-data-table-export').DataTable();
+      } );
+    </script>
+    
+{% endblock body %}

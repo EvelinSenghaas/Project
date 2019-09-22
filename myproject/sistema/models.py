@@ -7,6 +7,7 @@ class Tipo_Reunion(models.Model):
     descripcion = models.CharField('Descripcion',max_length=200,blank = False, null = True)
     def __str__(self):
         return self.nombre
+    
 
 class Reunion(models.Model):
     id_reunion=models.AutoField(primary_key=True)
