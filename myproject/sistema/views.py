@@ -12,8 +12,6 @@ def Asistencia(request):
     else:
         return render(request,'sistema/index_asistencia.html')
 
-
-
 def crearGrupo(request):
     if request.method == 'POST':
         grupo_form = GrupoForm(request.POST)
@@ -81,8 +79,8 @@ def crearTipo_Reunion(request):
         tipo_reunion_form=Tipo_ReunionForm()
     return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
 
-def editarTipo_Reunion(request):
-    tipo_reunion=Tipo_Reunion(id_tipo_reunion=id_tipo_reunion)
+def editarTipo_Reunion(request,id_tipo_reunion):
+    tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
     if request.method == 'GET':
         tipo_reunion_form = Tipo_ReunionForm(instance = tipo_reunion)
     else:

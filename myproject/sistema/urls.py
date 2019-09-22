@@ -8,7 +8,7 @@ from .views import crearGrupo,listarGrupo,editarGrupo
 
 urlpatterns = [
     path('crearTipo_Reunion/',crearTipo_Reunion,name='crearTipo_Reunion'),
-    path('editarTipo_Reunion/<int id_tipo_reunion',editarTipo_Reunion,name='editarTipo_Reunion'),
+    path('editarTipo_Reunion/<int:id_tipo_reunion>',editarTipo_Reunion,name='editarTipo_Reunion'),
     path('crearReunion/',crearReunion,name='crearReunion'),
     path('agregarAsistencia/',agregarAsistencia,name='agregarAsistencia'),
     path('agregarHorario_Disponible/',agregarHorario_Disponible,name='agregarHorario_Disponible'),

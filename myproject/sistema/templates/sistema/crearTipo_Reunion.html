@@ -1,4 +1,5 @@
 {% extends 'sistema/base_site.html'%}
+{% load static %}
 {% block titulo %}
     Crear un Tipo de Reunion
 {% endblock titulo %}
@@ -6,6 +7,10 @@
     <form method="POST">
         {% csrf_token %} 
         {{tipo_reunion_form.as_p}}
-        <button type="submit">Crear</button>
+        <div class="card">
+            <div class="card-body">
+                <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+            </div>
+        </div>
     </form>
 {% endblock body %}
