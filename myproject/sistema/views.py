@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm
-from .models import Miembro,Grupo,Tipo_Reunion
+from .models import Miembro,Grupo,Tipo_Reunion,Reunion
 
 def Home(request):
     return render(request,'sistema/index.html')
@@ -100,6 +100,23 @@ def crearReunion(request):
         reunion_form=ReunionForm()
     return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form})
 
+def editarReunion(request,id_reunion):
+    reunion = Reunion.objects.get(id_reunion=id_reunion)
+    if request.method == 'GET':
+        reunion_form=ReunionForm(instance = reunion)
+    else:
+        reunion_form=ReunionForm(request.POST,instance=reunion)
+        if reunionf_form.is_valid():
+            reunion_form.save()
+        return redirect('home')
+    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form})
+
+def listarReunion(request):
+    if request.method == 'POST':
+        return redirect('home')
+    else:
+        reuniones = Reunion.objects.all()
+    return render(request,'sistema/listarReunion.html',{'reuniones':reuniones})      
 def agregarAsistencia(request):
     if request.method == 'POST':
         asistencia_form=AsistenciaForm(request.POST)

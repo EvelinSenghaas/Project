@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import Asistencia,agregarAsistencia
-from .views import crearTipo_Reunion,editarTipo_Reunion,crearReunion
+from .views import crearTipo_Reunion,editarTipo_Reunion
+from .views import crearReunion,editarReunion,listarReunion
 from .views import agregarTipo_Telefono,agregarTelefono
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
 from .views import listarMiembro,crearMiembro,editarMiembro
@@ -10,6 +11,8 @@ urlpatterns = [
     path('crearTipo_Reunion/',crearTipo_Reunion,name='crearTipo_Reunion'),
     path('editarTipo_Reunion/<int:id_tipo_reunion>',editarTipo_Reunion,name='editarTipo_Reunion'),
     path('crearReunion/',crearReunion,name='crearReunion'),
+    path("listarReunion/", listarReunion, name='listarReunion'),
+    path('editarReunion/<int:id_reunion>',editarReunion,name='editarReunion'),
     path('agregarAsistencia/',agregarAsistencia,name='agregarAsistencia'),
     path('agregarHorario_Disponible/',agregarHorario_Disponible,name='agregarHorario_Disponible'),
     path('agregarTipo_Telefono/',agregarTipo_Telefono,name='agregarTipo_Telefono'),
