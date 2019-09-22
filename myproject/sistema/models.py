@@ -36,14 +36,20 @@ class Miembro(models.Model):
         ('CUIL','CUIL'),
         ('CUIT','CUIT'),
         ('PASAPORTE','PASAPORTE')
-        ]
+    ]
+    ESTADO_CIVIL=[
+        ('Soltero/a','Soltero/a'),
+        ('Casado/a','Casado/a'),
+        ('Divorciado/a','Divorciado/a'),
+        ('Viudo/a','Viudo/a')
+    ]
     tipo_dni = models.CharField('Tipo de DNI', max_length=20,choices=TIPO)
-    dni=models.BigIntegerField(primary_key=True)
+    dni=models.BigIntegerField('Documento',primary_key=True)
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     apellido = models.CharField('Apellido',max_length=200,blank = False, null = False)
     nacionalidad = models.CharField('Nacionalidad', max_length=100,blank=False, null = False)
     fecha_nacimiento = models.DateField('Fecha de Nacimiento', auto_now=False, auto_now_add=False)
-    estado_civil = models.CharField('Estado Civil', max_length=100,blank=False,null=False)
+    estado_civil = models.CharField('Estado Civil',max_length=20,choices=ESTADO_CIVIL,blank=False,null=False)
     cant_hijo = models.IntegerField('Cantidad de Hijos',null=True)
     trabaja = models.BooleanField('Trabaja')
     domicilio=models.ForeignKey(Domicilio, on_delete=models.CASCADE)

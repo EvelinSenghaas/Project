@@ -24,7 +24,7 @@ class DomicilioForm(forms.ModelForm):
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['dni','nombre','apellido','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','domicilio','correo']
+        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','domicilio','correo']
 
 class AsistenciaForm(forms.ModelForm):
     class Meta:

@@ -42,6 +42,17 @@ def crearMiembro(request):
         miembro_form=MiembroForm()
     return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form})
 
+def editarMiembro(request,dni):
+    miembro = Miembro.objects.get(dni= dni)
+    if request.method == 'GET':
+        miembro_form=MiembroForm(instance = miembro)
+    else:
+        miembro_form= MiembroForm(request.POST,instance = miembro)
+        if miembro_form.is_valid():
+            miembro_form.save()
+        return redirect('home')
+    return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form})
+
 def crearTipo_Reunion(request):
     if request.method == 'POST':
         tipo_reunion_form= Tipo_ReunionForm(request.POST)

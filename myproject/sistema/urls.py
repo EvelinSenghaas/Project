@@ -3,7 +3,7 @@ from .views import Asistencia,agregarAsistencia
 from .views import crearTipo_Reunion,crearReunion
 from .views import agregarTipo_Telefono,agregarTelefono
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,crearGrupo,agregarHorario_Disponible
-from .views import listarMiembro,crearMiembro
+from .views import listarMiembro,crearMiembro,editarMiembro
 
 urlpatterns = [
     path('crearMiembro/',crearMiembro,name='crearMiembro'),
@@ -18,5 +18,6 @@ urlpatterns = [
     path('agregarRespuesta/',agregarRespuesta,name='agregarRespuesta'),
     path('crearGrupo/',crearGrupo, name='crearGrupo'),
     path('Asistencia/',Asistencia,name = 'Asistencia'),
-    path('listarMiembro/',listarMiembro,name='listarMiembro')
+    path('listarMiembro/',listarMiembro,name='listarMiembro'),
+    path('editarMiembro/<int:dni>',editarMiembro,name='editarMiembro')
 ]
