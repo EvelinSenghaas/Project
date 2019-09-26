@@ -23,17 +23,21 @@ class Domicilio(models.Model):
     def __str__(self):
         return self.barrio
     
-class Reunion(models.Model):
-    id_reunion=models.AutoField(primary_key=True)
-    fecha = models.DateField('Fecha', auto_now=False, auto_now_add=False)
-    hora = models.TimeField('Horario', auto_now=False, auto_now_add=False)
-    tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.CASCADE)
-    nombre =models.CharField('Nombre', max_length=100,blank=False,null=True)
-    domicilio=models.ForeignKey(Domicilio,on_delete=models.CASCADE,blank=False,null=True)
+class Horario_Disponible(models.Model):
+    DIA=[
+        ('Lunes','Lunes'),
+        ('Martes','Martes'),
+        ('Miercoles','Miercoles'),
+        ('Jueves','Jueves'),
+        ('Viernes','Viernes'),
+        ('Sabado','Sabado'),
+        ('Domingo','Domingo')
+    ]
+    id_horario_disponible=models.AutoField(primary_key=True)
+    dia=models.CharField('dia',max_length=50,blank=False,null=False,choices=DIA)
+    desde=models.TimeField('Desde', auto_now=False, auto_now_add=False,null=True)
+    hasta=models.TimeField('Hasta', auto_now=False, auto_now_add=False,null=True)
 
-    def __str__(self):
-        return self.nombre
-    
 class Tipo_Telefono(models.Model):
     id_tipo_telefono=models.AutoField(primary_key=True)
     tipo=models.CharField('Tipo', max_length=50,blank=False,null=False)#puede ser celular,fijo
@@ -42,7 +46,6 @@ class Tipo_Telefono(models.Model):
     def __str__(self):
         return self.tipo
     
-
 class Telefono(models.Model):
     id_telefono=models.AutoField(primary_key=True)
     prefijo=models.IntegerField('Prefijo')
@@ -83,11 +86,10 @@ class Miembro(models.Model):
     correo=models.EmailField('e-mail', max_length=100,null=True)
     sexo =models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
     telefono=models.ForeignKey(Telefono, on_delete=models.CASCADE,null=True)
-    
+    horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.CASCADE,null=True)
     def __str__(self):
         return self.nombre
     
-
 class Grupo(models.Model):
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
@@ -96,23 +98,24 @@ class Grupo(models.Model):
     def __str__(self):
         return self.nombre
     
+class Reunion(models.Model):
+    id_reunion=models.AutoField(primary_key=True)
+    fecha = models.DateField('Fecha', auto_now=False, auto_now_add=False)
+    hora = models.TimeField('Horario', auto_now=False, auto_now_add=False)
+    tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.CASCADE)
+    nombre =models.CharField('Nombre', max_length=100,blank=False,null=True)
+    domicilio=models.ForeignKey(Domicilio,on_delete=models.CASCADE,blank=False,null=True)
+    grupo=models.ForeignKey(Grupo, on_delete=models.CASCADE,null=True)
+    def __str__(self):
+        return self.nombre        
     
-
 class Asistencia(models.Model):
     id_asistencia=models.AutoField(primary_key=True)
     presente=models.BooleanField('Presente',default=False)
     justificacion=models.TextField('Justificacion',blank=False,null=True)
     miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
     reunion=models.ForeignKey(Reunion, on_delete=models.CASCADE)
-    
-
-class Horario_Disponible(models.Model):
-    id_horario_disponible=models.AutoField(primary_key=True)
-    dia=models.CharField('Tipo', max_length=50,blank=False,null=False)
-    hora=models.TimeField('Hora', auto_now=False, auto_now_add=False)
-    miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
-    
-    
+        
 class Encuesta(models.Model):
     id_fecha_envio=models.AutoField(primary_key=True)
     fecha_envio=models.DateField('Fecha Envio',auto_now=False, auto_now_add=False)
@@ -123,8 +126,6 @@ class Pregunta(models.Model):
     descripcion=models.CharField('Pregunta', max_length=50,blank=False,null=False)
     encuesta=models.ForeignKey(Encuesta, on_delete=models.CASCADE)
     
-    
-
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)
     descripcion=models.CharField('Respuesta', max_length=50,blank=False,null=False)

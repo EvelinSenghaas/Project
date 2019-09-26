@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm
-from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio
+from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible
 
 def Home(request):
     return render(request,'sistema/index.html')
@@ -23,7 +23,7 @@ def crearGrupo(request):
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
 def listarGrupo(request):
-     grupos = Grupo.objects.all()
+    grupos = Grupo.objects.all()
     return render(request,'sistema/listarGrupo.html',{'grupos':grupos})
 
 def editarGrupo(request,id_grupo):
@@ -74,14 +74,18 @@ def crearMiembro(request):
         departamento=request.POST.get('departamento')
         piso=request.POST.get('piso')
 
-
+        dia=request.POST.get('dia')
+        desde=request.POST.get('desde')
+        hasta=request.POST.get('hasta')
+        horario_form=Horario_Disponible(dia=dia,desde=desde,hasta=hasta)
         domicilio_form=Domicilio(calle=calle,nro=nro,mz=mz,provincia=provincia,localidad=localidad,barrio=barrio,departamento=departamento,piso=piso)
         domicilio_form.save()
         tipo_telefono_form=Tipo_Telefono(tipo=tipo,empresa=empresa)
         tipo_telefono_form.save()
         telefono_form=Telefono(prefijo=prefijo,numero=numero,whatsapp=whatsapp,tipo_telefono=tipo_telefono_form)
         telefono_form.save()
-        miembro_form=Miembro(nombre=nombre,apellido=apellido,nacionalidad=nacionalidad,dni=dni,tipo_dni=tipo_dni,fecha_nacimiento=fecha_nacimiento,estado_civil=estado_civil,cant_hijo=cant_hijo,trabaja=trabaja,correo=correo,sexo=sexo,domicilio=domicilio_form,telefono=telefono_form)
+        horario_form.save()
+        miembro_form=Miembro(nombre=nombre,apellido=apellido,nacionalidad=nacionalidad,dni=dni,tipo_dni=tipo_dni,fecha_nacimiento=fecha_nacimiento,estado_civil=estado_civil,cant_hijo=cant_hijo,trabaja=trabaja,correo=correo,sexo=sexo,domicilio=domicilio_form,telefono=telefono_form,horario_disponible=horario_form)
         #if miembro_form.is_valid() and domicilio_form.is_valid() and tipo_telefono_form.is_valid() and telefono_form.is_valid():
         miembro_form.save()
 
@@ -92,7 +96,8 @@ def crearMiembro(request):
         miembro_form=MiembroForm()
         tipo_telefono_form=Tipo_TelefonoForm()
         telefono_form=TelefonoForm()
-    return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form})
+        horario_form=Horario_DisponibleForm()
+    return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
 
 def editarMiembro(request,dni):
 
@@ -103,12 +108,15 @@ def editarMiembro(request,dni):
     telefono=Telefono.objects.get(id_telefono=id_telefono)
     id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
     tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
+    id_horario=miembro.horario_disponible.id_horario_disponible
+    horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=id_horario)
 
     if request.method == 'GET':
         miembro_form=MiembroForm(instance = miembro)
         domicilio_form=DomicilioForm(instance=domicilio)
         tipo_telefono_form=Tipo_TelefonoForm(instance=tipo_telefono)
         telefono_form=TelefonoForm(instance=telefono)
+        horario_form=Horario_DisponibleForm(instance=horario_disponible)
 
     else:
         print('POSTea3')
@@ -116,6 +124,7 @@ def editarMiembro(request,dni):
         domicilio_form=DomicilioForm(request.POST,instance=domicilio)
         tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
         telefono_form=TelefonoForm(request.POST,instance=telefono)
+        horario_form=Horario_DisponibleForm(request.POST,instance=horario_disponible)
         
         '''miembro_form.nombre=request.POST.get('nombre')
         miembro_form.apellido=request.POST.get('apellido')
@@ -225,7 +234,6 @@ def agregarAsistencia(request):
         asistencia_form=AsistenciaForm()
     return render(request,'sistema/agregarAsistencia.html',{'asistencia_form':asistencia_form})
 
-def agregarTipo_Telefono(request):
     if request.method == 'POST':
         tipo_telefono_form = Tipo_TelefonoForm(request.POST)
         if tipo_telefono_form.is_valid():
@@ -234,16 +242,6 @@ def agregarTipo_Telefono(request):
     else:
         tipo_telefono_form = Tipo_TelefonoForm()
     return render(request,'sistema/agregarTipo_Telefono.html',{'tipo_telefono_form':tipo_telefono_form})   
-
-def agregarTelefono(request):
-    if request.method == 'POST':
-        telefono_form = TelefonoForm(request.POST)
-        if telefono_form.is_valid():
-            telefono_form.save()
-            return redirect('home')
-    else:
-        telefono_form=TelefonoForm()
-    return render(request,'sistema/agregarTelefono.html',{'telefono_form':telefono_form})
 
 def agregarHorario_Disponible(request):
     if request.method == 'POST':

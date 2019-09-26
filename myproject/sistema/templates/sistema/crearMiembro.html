@@ -157,8 +157,8 @@
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia</label></div>
                                         <div class="col col-md-4"><input type="text" id="text-input" name="provincia" placeholder="" class="form-control"></small></div>
-                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Localidad</label></div>
-                                        <div class="col col-md-5"><input type="text" id="text-input" name="localidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad</label></div>
+                                        <div class="col col-md-4"><input type="text" id="text-input" name="localidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
@@ -168,11 +168,11 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
-                                        <div class="col col-md-6"><input type="text" id="text-input" name="calle" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-5"><input type="text" id="text-input" name="calle" placeholder="" class="form-control"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Nº</label></div>
                                         <div class="col col-md-2"><input type="text" id="text-input" name="nro" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
-                                        <div class="col col-md-0"><label for="text-input" class=" form-control-label">Mz</label></div>
-                                        <div class="col col-md-1"><input type="text" id="text-input" name="mz" placeholder="" class="form-control"></small></div>
+                                        <div><label for="text-input" class=" form-control-label">Mz</label></div>
+                                        <div class="col col-md-2"><input type="text" id="text-input" name="mz" placeholder="" class="form-control"></small></div>
                                     </div>
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
@@ -180,7 +180,17 @@
                                         <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
                                         <div class="col col-md-2"><input type="text" id="text-input" name="piso" placeholder="" class="form-control"></small></div>
                                     </div>
-
+                                    
+                                    <br>
+                                    <strong>HORARIO DISPONIBLE</strong>
+                                    <br><br>
+                                    {% for field in horario_form %}
+                                        <div class="row form-group">
+                                            <div class="col col-md-2"><label for="{{field.id_for_label}}" class=" form-control-label" >{{field.html_name}}</label></div>
+                                            <div class="col col-md-4">{{field}}</div>
+                                        </div>
+                                    {% endfor %}
+                                    
 
                                 </div>
 
@@ -188,12 +198,7 @@
                                
                             <div class="card">
                                 <div class="card-body">
-                                    <!--<button type="button" class="btn btn-primary btn-sm">Primary</button>-->
-                                    <!--<button type="button" class="btn btn-secondary btn-sm">Secondary</button>-->
                                     <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
-                                    <!--<button type="button" class="btn btn-warning btn-sm">Warning</button>-->
-                                    <!--<button type="button" class="btn btn-danger btn-sm">Danger</button>-->
-                                    <!--<button type="button" class="btn btn-link btn-sm">Link</button>-->
                                 </div>
                             </div>
                             <div class="card-footer">

@@ -14,7 +14,7 @@ class Tipo_ReunionForm(forms.ModelForm):
 class ReunionForm(forms.ModelForm):
     class Meta:
         model=Reunion
-        fields=['nombre','fecha','hora','tipo_reunion']
+        fields=['nombre','fecha','hora','tipo_reunion','grupo']
 
 class DomicilioForm(forms.ModelForm):
     class Meta:
@@ -24,7 +24,7 @@ class DomicilioForm(forms.ModelForm):
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','correo']
+        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','correo','horario_disponible']
 
 class AsistenciaForm(forms.ModelForm):
     class Meta:
@@ -44,7 +44,12 @@ class TelefonoForm(forms.ModelForm):
 class Horario_DisponibleForm(forms.ModelForm): 
     class Meta:
         model = Horario_Disponible
-        fields = ['dia','hora','miembro']
+        fields = ['dia','desde','hasta']
+        widgets={
+            'dia':forms.Select(attrs={'class':'form-control col-md-20'}),
+            'desde': forms.TextInput(attrs={'class':'form-control col-md-20'}),
+            'hasta':forms.TextInput(attrs={'class':'form-control col-md-20'})
+        }
 
 class EncuestaForm(forms.ModelForm): 
     class Meta:
