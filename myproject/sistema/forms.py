@@ -19,12 +19,12 @@ class ReunionForm(forms.ModelForm):
 class DomicilioForm(forms.ModelForm):
     class Meta:
         model=Domicilio
-        fields=['calle','nro','mz','barrio','localidad','provincia','reunion']
+        fields=['calle','nro','mz','barrio','localidad','provincia','departamento','piso']
 
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','domicilio','correo']
+        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','correo']
 
 class AsistenciaForm(forms.ModelForm):
     class Meta:
@@ -39,7 +39,7 @@ class Tipo_TelefonoForm(forms.ModelForm):
 class TelefonoForm(forms.ModelForm):
     class Meta:
         model = Telefono
-        fields = ['prefijo','numero','whatsapp','miembro','tipo_telefono']
+        fields = ['prefijo','numero','whatsapp','tipo_telefono']
 
 class Horario_DisponibleForm(forms.ModelForm): 
     class Meta:

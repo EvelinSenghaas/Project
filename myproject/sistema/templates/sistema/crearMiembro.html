@@ -3,13 +3,189 @@
 {% block body%}
     <form method="POST">
         {% csrf_token %}
-        <div class="col-lg-6">
+        <div class="col-lg-11">
                         <div class="card">
                             <div class="card-header">
                                 <strong>Planilla de Registro de </strong> Miembros
                             </div>
-                            <form method="POST"></form>
-                                {{miembro_form.as_p}}
+                            <form method="POST" class="form-horizontal">
+                            
+                                <div class="card-body card-block">
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre</label></div>
+                                        <div class="col-5 col-md-9"><input type="text" id="miembro_form.nombre" name="nombre" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Apellido</label></div>
+                                        <div class="col col-md-9"><input type="text" id="text-input" name="apellido" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Tipo de Documento</label></div>
+                                        <div class="col-12 col-md-4">
+                                            <select id="select" name='tipo_dni' class="form-control">
+                                                <option value="DNI">DNI</option>
+                                                <option value="CUIT">CUIT</option>
+                                                <option value="CUIL">CUIL</option>
+                                                <option value="PASAPORTE">PASAPORTE</option>
+                                            </select>
+                                        </div>
+                                        <div class="col col-md-2" ><label for="text-input" class=" form-control-label">Nº Documento</label></div>
+                                        <div class="col col-md-3"><input type="text" id="text-input" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento</label></div>
+                                        <div class="col-12 col-md-4"><input type="text" id="text-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">   
+                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Estado Civil</label></div>
+                                        <div class="col-12 col-md-4">
+                                            <select id="select1" name='estado_civil' class="form-control">
+                                                <option value="Soltero/a">Soltero/a</option>
+                                                <option value="Casado/a">Casado/a</option>
+                                                <option value="Divorciado/a">Divorciado/a</option>
+                                                <option value="Viudo/a">Viudo/a</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nacionalidad</label></div>
+                                        <div class="col-12 col-md-9"><input type="text" id="text-input" name="nacionalidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
+                                        <div class="col-12 col-md-9"><input type="email" id="email-input" name="correo" placeholder="" class="form-control"><small class="form-text text-muted">Example@example.com</small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos</label></div>
+                                        <div class="col-12 col-md-4"><input type="text" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label class="form-control-label">Trabaja</label></div>
+                                            <div class="col col-md">
+                                                <div class="form-check">
+                                                    <div class="radio">
+                                                        <label for="radio1" class="form-check-label ">
+                                                            <input type="radio" id="Si" name="trabaja" value="True" class="form-check-input">Si
+                                                        </label>
+                                                    </div>
+                                                    <div class="radio">
+                                                        <label for="radio2" class="form-check-label ">
+                                                            <input type="radio" id="No" name="trabaja" value="False" class="form-check-input">No
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col col-md-1"><label class="form-control-label">Sexo</label></div>
+                                            <div class="col col-md">
+                                                <div class="form-check">
+                                                    <div class="radio">
+                                                        <label for="radio1" class="form-check-label ">
+                                                            <input type="radio" id="F" name="sexo" value="Femenino" class="form-check-input">Femenino
+                                                        </label>
+                                                    </div>
+                                                    <div class="radio">
+                                                        <label for="radio2" class="form-check-label ">
+                                                            <input type="radio" id="M" name="sexo" value="Masculino" class="form-check-input">Masculino
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </div>
+                                    
+                                    <br>
+                                    <strong>TELEFONO</strong>
+                                    <br><br>
+
+                                    <div class="row form-group">   
+                                        <div class ="col col-md-3"><label for="select" class="form-control-label">Tipo de Telefono</label></div>
+                                            <div class="col-12 col-md-4">
+                                                <select id="select" name='tipo' class="form-control">
+                                                    <option value="Movil">Movil</option>
+                                                    <option value="Fijo">Fijo</option>
+                                                </select>
+                                            </div>
+                                        <div class ="col col-md-1"><label for="select" class="form-control-label">Empresa</label></div>
+                                            <div class="col-12 col-md-4">
+                                                <select id="select" name='empresa' class="form-control">
+                                                    <option value="Claro">Claro</option>
+                                                    <option value="Personal">Personal</option>
+                                                    <option value="Movistar">Movistar</option>
+                                                    <option value="Otro">Otro</option>
+                                                </select>
+                                            </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col-12 col-md-3"><label for="text-input" class=" form-control-label">Prefijo</label></div>
+                                        <div class="col col-md-4"><input type="text" id="text-input" name="prefijo" placeholder="3764" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Nº Telefono</label></div>
+                                        <div class="col col-md-4"><input type="text" id="text-input" name="numero" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label class="form-control-label">Whatsapp</label></div>
+                                            <div class="col col-md">
+                                                <div class="form-check">
+                                                    <div class="radio">
+                                                        <label for="radio1" class="form-check-label ">
+                                                            <input type="radio" id="Si" name="whatsapp" value="True" class="form-check-input">Si
+                                                        </label>
+                                                    </div>
+                                                    <div class="radio">
+                                                        <label for="radio2" class="form-check-label ">
+                                                            <input type="radio" id="No" name="whatsapp" value="False" class="form-check-input">No
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                       
+                                    </div>
+
+                                    <br>
+                                    <strong>DOMICILIO</strong>
+                                    <br><br>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia</label></div>
+                                        <div class="col col-md-4"><input type="text" id="text-input" name="provincia" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Localidad</label></div>
+                                        <div class="col col-md-5"><input type="text" id="text-input" name="localidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio</label></div>
+                                        <div class="col col-md-10"><input type="text" id="text-input" name="barrio" placeholder="" class="form-control"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
+                                        <div class="col col-md-6"><input type="text" id="text-input" name="calle" placeholder="" class="form-control"></small></div>
+                                        <div><label for="text-input" class=" form-control-label">Nº</label></div>
+                                        <div class="col col-md-2"><input type="text" id="text-input" name="nro" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-0"><label for="text-input" class=" form-control-label">Mz</label></div>
+                                        <div class="col col-md-1"><input type="text" id="text-input" name="mz" placeholder="" class="form-control"></small></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
+                                        <div class="col col-md-2"><input type="text" id="text-input" name="departamento" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
+                                        <div class="col col-md-2"><input type="text" id="text-input" name="piso" placeholder="" class="form-control"></small></div>
+                                    </div>
+
+
+                                </div>
+
+                            </form>
+                               
                             <div class="card">
                                 <div class="card-body">
                                     <!--<button type="button" class="btn btn-primary btn-sm">Primary</button>-->

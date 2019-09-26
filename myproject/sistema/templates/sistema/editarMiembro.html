@@ -1,0 +1,12 @@
+{% extends 'sistema/base_site.html'%}
+{% load static %}
+{% block body %}
+    <form method="POST">
+        {% csrf_token %}
+        <form>{{miembro_form.as_p}}
+        {{tipo_telefono_form.as_p}}
+        {{telefono_form.as_p}}
+        {{domicilio_form}}
+        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+    </form>
+{% endblock body %}

@@ -1,6 +1,7 @@
 {% extends 'sistema/base_site.html' %}
 {% load static %}
 {% block body %}
+        
         <div class="breadcrumbs">
             <div class="breadcrumbs-inner">
                 <div class="row m-0">
@@ -40,27 +41,21 @@
                                     <thead>
                                         <tr>
                                             <th>Nombre</th>
-                                            <th>Tipo de Reunion</th>
-                                            <th>Dia</th>
-                                            <th>Horario</th>
-                                            <th>Direccion</th>
+                                            <th>Descripcion</th>
                                             <th> </th>
                                             
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% if reuniones %}
-                                            {% for reunion in reuniones %}
+                                        {% if tipo_reuniones %}
+                                            {% for tipo_reunion in tipo_reuniones %}
                                                 <tr>
-                                                    <td>{{reunion.nombre}}</td>
-                                                    <td>{{reunion.tipo_reunion}}</td>
-                                                    <td>{{reunion.fecha}}</td>
-                                                    <td>{{reunion.hora}}</td>
-                                                    <td>en el mejor lugar</td>
+                                                    <td>{{tipo_reunion.nombre}}</td>
+                                                    <td>{{tipo_reunion.descripcion}}</td>
                                                     <td> 
                                                         <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        
-                                                        <a href="/sistema/editarReunion/{{reunion.id_reunion}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
-                                                        <a href=" {%url 'sistema:eliminarMiembro' miembro.dni %} " class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-o"></i></a>
+                                                        <a href="/sistema/editarTipo_Reunion/{{tipo_reunion.id_tipo_reunion}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
+                                                        <a href="#" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-o"></i></a>
                                                     </td>
                                                 </tr>
                                             {% endfor %}

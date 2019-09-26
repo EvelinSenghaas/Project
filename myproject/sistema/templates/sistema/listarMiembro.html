@@ -59,7 +59,37 @@
                                                     <td> 
                                                         <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        
                                                         <a href="/sistema/editarMiembro/{{miembro.dni}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
-                                                        <a href="#" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-o"></i></a>
+                                                        <a href="#myModal2"class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{miembro.dni}}"><i class="fa fa-trash-o"></i></a>
+
+                                                        <!-- inicio del modal-->
+                                                            <div class="btn-group">
+                                                                <!--<center>
+                                                                 <button type="button" class="btn btn-danger btn-icon-split" data-toggle="modal" data-target=".bs-example-modal-lg2{{miembro.dni}}">
+                                                                    <div id="icon8">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </div>
+                                                                </button>
+                                                                </center>-->
+                                                                
+                                                                <div class="modal fade bs-example-modal-lg2{{miembro.dni}}" id="myModal2{{miembro.dni}}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h4 class="modal-title" id="myModalLabel{{miembro.dni}}">Confirmacion de Eliminacion</h4>
+                                                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <h4>Esta seguro de Eliminar al Miembro {{miembro.apellido}} {{miembro.nombre}} ?</h4>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                                <a href=" {% url 'sistema:eliminarMiembro' miembro.dni%}" class="btn btn-primary" >Confirmar Eliminacion</a>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                        <!--Fin del modal-->
                                                     </td>
                                                 </tr>
                                             {% endfor %}
