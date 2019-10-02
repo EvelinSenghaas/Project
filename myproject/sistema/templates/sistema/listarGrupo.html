@@ -50,13 +50,34 @@
                                             {% for grupo in grupos %}
                                                 <tr>
                                                     <td>{{grupo.nombre}}</td>
-                                                    <td>{% for miembro in grupo.miembro.all %}
-                                                            {{miembro.nombre}}<br>
+                                                    <td>{% for grupo in grupo.miembro.all %}
+                                                            {{grupo.nombre}}<br>
                                                     {% endfor %}</td>
                                                     <td> 
                                                         <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        
                                                         <a href="/sistema/editarGrupo/{{grupo.id_grupo}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
-                                                        <a href="#" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash-o"></i></a>
+                                                        <a href="#myModal2" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{grupo.id_grupo}}"><i class="fa fa-trash-o"></i></a>
+                                                        <!-- inicio del modal-->
+                                                            <div class="btn-group">
+                                                                <div class="modal fade bs-example-modal-lg2{{grupo.id_grupo}}" id="myModal2{{grupo.id_grupo}}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h4 class="modal-title" id="myModalLabel{{grupo.id_grupo}}">Confirmacion de Eliminacion</h4>
+                                                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <h4>Esta seguro de Eliminar al grupo {{grupo.nombre}} ?</h4>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                                <a href=" {% url 'sistema:eliminarGrupo' grupo.id_grupo%}" class="btn btn-primary" >Confirmar Eliminacion</a>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                        <!--Fin del modal-->
                                                     </td>
                                                 </tr>
                                             {% endfor %}

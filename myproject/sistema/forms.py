@@ -15,6 +15,7 @@ class ReunionForm(forms.ModelForm):
     class Meta:
         model=Reunion
         fields=['nombre','fecha','hora','tipo_reunion','grupo']
+        
 
 class DomicilioForm(forms.ModelForm):
     class Meta:
@@ -24,7 +25,7 @@ class DomicilioForm(forms.ModelForm):
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','correo','horario_disponible']
+        fields = ['nombre','apellido','tipo_dni','dni','nacionalidad','fecha_nacimiento','estado_civil','cant_hijo','trabaja','sexo','correo','horario_disponible']
 
 class AsistenciaForm(forms.ModelForm):
     class Meta:
@@ -35,11 +36,20 @@ class Tipo_TelefonoForm(forms.ModelForm):
     class Meta:
         model = Tipo_Telefono
         fields = ['tipo','empresa']
+        '''widget={
+            'tipo':forms.Select(attrs={'class':'form-control col-md-20'}),
+            'empresa':forms.Select(attrs={'class':'form-control col-md-20'})
+        }'''
 
 class TelefonoForm(forms.ModelForm):
     class Meta:
         model = Telefono
         fields = ['prefijo','numero','whatsapp','tipo_telefono']
+        '''widgets = {
+            'prefijo':forms.TextInput(attrs={'class':'form-control col-md-20'}),
+            'numero':forms.TextInput(attrs={'class':'form-control col-md-20'}),
+            'whatsapp':forms.BooleanField(required=True)
+        }'''
 
 class Horario_DisponibleForm(forms.ModelForm): 
     class Meta:

@@ -14,18 +14,18 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre</label></div>
-                                        <div class="col-5 col-md-9"><input type="text" id="miembro_form.nombre" name="nombre" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-5 col-md-9"><input required type="text" id="miembro_form.nombre" name="nombre" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Apellido</label></div>
-                                        <div class="col col-md-9"><input type="text" id="text-input" name="apellido" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-9"><input required type="text" id="text-input" name="apellido" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="select" class=" form-control-label">Tipo de Documento</label></div>
                                         <div class="col-12 col-md-4">
-                                            <select id="select" name='tipo_dni' class="form-control">
+                                            <select id="select" name='tipo_dni' class="form-control" required>
                                                 <option value="DNI">DNI</option>
                                                 <option value="CUIT">CUIT</option>
                                                 <option value="CUIL">CUIL</option>
@@ -33,18 +33,18 @@
                                             </select>
                                         </div>
                                         <div class="col col-md-2" ><label for="text-input" class=" form-control-label">Nº Documento</label></div>
-                                        <div class="col col-md-3"><input type="text" id="text-input" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input required type="text" id="text-input" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento</label></div>
-                                        <div class="col-12 col-md-4"><input type="text" id="text-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4"><input required type="text" id="text-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">   
                                         <div class="col col-md-3"><label for="select" class=" form-control-label">Estado Civil</label></div>
                                         <div class="col-12 col-md-4">
-                                            <select id="select1" name='estado_civil' class="form-control">
+                                            <select id="select1" name='estado_civil' class="form-control" required>
                                                 <option value="Soltero/a">Soltero/a</option>
                                                 <option value="Casado/a">Casado/a</option>
                                                 <option value="Divorciado/a">Divorciado/a</option>
@@ -55,24 +55,24 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nacionalidad</label></div>
-                                        <div class="col-12 col-md-9"><input type="text" id="text-input" name="nacionalidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-9"><input required type="text" id="text-input" name="nacionalidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
-                                        <div class="col-12 col-md-9"><input type="email" id="email-input" name="correo" placeholder="" class="form-control"><small class="form-text text-muted">Example@example.com</small></div>
+                                        <div class="col-12 col-md-9"><input required type="email" id="email-input" name="correo" placeholder="" class="form-control"><small class="form-text text-muted">Example@example.com</small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos</label></div>
-                                        <div class="col-12 col-md-4"><input type="text" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4"><input required type="text" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label class="form-control-label">Trabaja</label></div>
                                             <div class="col col-md">
                                                 <div class="form-check">
-                                                    <div class="radio">
+                                                    <div class="radio" required>
                                                         <label for="radio1" class="form-check-label ">
                                                             <input type="radio" id="Si" name="trabaja" value="True" class="form-check-input">Si
                                                         </label>
@@ -87,7 +87,7 @@
                                             <div class="col col-md-1"><label class="form-control-label">Sexo</label></div>
                                             <div class="col col-md">
                                                 <div class="form-check">
-                                                    <div class="radio">
+                                                    <div class="radio" required>
                                                         <label for="radio1" class="form-check-label ">
                                                             <input type="radio" id="F" name="sexo" value="Femenino" class="form-check-input">Femenino
                                                         </label>
@@ -104,21 +104,21 @@
                                     <br>
                                     <strong>TELEFONO</strong>
                                     <br><br>
-
                                     <div class="row form-group">   
                                         <div class ="col col-md-3"><label for="select" class="form-control-label">Tipo de Telefono</label></div>
                                             <div class="col-12 col-md-4">
-                                                <select id="select" name='tipo' class="form-control">
+                                                <select id="select" name='tipo' class="form-control" required>
                                                     <option value="Movil">Movil</option>
                                                     <option value="Fijo">Fijo</option>
                                                 </select>
                                             </div>
                                         <div class ="col col-md-1"><label for="select" class="form-control-label">Empresa</label></div>
                                             <div class="col-12 col-md-4">
-                                                <select id="select" name='empresa' class="form-control">
+                                                <select id="select" name='empresa' class="form-control" required>
                                                     <option value="Claro">Claro</option>
                                                     <option value="Personal">Personal</option>
                                                     <option value="Movistar">Movistar</option>
+                                                    <option value="Tuenti">Tuenti</option>
                                                     <option value="Otro">Otro</option>
                                                 </select>
                                             </div>
@@ -156,21 +156,21 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia</label></div>
-                                        <div class="col col-md-4"><input type="text" id="text-input" name="provincia" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-4"><input required type="text" id="text-input" name="provincia" placeholder="" class="form-control"></small></div>
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad</label></div>
-                                        <div class="col col-md-4"><input type="text" id="text-input" name="localidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-4"><input required type="text" id="text-input" name="localidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio</label></div>
-                                        <div class="col col-md-10"><input type="text" id="text-input" name="barrio" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-10"><input required type="text" id="text-input" name="barrio" placeholder="" class="form-control"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
-                                        <div class="col col-md-5"><input type="text" id="text-input" name="calle" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-5"><input required type="text" id="text-input" name="calle" placeholder="" class="form-control"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Nº</label></div>
-                                        <div class="col col-md-2"><input type="text" id="text-input" name="nro" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-2"><input required type="text" id="text-input" name="nro" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Mz</label></div>
                                         <div class="col col-md-2"><input type="text" id="text-input" name="mz" placeholder="" class="form-control"></small></div>
                                     </div>

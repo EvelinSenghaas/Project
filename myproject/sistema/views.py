@@ -23,7 +23,7 @@ def crearGrupo(request):
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
 def listarGrupo(request):
-    grupos = Grupo.objects.all()
+    grupos = Grupo.objects.filter('borrado'==False)
     return render(request,'sistema/listarGrupo.html',{'grupos':grupos})
 
 def editarGrupo(request,id_grupo):
@@ -37,11 +37,13 @@ def editarGrupo(request,id_grupo):
         return redirect('/sistema/listarGrupo')
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
+def eliminarGrupo(request,id_grupo):
+    grupo = Grupo.objects.get(id_grupo=id_grupo)
+    grupo.borrado=True
+    return redirect('/sistema/listarGrupo')
+
 def listarMiembro(request):
-    if request.method == 'POST':
-        return redirect('home')
-    else:
-        miembros = Miembro.objects.all()
+    miembros = Miembro.objects.filter('borrado'==False)
     return render(request,'sistema/listarMiembro.html',{'miembros':miembros})
 
 def crearMiembro(request):
@@ -100,7 +102,6 @@ def crearMiembro(request):
     return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
 
 def editarMiembro(request,dni):
-
     miembro = Miembro.objects.get(dni= dni)
     id_domicilio=miembro.domicilio.id_domicilio
     domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
@@ -119,7 +120,6 @@ def editarMiembro(request,dni):
         horario_form=Horario_DisponibleForm(instance=horario_disponible)
 
     else:
-        print('POSTea3')
         miembro_form=MiembroForm(request.POST,instance=miembro)
         domicilio_form=DomicilioForm(request.POST,instance=domicilio)
         tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
@@ -168,10 +168,14 @@ def eliminarMiembro(request,dni):
     telefono=Telefono.objects.get(id_telefono=id_telefono)
     id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
     tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
-    domicilio.delete()
-    miembro.delete()
-    telefono.delete()
-    tipo_telefono.delete()
+    domicilio.borrado=True
+    miembro.borrado=True
+    telefono.borrado=True
+    tipo_telefono.borrado=True
+    domicilio.save()
+    miembro.save()
+    telefono.save()
+    tipo_telefono.save()
     return redirect('/sistema/listarMiembro')
 
 def crearTipo_Reunion(request):
@@ -196,33 +200,67 @@ def editarTipo_Reunion(request,id_tipo_reunion):
     return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
 
 def listarTipo_Reunion(request):
-    tipo_reuniones = Tipo_Reunion.objects.all()
+    tipo_reuniones = Tipo_Reunion.objects.filter('borrado'==False)
     return render(request,'sistema/listarTipo_Reunion.html',{'tipo_reuniones':tipo_reuniones})
+
+def eliminarTipo_Reunion(request,id_tipo_reunion):
+    tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
+    tipo_reunion.borrado=False
+    tipo_reunion.save()
+    return redirect('/sistema/listarTipo_Reunion/')
 
 def crearReunion(request):
     if request.method == 'POST':
         reunion_form=ReunionForm(request.POST)
+
+        calle=request.POST.get('calle')
+        nro=request.POST.get('nro')
+        mz=request.POST.get('mz')
+        provincia=request.POST.get('provincia')
+        localidad=request.POST.get('localidad')
+        barrio=request.POST.get('barrio')
+        departamento=request.POST.get('departamento')
+        piso=request.POST.get('piso')
+
+        domicilio_form=Domicilio(calle=calle,nro=nro,mz=mz,provincia=provincia,localidad=localidad,barrio=barrio,departamento=departamento,piso=piso)
+        domicilio_form.save()
+
+        reunion_form.domicilio=domicilio_form
         if reunion_form.is_valid():
             reunion_form.save()
+            domicilio_form.save()
             return redirect('/sistema/listarReunion')
     else:
         reunion_form=ReunionForm()
-    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form})
+        domicilio_form=DomicilioForm()
+    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
     if request.method == 'GET':
         reunion_form=ReunionForm(instance = reunion)
+        #domicilio_form=DomicilioForm(intance = domicilio)
     else:
         reunion_form=ReunionForm(request.POST,instance=reunion)
-        if reunionf_form.is_valid():
+        #domicilio_form=DomicilioForm(instance = domicilio)
+        if reunion_form.is_valid():
             reunion_form.save()
+            #domicilio_form.save()
         return redirect('/sistema/listarReunion')
-    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form})
+    return render(request,'sistema/editarReunion.html',{'reunion_form':reunion_form})
 
 def listarReunion(request):
-    reuniones = Reunion.objects.all()
+    reuniones = Reunion.objects.filter('borrado'==False)
     return render(request,'sistema/listarReunion.html',{'reuniones':reuniones})      
+
+def eliminarReunion(request,id_reunion):
+    reunion=Reunion.objects.get(id_reunion=id_reunion)
+    domicilio=Domicilio.objects.get(id_domicilio=reunion.domicilio.id_domicilio)
+    reunion.borrado=True
+    domicilio.borrado=True
+    reunion.save()
+    domicilio.save()
+    return redirect('/sistema/listarReunion/')
 
 def agregarAsistencia(request):
     if request.method == 'POST':
@@ -233,15 +271,6 @@ def agregarAsistencia(request):
     else:
         asistencia_form=AsistenciaForm()
     return render(request,'sistema/agregarAsistencia.html',{'asistencia_form':asistencia_form})
-
-    if request.method == 'POST':
-        tipo_telefono_form = Tipo_TelefonoForm(request.POST)
-        if tipo_telefono_form.is_valid():
-            tipo_telefono_form.save()
-            return redirect('home')
-    else:
-        tipo_telefono_form = Tipo_TelefonoForm()
-    return render(request,'sistema/agregarTipo_Telefono.html',{'tipo_telefono_form':tipo_telefono_form})   
 
 def agregarHorario_Disponible(request):
     if request.method == 'POST':

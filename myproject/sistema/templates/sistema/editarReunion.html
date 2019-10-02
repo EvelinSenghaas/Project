@@ -1,0 +1,17 @@
+{% extends 'sistema/base_site.html' %}
+{% block titulo %}
+    Crear Reunion
+{% endblock titulo %}
+{% block body %}
+    <form method="POST">
+        {% csrf_token %}
+        {{reunion_form.as_p}}
+        {{domicilio_form}}
+        <div class="card">
+                     
+            <div class="card-body">
+                <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+            </div>
+        </div>
+    </form>
+{% endblock body %}
