@@ -34,11 +34,11 @@ class DomicilioForm(forms.ModelForm):
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['nombre','apellido','tipo_dni','dni','fecha_nacimiento','estado_civil','cant_hijo','trabaja','sexo','correo','horario_disponible']
+        fields = ['nombre','apellido','tipo_dni','dni','fecha_nacimiento','estado_civil','cant_hijo','trabaja','sexo','correo']
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'apellido':forms.TextInput(attrs={'class':'form-control'}),
-            #'tipo_dni':form.SelectInpuet
+            'tipo_dni':forms.Select(attrs = {'class' : 'form-control' }),
             'dni':forms.TextInput(attrs={'class':'form-control'}),
             'fecha_nacimiento':forms.DateInput(attrs={'class':'form-control f_nac'}),
             'cant_hijo':forms.TextInput(attrs={'class':'form-control'}), #no es tan text....
@@ -61,7 +61,7 @@ class Tipo_TelefonoForm(forms.ModelForm):
 class TelefonoForm(forms.ModelForm):
     class Meta:
         model = Telefono
-        fields = ['prefijo','numero','whatsapp','tipo_telefono']
+        fields = ['prefijo','numero','whatsapp']
         
 
 class Horario_DisponibleForm(forms.ModelForm): 
@@ -69,9 +69,9 @@ class Horario_DisponibleForm(forms.ModelForm):
         model = Horario_Disponible
         fields = ['dia','desde','hasta']
         widgets={
-            'dia':forms.Select(attrs={'class':'form-control col-md-20'}),
-            'desde': forms.TextInput(attrs={'class':'form-control col-md-20'}),
-            'hasta':forms.TextInput(attrs={'class':'form-control col-md-20'})
+            'dia':forms.Select(attrs={'class':'form-control '}),
+            'desde': forms.TimeInput(attrs={'class':'form-control '}),
+            'hasta':forms.TimeInput(attrs={'class':'form-control '})
         }
 
 class EncuestaForm(forms.ModelForm): 
