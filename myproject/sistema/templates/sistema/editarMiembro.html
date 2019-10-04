@@ -1,13 +1,191 @@
 {% extends 'sistema/base_site.html'%}
 {% load static %}
-{% block body %}
+{% block body%}
     <form method="POST">
         {% csrf_token %}
-        <form>{{miembro_form.as_p}}
-        {{tipo_telefono_form.as_p}}
-        {{telefono_form.as_p}}
-        {{domicilio_form}}
-        {{horario_form}}
-        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+        <div class="col-lg-11">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Planilla de Registro de </strong> Miembros
+                            </div>
+                            <form method="POST" class="form-horizontal">
+                            
+                                <div class="card-body card-block">
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
+                                        <div class="col-md-4">{{miembro_form.nombre}}</div>
+                                        <div><label for="text-input" class=" form-control-label">Apellido (*) </label></div>
+                                        <div class="col col-md-3">{{miembro_form.apellido}}</div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Tipo de Documento</label></div>
+                                        <div class="col-12 col-md-4">
+                                            <!--<select id="select" name='tipo_dni' class="form-control" required>
+                                                <option value="DNI">DNI</option>
+                                                <option value="CUIT">CUIT</option>
+                                                <option value="CUIL">CUIL</option>
+                                                <option value="PASAPORTE">PASAPORTE</option>
+                                            </select>-->
+                                            {{miembro_form.tipo_dni}}
+                                        </div>
+                                        <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
+                                        <div class="col col-md-3">{{miembro_form.dni}}<small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
+                                        <div class="col-12 col-md-4">{{miembro_form.fecha_nacimiento}}<small class="form-text text-muted">dd/mm/aaaa</small></div>
+                                    </div>
+
+                                    <div class="row form-group">   
+                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Estado Civil (*)</label></div>
+                                        <div class="col-12 col-md-4">
+                                        <!--   <select id="select1" name='estado_civil' class="form-control" required>
+                                                <option value="Soltero/a">Soltero/a</option>
+                                                <option value="Casado/a">Casado/a</option>
+                                                <option value="Divorciado/a">Divorciado/a</option>
+                                                <option value="Viudo/a">Viudo/a</option>
+                                            </select>-->
+                                            {{miembro_form.estado_civil}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
+                                        <div class="col-12 col-md-9">{{miembro_form.correo}}<small class="form-text text-muted">Example@example.com</small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos (*)</label></div>
+                                        <div class="col-12 col-md-4">{{miembro_form.cant_hijo}}<small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label class="form-control-label">Trabaja (*)</label></div>
+                                            <div class="col col-md-4">
+                                                <div class="form-check">
+                                                    <!--<div class="radio" required>
+                                                        <label for="radio1" class="form-check-label ">
+                                                            <input type="radio" id="Si" name="trabaja" value="True" class="form-check-input">Si
+                                                        </label>
+                                                    </div>
+                                                    <div class="radio">
+                                                        <label for="radio2" class="form-check-label ">
+                                                            <input type="radio" id="No" name="trabaja" value="False" class="form-check-input">No
+                                                        </label>
+                                                    </div>
+                                                </div>-->
+                                                    {{miembro_form.trabaja}}
+                                                </div>
+                                            </div>
+                                                
+                                            <div><label class="form-control-label">Sexo (*)</label></div>
+                                            <div class="col col-md-3">
+                                                <div class="form-check">
+                                                    <!--<div class="radio" required>
+                                                        <label for="radio1" class="form-check-label ">
+                                                            <input type="radio" id="F" name="sexo" value="Femenino" class="form-check-input">Femenino
+                                                        </label>
+                                                    </div>
+                                                    <div class="radio">
+                                                        <label for="radio2" class="form-check-label ">
+                                                            <input type="radio" id="M" name="sexo" value="Masculino" class="form-check-input">Masculino
+                                                        </label>
+                                                    </div>-->
+                                                    {{miembro_form.sexo}}
+                                                </div>
+                                            </div>
+                                    </div>
+                                    
+                                    <br>
+                                    <strong>TELEFONO</strong>
+                                    <br><br>
+                                    <div class="row form-group">   
+                                        <div class ="col col-md-3"><label for="select" class="form-control-label">Tipo de Telefono</label></div>
+                                            <div class="col-12 col-md-4">
+                                                {{tipo_telefono_form.tipo}}
+                                            </div>
+                                        <div class ="col col-md-1"><label for="select" class="form-control-label">Empresa</label></div>
+                                            <div class="col-12 col-md-4">
+                                                {{tipo_telefono_form.empresa}}
+                                            </div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col-12 col-md-3"><label for="text-input" class=" form-control-label">Prefijo</label></div>
+                                        <div class="col col-md-4">{{telefono_form.prefijo}}<small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Nº Telefono</label></div>
+                                        <div class="col col-md-4">{{telefono_form.numero}}<small class="form-text text-muted"></small></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label class="form-control-label">Whatsapp</label></div>
+                                            <div class="col col-md">
+                                                {{telefono_form.whatsapp}}
+                                            </div>
+                                       
+                                    </div>
+
+                                    <br>
+                                    <strong>DOMICILIO</strong>
+                                    <br><br>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
+                                        <div class="col col-md-4">{{domicilio_form.provincia}}</div>
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
+                                        <div class="col col-md-4">{{domicilio_form.localidad}}</div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
+                                        <div class="col col-md-10">{{domicilio_form.barrio}}</div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle (*)</label></div>
+                                        <div class="col col-md-5">{{domicilio_form.calle}}</div>
+                                        <div><label for="text-input" class=" form-control-label">Nº (*)</label></div>
+                                        <div class="col col-md-2">{{domicilio_form.nro}}</div>
+                                        <div><label for="text-input" class=" form-control-label">Mz</label></div>
+                                        <div class="col col-md-2">{{domicilio_form.mz}}</div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
+                                        <div class="col col-md-2">{{domicilio_form.departamento}}</div>
+                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
+                                        <div class="col col-md-2">{{domicilio_form.piso}}</div>
+                                    </div>
+                                    
+                                    <br>
+                                    <strong>HORARIO DISPONIBLE</strong>
+                                    <br><br>
+                                    {% for field in horario_form %}
+                                        <div class="row form-group">
+                                            <div class="col col-md-2"><label for="{{field.id_for_label}}" class=" form-control-label" >{{field.html_name}} (*)</label></div>
+                                            <div class="col col-md-4">{{field}}</div>
+                                        </div>
+                                    {% endfor %}
+                                    
+
+                                </div>
+
+                            </form>
+                               
+                            <div class="card">
+                                <div class="card-body">
+                                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="reset" class="btn btn-danger btn-sm">
+                                    <i class="fa fa-ban"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+        </div>
     </form>
-{% endblock body %}
+
+{% endblock body%}

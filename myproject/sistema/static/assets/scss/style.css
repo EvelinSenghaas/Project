@@ -419,7 +419,8 @@ input,
 textarea {
   -webkit-box-shadow: none;
           box-shadow: none;
-  outline: 0 !important; }
+  outline: 0 !important; 
+  border: none;}
 
 .no-padding {
   padding: 0 !important; }

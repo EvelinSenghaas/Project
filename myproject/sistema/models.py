@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import date
 
 class Tipo_Reunion(models.Model):
     id_tipo_reunion =  models.AutoField(primary_key = True)
@@ -8,15 +8,15 @@ class Tipo_Reunion(models.Model):
     borrado = models.BooleanField('borrado',default=False)
     
     def __str__(self):
-        return self.nombre
+        return self.nombre 
     
 class Domicilio(models.Model):
     id_domicilio = models.AutoField(primary_key=True)
     calle=models.CharField('Calle', max_length=100,blank=False,null=False)
     nro=models.CharField('Numero', max_length=50,blank=False,null=False)
-    mz = models.CharField('Manzana', max_length=50,null=True)
-    departamento=models.CharField('Departamento', max_length=50,null=True)
-    piso=models.CharField('Piso', max_length=50,null=True)
+    mz = models.CharField('Manzana', max_length=50,null=True,blank=True)
+    departamento=models.CharField('Departamento', max_length=50,null=True,blank=True)
+    piso=models.CharField('Piso', max_length=50,null=True,blank=True)
     barrio = models.CharField('Barrio', max_length=100,blank=False,null=False)
     localidad=models.CharField('Localidad', max_length=50,blank=False,null=False)
     provincia=models.CharField('Provincia', max_length=50,blank=False,null=False)
@@ -65,10 +65,10 @@ class Tipo_Telefono(models.Model):
     
 class Telefono(models.Model):
     id_telefono=models.AutoField(primary_key=True)
-    prefijo=models.IntegerField('Prefijo',default=3764)
+    prefijo=models.IntegerField('Prefijo',blank=True,null=True)
     numero=models.IntegerField('Numero')
     whatsapp=models.BooleanField('Whatsapp',default=True)
-    tipo_telefono=models.ForeignKey(Tipo_Telefono, on_delete=models.CASCADE,null=True)
+    tipo_telefono=models.ForeignKey(Tipo_Telefono, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)    
 
     def __str__(self):
@@ -95,20 +95,26 @@ class Miembro(models.Model):
     dni=models.BigIntegerField('Documento',primary_key=True)
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     apellido = models.CharField('Apellido',max_length=200,blank = False, null = False)
-    nacionalidad = models.CharField('Nacionalidad', max_length=100,blank=False, null = False)
     fecha_nacimiento = models.DateField('Fecha de Nacimiento', auto_now=False, auto_now_add=False)
     estado_civil = models.CharField('Estado Civil',max_length=20,choices=ESTADO_CIVIL,blank=False,null=False)
     cant_hijo = models.IntegerField('Cantidad de Hijos',null=True)
     trabaja = models.BooleanField('Trabaja',default=False)
-    domicilio=models.ForeignKey(Domicilio, on_delete=models.CASCADE)
-    correo=models.EmailField('e-mail', max_length=100,null=True)
+    domicilio=models.ForeignKey(Domicilio, on_delete=models.PROTECT)
+    correo=models.EmailField('e-mail', max_length=100,null=True,blank=True)
     sexo =models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
-    telefono=models.ForeignKey(Telefono, on_delete=models.CASCADE,null=True)
-    horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.CASCADE,null=True)
+    telefono=models.ForeignKey(Telefono, on_delete=models.PROTECT,null=True)
+    horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre + ' ' + self.apellido
+    
+    def edad(self, fecha_nacimiento):
+        diferencia_fechas = date.today() - fecha_nacimiento
+        diferencia_fechas_dias = diferencia_fechas.days
+        edad_numerica = diferencia_fechas_dias / 365.2425
+        edad = int(edad_numerica)
+        return edad
     
 class Grupo(models.Model):
     id_grupo=models.AutoField(primary_key=True)
@@ -123,10 +129,10 @@ class Reunion(models.Model):
     id_reunion=models.AutoField(primary_key=True)
     fecha = models.DateField('Fecha', auto_now=False, auto_now_add=False)
     hora = models.TimeField('Horario', auto_now=False, auto_now_add=False)
-    tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.CASCADE)
+    tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.PROTECT)
     nombre =models.CharField('Nombre', max_length=100,blank=False,null=True)
-    domicilio=models.ForeignKey(Domicilio,on_delete=models.CASCADE,blank=False,null=True)
-    grupo=models.ForeignKey(Grupo, on_delete=models.CASCADE,null=True)
+    domicilio=models.ForeignKey(Domicilio,on_delete=models.PROTECT,blank=False,null=True)
+    grupo=models.ForeignKey(Grupo, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)
 
     def __str__(self):
@@ -136,26 +142,26 @@ class Asistencia(models.Model):
     id_asistencia=models.AutoField(primary_key=True)
     presente=models.BooleanField('Presente',default=False)
     justificacion=models.TextField('Justificacion',blank=False,null=True)
-    miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
-    reunion=models.ForeignKey(Reunion, on_delete=models.CASCADE)
+    miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
+    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
         
 class Encuesta(models.Model):
     id_fecha_envio=models.AutoField(primary_key=True)
     fecha_envio=models.DateField('Fecha Envio',auto_now=False, auto_now_add=False)
-    miembro=models.ForeignKey(Miembro, on_delete=models.CASCADE)
+    miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
 
 class Pregunta(models.Model):
     id_pregunta=models.AutoField(primary_key=True)
     descripcion=models.CharField('Pregunta', max_length=50,blank=False,null=False)
-    encuesta=models.ForeignKey(Encuesta, on_delete=models.CASCADE)
+    encuesta=models.ForeignKey(Encuesta, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
     
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)
     descripcion=models.CharField('Respuesta', max_length=50,blank=False,null=False)
     puntaje=models.IntegerField('Puntaje')
-    pregunta=models.OneToOneField(Pregunta, on_delete=models.CASCADE)
+    pregunta=models.OneToOneField(Pregunta, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
     
     

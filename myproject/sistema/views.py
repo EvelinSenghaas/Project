@@ -40,17 +40,20 @@ def editarGrupo(request,id_grupo):
 def eliminarGrupo(request,id_grupo):
     grupo = Grupo.objects.get(id_grupo=id_grupo)
     grupo.borrado=True
+    grupo.save()
     return redirect('/sistema/listarGrupo')
 
 def listarMiembro(request):
-    miembros = Miembro.objects.filter('borrado'==False)
+    miembros = Miembro.objects.all()
+    for miembro in miembros:        
+        miembro.fecha_nacimiento = miembro.edad(miembro.fecha_nacimiento)
+    #miembros = Miembro.objects.filter('borrado'==False)
     return render(request,'sistema/listarMiembro.html',{'miembros':miembros})
 
 def crearMiembro(request):
     if request.method == 'POST':    
         nombre=request.POST.get('nombre')
         apellido=request.POST.get('apellido')
-        nacionalidad=request.POST.get('nacionalidad')
         dni=request.POST.get('dni')
         tipo_dni=request.POST.get('tipo_dni')
         fecha_nacimiento=request.POST.get('fecha_nacimiento')
@@ -59,13 +62,6 @@ def crearMiembro(request):
         trabaja=request.POST.get('trabaja')
         correo =request.POST.get('correo')
         sexo =request.POST.get('sexo')
-
-        tipo=request.POST.get('tipo')
-        empresa=request.POST.get('empresa')
-
-        prefijo=request.POST.get('prefijo')
-        numero=request.POST.get('numero')
-        whatsapp=request.POST.get('whatsapp')
 
         calle=request.POST.get('calle')
         nro=request.POST.get('nro')
@@ -79,15 +75,28 @@ def crearMiembro(request):
         dia=request.POST.get('dia')
         desde=request.POST.get('desde')
         hasta=request.POST.get('hasta')
+        
         horario_form=Horario_Disponible(dia=dia,desde=desde,hasta=hasta)
         domicilio_form=Domicilio(calle=calle,nro=nro,mz=mz,provincia=provincia,localidad=localidad,barrio=barrio,departamento=departamento,piso=piso)
         domicilio_form.save()
-        tipo_telefono_form=Tipo_Telefono(tipo=tipo,empresa=empresa)
-        tipo_telefono_form.save()
-        telefono_form=Telefono(prefijo=prefijo,numero=numero,whatsapp=whatsapp,tipo_telefono=tipo_telefono_form)
-        telefono_form.save()
         horario_form.save()
-        miembro_form=Miembro(nombre=nombre,apellido=apellido,nacionalidad=nacionalidad,dni=dni,tipo_dni=tipo_dni,fecha_nacimiento=fecha_nacimiento,estado_civil=estado_civil,cant_hijo=cant_hijo,trabaja=trabaja,correo=correo,sexo=sexo,domicilio=domicilio_form,telefono=telefono_form,horario_disponible=horario_form)
+
+        if request.POST.get('prefijo') and request.POST.get('numero') != None:
+            tipo=request.POST.get('tipo')
+            empresa=request.POST.get('empresa')
+            prefijo=request.POST.get('prefijo')
+            numero=request.POST.get('numero')
+            whatsapp=request.POST.get('whatsapp')
+            tipo_telefono_form=Tipo_Telefono(tipo=tipo,empresa=empresa)
+            tipo_telefono_form.save()
+            telefono_form=Telefono(prefijo=prefijo,numero=numero,whatsapp=whatsapp,tipo_telefono=tipo_telefono_form)
+            telefono_form.save()
+            miembro_form=Miembro(nombre=nombre,apellido=apellido,dni=dni,tipo_dni=tipo_dni,fecha_nacimiento=fecha_nacimiento,estado_civil=estado_civil,cant_hijo=cant_hijo,trabaja=trabaja,correo=correo,sexo=sexo,domicilio=domicilio_form,telefono=telefono_form,horario_disponible=horario_form)
+        else:
+            miembro_form=Miembro(nombre=nombre,apellido=apellido,dni=dni,tipo_dni=tipo_dni,fecha_nacimiento=fecha_nacimiento,estado_civil=estado_civil,cant_hijo=cant_hijo,trabaja=trabaja,correo=correo,sexo=sexo,domicilio=domicilio_form,horario_disponible=horario_form)
+
+
+        
         #if miembro_form.is_valid() and domicilio_form.is_valid() and tipo_telefono_form.is_valid() and telefono_form.is_valid():
         miembro_form.save()
 
@@ -105,25 +114,34 @@ def editarMiembro(request,dni):
     miembro = Miembro.objects.get(dni= dni)
     id_domicilio=miembro.domicilio.id_domicilio
     domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
-    id_telefono=miembro.telefono.id_telefono
-    telefono=Telefono.objects.get(id_telefono=id_telefono)
-    id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
-    tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
+    if miembro.telefono != None:
+        id_telefono=miembro.telefono.id_telefono
+        telefono=Telefono.objects.get(id_telefono=id_telefono)
+        id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
+        tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
     id_horario=miembro.horario_disponible.id_horario_disponible
     horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=id_horario)
 
     if request.method == 'GET':
         miembro_form=MiembroForm(instance = miembro)
         domicilio_form=DomicilioForm(instance=domicilio)
-        tipo_telefono_form=Tipo_TelefonoForm(instance=tipo_telefono)
-        telefono_form=TelefonoForm(instance=telefono)
+        if miembro.telefono != None:
+            tipo_telefono_form=Tipo_TelefonoForm(instance=tipo_telefono)
+            telefono_form=TelefonoForm(instance=telefono)
+        else:
+            tipo_telefono_form=Tipo_TelefonoForm()
+            telefono_form=TelefonoForm()
         horario_form=Horario_DisponibleForm(instance=horario_disponible)
 
     else:
         miembro_form=MiembroForm(request.POST,instance=miembro)
         domicilio_form=DomicilioForm(request.POST,instance=domicilio)
-        tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
-        telefono_form=TelefonoForm(request.POST,instance=telefono)
+        if miembro.telefono != None:
+            tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
+            telefono_form=TelefonoForm(request.POST,instance=telefono)
+        else:
+            tipo_telefono_form=Tipo_TelefonoForm(request.POST)
+            telefono_form=TelefonoForm(request.POST)
         horario_form=Horario_DisponibleForm(request.POST,instance=horario_disponible)
         
         '''miembro_form.nombre=request.POST.get('nombre')
@@ -137,7 +155,7 @@ def editarMiembro(request,dni):
         miembro_form.trabaja=request.POST.get('trabaja')
         miembro_form.correo =request.POST.get('correo')
         miembro_form.sexo =request.POST.get('sexo')
-        #miembro_form.barrio=request.POST.get('barrio')
+        #miembro_form.barrio=request.POST.get('barrio')'''
 
         tipo_telefono_form.tipo=request.POST.get('tipo')
         tipo_telefono_form.empresa=request.POST.get('empresa')
@@ -146,19 +164,24 @@ def editarMiembro(request,dni):
         telefono_form.numero=request.POST.get('numero')
         telefono_form.whatsapp=request.POST.get('whatsapp')
 
-        domicilio_form.calle=request.POST.get('calle')
+        '''domicilio_form.calle=request.POST.get('calle')
         domicilio_form.nro=request.POST.get('nro')
         domicilio_form.mz=request.POST.get('mz')
         domicilio_form.provincia=request.POST.get('provincia')
         domicilio_form.localidad=request.POST.get('localidad')
         domicilio_form.barrio=request.POST.get('barrio')'''
         domicilio_form.save()
-        miembro_form.save()
+        miembro_form.telefono=telefono_form
         tipo_telefono_form.save()
         telefono_form.save()
-        return redirect('/sistema/listarMiembro')
+        horario_form.save()
+        miembro_form.save()
 
-    return render(request,'sistema/editarMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form})
+        return redirect('/sistema/listarMiembro')
+    #if miembro.telefono != None:
+    return render(request,'sistema/editarMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+    #else:
+        #return render(request,'sistema/editarMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form})
 
 def eliminarMiembro(request,dni):
     miembro = Miembro.objects.get(dni=dni)
