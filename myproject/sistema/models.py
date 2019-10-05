@@ -55,8 +55,8 @@ class Tipo_Telefono(models.Model):
         ('Otro','Otro')
     }
     id_tipo_telefono=models.AutoField(primary_key=True)
-    tipo=models.CharField('Tipo', max_length=50,blank=False,null=False,choices=TIPO)
-    empresa=models.CharField('Empresa', max_length=50,blank=False,null=False,choices=EMPRESA)
+    tipo=models.CharField('Tipo', max_length=50,blank=True,null=True,choices=TIPO)
+    empresa=models.CharField('Empresa', max_length=50,blank=True,null=True,choices=EMPRESA)
     borrado = models.BooleanField('borrado',default=False)
 
     
@@ -66,7 +66,7 @@ class Tipo_Telefono(models.Model):
 class Telefono(models.Model):
     id_telefono=models.AutoField(primary_key=True)
     prefijo=models.IntegerField('Prefijo',blank=True,null=True)
-    numero=models.IntegerField('Numero')
+    numero=models.IntegerField('Numero',null=True,blank=True)
     whatsapp=models.BooleanField('Whatsapp',default=True)
     tipo_telefono=models.ForeignKey(Tipo_Telefono, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)    

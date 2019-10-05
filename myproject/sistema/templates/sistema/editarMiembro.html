@@ -27,7 +27,20 @@
                                         <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
                                         <div class="col col-md-3">{{miembro_form.dni}}<small class="form-text text-muted"></small></div>
                                     </div>
+                                    {% if messages %}
+                                        <div class="col-md-12">
+                                        <ul class="messages">
+                                            {% for message in messages %}
 
+                                            <div class="alert alert-danger">
+                                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                                            </div>
+
+                                            {% endfor %}
+                                        </ul>
+                                        </div>
+                                    {% endif %}
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
                                         <div class="col-12 col-md-4">{{miembro_form.fecha_nacimiento}}<small class="form-text text-muted">dd/mm/aaaa</small></div>
@@ -36,12 +49,6 @@
                                     <div class="row form-group">   
                                         <div class="col col-md-3"><label for="select" class=" form-control-label">Estado Civil (*)</label></div>
                                         <div class="col-12 col-md-4">
-                                        <!--   <select id="select1" name='estado_civil' class="form-control" required>
-                                                <option value="Soltero/a">Soltero/a</option>
-                                                <option value="Casado/a">Casado/a</option>
-                                                <option value="Divorciado/a">Divorciado/a</option>
-                                                <option value="Viudo/a">Viudo/a</option>
-                                            </select>-->
                                             {{miembro_form.estado_civil}}
                                         </div>
                                     </div>

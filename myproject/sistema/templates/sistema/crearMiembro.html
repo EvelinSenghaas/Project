@@ -34,7 +34,20 @@
                                         <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
                                         <div class="col col-md-3"><input required type="text" id="text-input" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
+                                    {% if messages %}
+                                        <div class="col-md-12">
+                                        <ul class="messages">
+                                            {% for message in messages %}
 
+                                            <div class="alert alert-danger">
+                                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                                            </div>
+
+                                            {% endfor %}
+                                        </ul>
+                                        </div>
+                                    {% endif %}
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
                                         <div class="col-12 col-md-4"><input required type="date" id="date-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
@@ -178,12 +191,14 @@
                                     <br>
                                     <strong>HORARIO DISPONIBLE</strong>
                                     <br><br>
-                                    {% for field in horario_form %}
-                                        <div class="row form-group">
-                                            <div class="col col-md-2"><label for="{{field.id_for_label}}" class=" form-control-label" >{{field.html_name}} (*)</label></div>
-                                            <div class="col col-md-4">{{field}}</div>
-                                        </div>
-                                    {% endfor %}
+                                    {% if horario_form  %}
+                                        {% for field in horario_form %}
+                                            <div class="row form-group">
+                                                <div class="col col-md-2"><label for="{{field.id_for_label}}" class=" form-control-label" >{{field.html_name}} (*)</label></div>
+                                                <div class="col col-md-4">{{field}}</div>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
                                     
 
                                 </div>
