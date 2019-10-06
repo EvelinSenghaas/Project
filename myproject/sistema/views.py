@@ -47,7 +47,7 @@ def eliminarGrupo(request,id_grupo):
     return redirect('/sistema/listarGrupo')
 
 def listarMiembro(request):
-    miembros = Miembro.objects.all()
+    miembros = Miembro.objects.filter(borrado=False)
     for miembro in miembros:        
         miembro.fecha_nacimiento = miembro.edad(miembro.fecha_nacimiento)
     #miembros = Miembro.objects.filter('borrado'==False)

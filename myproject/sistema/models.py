@@ -24,7 +24,7 @@ class Domicilio(models.Model):
 
     
     def __str__(self):
-        return self.barrio
+        return self.barrio+'  calle '+self.calle+'  nro '+self.nro
     
 class Horario_Disponible(models.Model):
     DIA=[
