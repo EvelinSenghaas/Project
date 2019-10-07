@@ -4,7 +4,7 @@ from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Domicilio,Asistencia,Tipo
 class GrupoForm(forms.ModelForm):
     def __init__(self,*args, **kwargs):
             super(GrupoForm, self).__init__(*args, **kwargs)
-            self.fields['miembro'].queryset = Miembro.objects.filter(borrado=False).exclude(borrado=True)
+            self.fields['miembro'].queryset = Miembro.objects.filter(borrado=False)
              
     class Meta:
         model=Grupo
@@ -14,16 +14,23 @@ class GrupoForm(forms.ModelForm):
             'miembro':forms.CheckboxSelectMultiple(),
         }
         
-
 class Tipo_ReunionForm(forms.ModelForm):
     class Meta:
         model=Tipo_Reunion
         fields=['nombre','descripcion']
 
 class ReunionForm(forms.ModelForm):
+    def __init__(self,*args, **kwargs):
+            super(ReunionForm, self).__init__(*args, **kwargs)
+            self.fields['grupo'].queryset = Grupo.objects.filter(borrado=False)
+            self.fields['tipo_reunion'].queryset = Tipo_Reunion.objects.filter(borrado=False)
+             
     class Meta:
         model=Reunion
-        fields=['nombre','fecha','hora','tipo_reunion','grupo']
+        fields=['nombre','fecha','hora','tipo_reunion','grupo','domicilio']
+        labels={
+            'nombre':'Nombre','fecha':'Fecha'
+        }
         
 class DomicilioForm(forms.ModelForm):
     class Meta:
@@ -66,7 +73,6 @@ class Tipo_TelefonoForm(forms.ModelForm):
         model = Tipo_Telefono
         fields = ['tipo','empresa']
         
-
 class TelefonoForm(forms.ModelForm):
     class Meta:
         model = Telefono

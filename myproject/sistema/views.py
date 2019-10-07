@@ -50,7 +50,6 @@ def listarMiembro(request):
     miembros = Miembro.objects.filter(borrado=False)
     for miembro in miembros:        
         miembro.fecha_nacimiento = miembro.edad(miembro.fecha_nacimiento)
-    #miembros = Miembro.objects.filter('borrado'==False)
     return render(request,'sistema/listarMiembro.html',{'miembros':miembros})
 
 def crearMiembro(request):
@@ -227,28 +226,13 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
 def crearReunion(request):
     if request.method == 'POST':
         reunion_form=ReunionForm(request.POST)
-
-        calle=request.POST.get('calle')
-        nro=request.POST.get('nro')
-        mz=request.POST.get('mz')
-        provincia=request.POST.get('provincia')
-        localidad=request.POST.get('localidad')
-        barrio=request.POST.get('barrio')
-        departamento=request.POST.get('departamento')
-        piso=request.POST.get('piso')
-
-        domicilio_form=Domicilio(calle=calle,nro=nro,mz=mz,provincia=provincia,localidad=localidad,barrio=barrio,departamento=departamento,piso=piso)
-        domicilio_form.save()
-
         reunion_form.domicilio=domicilio_form
-        if reunion_form.is_valid():
+        if reunion_form.is_valid()and domicilio_form.is_valid():
             reunion_form.save()
-            domicilio_form.save()
             return redirect('/sistema/listarReunion')
     else:
         reunion_form=ReunionForm()
-        domicilio_form=DomicilioForm()
-    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form})
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
@@ -265,7 +249,7 @@ def editarReunion(request,id_reunion):
     return render(request,'sistema/editarReunion.html',{'reunion_form':reunion_form})
 
 def listarReunion(request):
-    reuniones = Reunion.objects.filter('borrado'==False)
+    reuniones = Reunion.objects.filter(borrado=False)
     return render(request,'sistema/listarReunion.html',{'reuniones':reuniones})      
 
 def eliminarReunion(request,id_reunion):
