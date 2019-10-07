@@ -4,13 +4,36 @@
 {% endblock titulo%}
 {% block body%}
     <form method="POST">
-        {% csrf_token %}
-        {{grupo_form.as_p}}
-        <p> * mantenga apretado la tecla ctrl y presione los miembros que desee agregar/quitar</p>
-        <div class="card">
-            <div class="card-body">
-                <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
-            </div>
-        </div>
+    <div class="col-lg-11">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Planilla de Registro de </strong> Grupos
+                            </div>
+                            <form method="POST" class="form-horizontal">
+                                {% csrf_token %}
+
+                                <div class="row form-group">
+                                    <div class="col-md-3"><label for="text-input">Nombre del Grupo (*)</label></div>
+                                    <div class="col-md-5">{{grupo_form.nombre}}</div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col-md-3"><label for="text-input">Miembros del Grupo (*)</label></div>
+                                    <div class="col-md-7">{{grupo_form.miembro}}</div>
+                                   
+                                </div>
+                                <p> * mantenga apretado la tecla ctrl y presione los miembros que desee agregar/quitar</p>
+                                
+                               
+
+                                <div class="card">
+                                    <div class="card-body">
+                                        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+    </div>
+        
     </form>
 {% endblock body%}

@@ -1,10 +1,19 @@
 from django import forms
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Domicilio,Asistencia,Tipo_Telefono,Telefono,Horario_Disponible,Encuesta,Pregunta,Respuesta
 
-class GrupoForm(forms.ModelForm): 
+class GrupoForm(forms.ModelForm):
+    def __init__(self,*args, **kwargs):
+            super(GrupoForm, self).__init__(*args, **kwargs)
+            self.fields['miembro'].queryset = Miembro.objects.filter(borrado=False).exclude(borrado=True)
+             
     class Meta:
         model=Grupo
         fields=['nombre','miembro']
+        widgets={
+            'nombre': forms.TextInput(attrs={'class':'form-control'}),
+            'miembro':forms.CheckboxSelectMultiple(),
+        }
+        
 
 class Tipo_ReunionForm(forms.ModelForm):
     class Meta:

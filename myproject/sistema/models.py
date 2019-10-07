@@ -73,7 +73,7 @@ class Telefono(models.Model):
 
     def __str__(self):
         return self.prefijo + self.numero
-    
+
 class Miembro(models.Model):
     TIPO=[
         ('DNI','DNI'),
@@ -106,6 +106,7 @@ class Miembro(models.Model):
     horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)
 
+
     def __str__(self):
         return self.nombre + ' ' + self.apellido
     
@@ -115,16 +116,16 @@ class Miembro(models.Model):
         edad_numerica = diferencia_fechas_dias / 365.2425
         edad = int(edad_numerica)
         return edad
-    
+
 class Grupo(models.Model):
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
-    miembro=models.ManyToManyField(Miembro)
     borrado = models.BooleanField('borrado',default=False)
-    
+    miembro=models.ManyToManyField(Miembro)
+
     def __str__(self):
         return self.nombre
-    
+
 class Reunion(models.Model):
     id_reunion=models.AutoField(primary_key=True)
     fecha = models.DateField('Fecha', auto_now=False, auto_now_add=False)

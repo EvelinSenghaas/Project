@@ -51,7 +51,9 @@
                                                 <tr>
                                                     <td>{{grupo.nombre}}</td>
                                                     <td>{% for grupo in grupo.miembro.all %}
-                                                            {{grupo.nombre}}<br>
+                                                            {{grupo.apellido}}, 
+                                                            {{grupo.nombre}}
+                                                            <br>
                                                     {% endfor %}</td>
                                                     <td> 
                                                         <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        

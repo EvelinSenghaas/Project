@@ -26,7 +26,7 @@ def crearGrupo(request):
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
 def listarGrupo(request):
-    grupos = Grupo.objects.filter('borrado'==False)
+    grupos = Grupo.objects.filter(borrado=False)
     return render(request,'sistema/listarGrupo.html',{'grupos':grupos})
 
 def editarGrupo(request,id_grupo):
@@ -172,19 +172,23 @@ def editarMiembro(request,dni):
     return render(request,'sistema/editarMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
 
 def eliminarMiembro(request,dni):
-    miembro = Miembro.objects.get(dni=dni)
-    id_domicilio=miembro.domicilio.id_domicilio
+    miembroo = Miembro.objects.get(dni=dni)
+    if Grupo.objects.filter(miembro = miembroo).exists():
+        print('lina pone un msg chamiga')
+        messages.error(request, 'NO SE PUEDE ELIMINAR AL MIEMBRO porque es parte de un grupo') 
+        return redirect('/sistema/listarMiembro')
+    id_domicilio=miembroo.domicilio.id_domicilio
     domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
-    id_telefono=miembro.telefono.id_telefono
+    id_telefono=miembroo.telefono.id_telefono
     telefono=Telefono.objects.get(id_telefono=id_telefono)
     id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
     tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
     domicilio.borrado=True
-    miembro.borrado=True
+    miembroo.borrado=True
     telefono.borrado=True
     tipo_telefono.borrado=True
     domicilio.save()
-    miembro.save()
+    miembroo.save()
     telefono.save()
     tipo_telefono.save()
     return redirect('/sistema/listarMiembro')
