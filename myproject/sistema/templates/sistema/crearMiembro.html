@@ -32,8 +32,9 @@
                                             </select>
                                         </div>
                                         <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
-                                        <div class="col col-md-3"><input required type="text" id="text-input" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input required type="text" id="dni" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
+
                                     {% if messages %}
                                         <div class="col-md-12">
                                         <ul class="messages">
@@ -48,6 +49,7 @@
                                         </ul>
                                         </div>
                                     {% endif %}
+
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
                                         <div class="col-12 col-md-4"><input required type="date" id="date-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
@@ -218,5 +220,30 @@
                         </div>
         </div>
     </form>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+        $(document).ready(function(){
+           $("#dni").change(function () {
+             var dni = $(this).val();
+             
+             $.ajax({
+               
+               url: '{% url "sistema:validarMiembro" %}',
+               data: {
+                 'dni': dni
+               },
+               dataType: 'json',
+               
+               success: function (data) {
+                   
+                 if (data.is_taken) {
+                   alert("Este miembro ya existe");
+                 }
+               }
+             });
+       
+           });
+       });
+         </script>
 
 {% endblock body%}

@@ -27,10 +27,16 @@ class ReunionForm(forms.ModelForm):
              
     class Meta:
         model=Reunion
-        fields=['nombre','fecha','hora','tipo_reunion','grupo','domicilio']
+        fields=['nombre','fecha','hora','tipo_reunion','grupo']
         labels={
             'nombre':'Nombre','fecha':'Fecha'
         }
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class':'form-control'}),
+            'fecha':forms.DateInput(attrs={'class':'form-control' ,'type':"date"}),
+            'hora':forms.DateTimeInput(attrs={'class':'form-control'}),
+        }
+
         
 class DomicilioForm(forms.ModelForm):
     class Meta:

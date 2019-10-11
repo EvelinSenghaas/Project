@@ -5,6 +5,11 @@ from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Do
 from datetime import date
 import datetime
 from django.contrib import messages
+from django.core import serializers
+import json
+from django.http import HttpResponse
+from django.http import JsonResponse
+
 
 def Home(request):
     return render(request,'sistema/index.html')
@@ -172,7 +177,7 @@ def editarMiembro(request,dni):
 
 def eliminarMiembro(request,dni):
     miembroo = Miembro.objects.get(dni=dni)
-    if Grupo.objects.filter(miembro = miembroo).exists():
+    if Grupo.objects.filter(miembro = miembroo,borrado=False).exists():
         print('lina pone un msg chamiga')
         messages.error(request, 'NO SE PUEDE ELIMINAR AL MIEMBRO porque es parte de un grupo') 
         return redirect('/sistema/listarMiembro')
@@ -191,6 +196,16 @@ def eliminarMiembro(request,dni):
     telefono.save()
     tipo_telefono.save()
     return redirect('/sistema/listarMiembro')
+
+def validarMiembro(request):
+    dni = request.GET.get('dni')
+    data = {
+        'is_taken': Miembro.objects.filter(dni=dni).exists()
+    }
+    if data['is_taken']:
+        data['error_message'] = 'Este miembro ya existe'
+    print(data)
+    return JsonResponse(data)
 
 def crearTipo_Reunion(request):
     if request.method == 'POST':
@@ -214,39 +229,54 @@ def editarTipo_Reunion(request,id_tipo_reunion):
     return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
 
 def listarTipo_Reunion(request):
-    tipo_reuniones = Tipo_Reunion.objects.filter('borrado'==False)
+    tipo_reuniones = Tipo_Reunion.objects.filter(borrado=False)
     return render(request,'sistema/listarTipo_Reunion.html',{'tipo_reuniones':tipo_reuniones})
 
 def eliminarTipo_Reunion(request,id_tipo_reunion):
     tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
-    tipo_reunion.borrado=False
-    tipo_reunion.save()
+    if Reunion.objects.filter(tipo_reunion=tipo_reunion ).exists():
+        messages.error(request, 'NO SE PUEDE ELIMINAR AL tipo de reunion porque hay una reunion de este tipo activa') 
+        return redirect('/sistema/listarTipo_Reunion')    
+    else:
+        tipo_reunion.borrado=False
+        tipo_reunion.save()
     return redirect('/sistema/listarTipo_Reunion/')
 
 def crearReunion(request):
     if request.method == 'POST':
         reunion_form=ReunionForm(request.POST)
-        reunion_form.domicilio=domicilio_form
+        domicilio_form=DomicilioForm(request.POST)
         if reunion_form.is_valid()and domicilio_form.is_valid():
-            reunion_form.save()
+            print('entre capa')
+            reunion=reunion_form.save(commit=False)
+            domicilio=domicilio_form.save(commit=False)
+            reunion.domicilio=domicilio
+            domicilio.save()
+            reunion.save()
             return redirect('/sistema/listarReunion')
     else:
         reunion_form=ReunionForm()
-    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form})
+        domicilio_form=DomicilioForm()
+    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
+    domicilio=Domicilio.objects.get(id = reunion.domicilio.id)
     if request.method == 'GET':
         reunion_form=ReunionForm(instance = reunion)
-        #domicilio_form=DomicilioForm(intance = domicilio)
+        domicilio_form=DomicilioForm(intance = domicilio)
     else:
         reunion_form=ReunionForm(request.POST,instance=reunion)
-        #domicilio_form=DomicilioForm(instance = domicilio)
-        if reunion_form.is_valid():
-            reunion_form.save()
-            #domicilio_form.save()
+        domicilio_form=DomicilioForm(instance = domicilio)
+        if reunion_form.is_valid() and domicilio_form.is_valid():
+            print('entre capa')
+            reunion=reunion_form.save(commit=False)
+            domicilio=domicilio_form.save(commit=False)
+            reunion.domicilio=domicilio
+            domicilio.save()
+            reunion.save()
         return redirect('/sistema/listarReunion')
-    return render(request,'sistema/editarReunion.html',{'reunion_form':reunion_form})
+    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def listarReunion(request):
     reuniones = Reunion.objects.filter(borrado=False)

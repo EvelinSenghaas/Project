@@ -25,7 +25,7 @@
                                             {{miembro_form.tipo_dni}}
                                         </div>
                                         <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
-                                        <div class="col col-md-3">{{miembro_form.dni}}<small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input readonly="readonly" {{miembro_form.dni}}></div>
                                     </div>
                                     {% if messages %}
                                         <div class="col-md-12">

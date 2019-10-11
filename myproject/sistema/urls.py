@@ -3,7 +3,7 @@ from .views import Asistencia,agregarAsistencia
 from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,eliminarTipo_Reunion
 from .views import crearReunion,editarReunion,listarReunion,eliminarReunion
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
-from .views import listarMiembro,crearMiembro,editarMiembro,eliminarMiembro
+from .views import listarMiembro,crearMiembro,editarMiembro,eliminarMiembro,validarMiembro
 from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo
 
 urlpatterns = [
@@ -28,5 +28,6 @@ urlpatterns = [
     path('crearMiembro/',crearMiembro,name='crearMiembro'),
     path('listarMiembro/',listarMiembro,name='listarMiembro'),
     path('editarMiembro/<int:dni>',editarMiembro,name='editarMiembro'),
-    path('eliminarMiembro/<int:dni>',eliminarMiembro, name='eliminarMiembro')
+    path('eliminarMiembro/<int:dni>',eliminarMiembro, name='eliminarMiembro'),
+    path("validadMiembro/", validarMiembro, name="validarMiembro")
 ]

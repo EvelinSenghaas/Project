@@ -16,17 +16,43 @@
                         {% for field in reunion_form %}
                         <div class="row form-group">
                             <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
-                            {{field}}
+                            <div class = "col col-md-4">{{field}}</div>
                         </div>
                         {% endfor %}
                         <br>
                         <strong>Lugar de la Reunion</strong>
                         <br><br>
+
                         <div class="row form-group">
-                            <div class="col col-md-5">{{miembro.domicilio}}</div>
-                           
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia</label></div>
+                            <div class="col col-md-4">{{domicilio_form.provincia}}</div>
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad</label></div>
+                            <div class="col col-md-4">{{domicilio_form.localidad}}</small></div>
                         </div>
-                        
+
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio</label></div>
+                            <div class="col col-md-10">{{domicilio_form.barrio}}</div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
+                            <div class="col col-md-5">{{domicilio_form.calle}}</div>
+                            <div><label for="text-input" class=" form-control-label">Nº</label></div>
+                            <div class="col col-md-2">{{domicilio_form.nro}}</div>
+                            <div><label for="text-input" class=" form-control-label">Mz</label></div>
+                            <div class="col col-md-2">{{domicilio_form.mz}}</div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
+                            <div class="col col-md-2">{{domicilio_form.departamento}}</div>
+                            <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
+                            <div class="col col-md-2">{{domicilio_form.piso}}</div>
+                        </div>
+                                                
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                        </div>
                         </div>
                     </form>
                 </div>
