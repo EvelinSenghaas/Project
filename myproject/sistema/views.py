@@ -244,16 +244,21 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
 
 def crearReunion(request):
     if request.method == 'POST':
+        nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST)
         domicilio_form=DomicilioForm(request.POST)
         if reunion_form.is_valid()and domicilio_form.is_valid():
-            print('entre capa')
-            reunion=reunion_form.save(commit=False)
-            domicilio=domicilio_form.save(commit=False)
-            reunion.domicilio=domicilio
-            domicilio.save()
-            reunion.save()
-            return redirect('/sistema/listarReunion')
+            if Reunion.objects.filter(nombre=nombrecito).exists():
+                messages.error(request, 'fecha de nacimiento incorrecta')
+            else:
+                print('entre capa')
+                reunion=reunion_form.save(commit=False)
+                domicilio=domicilio_form.save(commit=False)
+                print(domicilio)
+                domicilio.save()
+                reunion.domicilio=domicilio
+                reunion.save()
+                return redirect('/sistema/listarReunion')
     else:
         reunion_form=ReunionForm()
         domicilio_form=DomicilioForm()
@@ -261,21 +266,25 @@ def crearReunion(request):
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
-    domicilio=Domicilio.objects.get(id = reunion.domicilio.id)
+    id = reunion.domicilio.id_domicilio
+    domicilio=Domicilio.objects.get(id_domicilio = id)
     if request.method == 'GET':
         reunion_form=ReunionForm(instance = reunion)
-        domicilio_form=DomicilioForm(intance = domicilio)
+        domicilio_form=DomicilioForm(instance = domicilio)
     else:
+        nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST,instance=reunion)
         domicilio_form=DomicilioForm(instance = domicilio)
-        if reunion_form.is_valid() and domicilio_form.is_valid():
-            print('entre capa')
-            reunion=reunion_form.save(commit=False)
-            domicilio=domicilio_form.save(commit=False)
-            reunion.domicilio=domicilio
-            domicilio.save()
-            reunion.save()
-        return redirect('/sistema/listarReunion')
+        if Reunion.objects.filter(nombre=nombrecito).exists():
+                messages.error(request, 'Nombre Repetido: no se admiten nombres repetidos')
+        else:
+            if reunion_form.is_valid() and domicilio_form.is_valid():
+                    reunion=reunion_form.save(commit=False)
+                    domicilio=domicilio_form.save(commit=False)
+                    reunion.domicilio=domicilio
+                    domicilio.save()
+                    reunion.save()
+                    return redirect('/sistema/listarReunion')
     return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def listarReunion(request):
