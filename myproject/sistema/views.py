@@ -21,6 +21,7 @@ def Asistencia(request):
         return render(request,'sistema/index_asistencia.html')
 
 def crearGrupo(request):
+    miembros=Miembro.objects.all()
     if request.method == 'POST':
         grupo_form = GrupoForm(request.POST)
         if grupo_form.is_valid():
@@ -28,7 +29,7 @@ def crearGrupo(request):
             return redirect('/sistema/listarGrupo')
     else:
         grupo_form=GrupoForm()
-    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
+    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'miembros':miembros})
 
 def listarGrupo(request):
     grupos = Grupo.objects.filter(borrado=False)
@@ -210,9 +211,13 @@ def validarMiembro(request):
 def crearTipo_Reunion(request):
     if request.method == 'POST':
         tipo_reunion_form= Tipo_ReunionForm(request.POST)
+        nombrecito=request.POST.get('nombre')
         if tipo_reunion_form.is_valid():
-            tipo_reunion_form.save()
-            return redirect('/sistema/listarTipo_Reunion')
+            if Tipo_Reunion.objects.filter(nombre=nombrecito):
+                messages.error(request,'Nombre repetido')
+            else:
+                tipo_reunion_form.save()
+                return redirect('/sistema/listarTipo_Reunion')
     else:
         tipo_reunion_form=Tipo_ReunionForm()
     return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})

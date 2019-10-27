@@ -5,10 +5,12 @@
 {% block body%}
     <form method="POST">
     <div class="col-lg-11">
+     
                         <div class="card">
                             <div class="card-header">
                                 <strong>Planilla de Registro de </strong> Grupos
                             </div>
+                            <div class="col-md-3"><input id="mibusqueda"></div>
                             <form method="POST" class="form-horizontal">
                                 {% csrf_token %}
 
@@ -18,8 +20,13 @@
                                 </div>
 
                                 <div class="row form-group">
-                                    <div class="col-md-3"><label for="text-input">Miembros del Grupo (*)</label></div>
-                                    <div class="col-md-7">{{grupo_form.miembro}}</div>
+                                    {% comment %} <div class="col-md-3"><label for="text-input">Miembros del Grupo (*)</label></div>
+                                    <div class="col-md-7">{{grupo_form.miembro}}</div> {% endcomment %}
+                                    <select class="form-control" multiple="multiple">
+                                        {% for miembro in miembros %}
+                                                <option value='{{miembro.dni}}'>{{miembro.apellido}}, {{miembro.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
                                    
                                 </div>
                                 <p> * mantenga apretado la tecla ctrl y presione los miembros que desee agregar/quitar</p>

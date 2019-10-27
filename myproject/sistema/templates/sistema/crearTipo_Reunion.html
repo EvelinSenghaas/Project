@@ -12,6 +12,20 @@
                     <strong>Planilla de Registro de </strong> Tipo de Reuniones
                 </div>
                 <div class="card-body">
+                        {% if messages %}
+                            <div class="col-md-12">
+                                <ul class="messages">
+                                    {% for message in messages %}
+
+                                        <div class="alert alert-danger">
+                                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                                        </div>
+
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                     {{tipo_reunion_form.as_p}}
                     <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
                 </div>
