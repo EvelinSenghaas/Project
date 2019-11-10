@@ -1,29 +1,38 @@
 from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm
+from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible
+from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia
 from datetime import date
 import datetime
 from django.contrib import messages
 from django.core import serializers
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from .serializers import ProvinciaSerializer,LocalidadSerializer,BarrioSerializer,AsistenciaSerializer
 import json
 from django.http import HttpResponse
 from django.http import JsonResponse
 
+class JSONResponse(HttpResponse):
+    """
+    An HttpResponse that renders its content into JSON.
+    """
+    def __init__(self, data, **kwargs):
+        content = JSONRenderer().render(data)
+        kwargs['content_type'] = 'application/json'
+        super(JSONResponse, self).__init__(content, **kwargs)
 
 def Home(request):
     return render(request,'sistema/index.html')
-
-def Asistencia(request):
-    if request.method == 'POST':
-        return redirect('home')
-    else:
-        return render(request,'sistema/index_asistencia.html')
 
 def crearGrupo(request):
     miembros=Miembro.objects.all()
     if request.method == 'POST':
         grupo_form = GrupoForm(request.POST)
+        print(grupo_form)
         if grupo_form.is_valid():
             grupo_form.save()
             return redirect('/sistema/listarGrupo')
@@ -59,13 +68,22 @@ def listarMiembro(request):
     return render(request,'sistema/listarMiembro.html',{'miembros':miembros})
 
 def crearMiembro(request):
+    provincia_form=Provincia.objects.all()
     if request.method == 'POST':
-
         miembro_form=MiembroForm(request.POST)
         miembro=miembro_form.save(commit=False)
 
+        barrio_form=request.POST.get('barrio')
+        barrio=Barrio.objects.get(id_barrio=barrio_form)
+
+        estado_civil_form=request.POST.get('estado_civil')
+        estado_civil=Estado_Civil.objects.get(id_estado=estado_civil_form)
+
         domicilio_form=DomicilioForm(request.POST)
-        domicilio=domicilio_form.save()
+        domicilio=domicilio_form.save(commit=False)
+        domicilio.barrio=barrio
+        domicilio.save()
+
 
         horario_form=Horario_DisponibleForm(request.POST)
         horario=horario_form.save()
@@ -80,33 +98,53 @@ def crearMiembro(request):
 
         fecha = datetime.datetime.strptime(str(miembro.fecha_nacimiento), '%Y-%m-%d')
         if fecha.date() > datetime.date.today():
-            print(fecha.date())
             messages.error(request, 'fecha de nacimiento incorrecta')
-            return render(request,'sistema/editarMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
-        
+            barrio = Barrio.objects.all()
+            localidad_form=Localidad.objects.all()
+            provincia_form=Provincia.objects.all()
+            estado_civil_form=request.POST.get('estado_civil')
+            return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
         else:
             miembro.domicilio=domicilio
+            miembro.estado_civil=estado_civil
             miembro.horario_disponible=horario
             if  telefono != None:
                 miembro.telefono=telefono
             miembro.nombre=miembro.nombre.capitalize()
             miembro.apellido=miembro.apellido.upper()
+            miembro.borrado=False
+            miembro_contacto=request.POST.get('miembro')
+            if miembro_contacto != None:
+                print(miembro_contacto)
+                miembro_cont=Miembro.objects.get(dni=miembro_contacto)
+                tel_contacto=Telefono_Contacto()
+                tel_contacto.miembro=miembro_cont
+                tel_contacto.save()
             miembro.save()
+
             return redirect('/sistema/listarMiembro')
         
     else:
+        provincia_form=Provincia.objects.all()
+        localidad_form=Localidad.objects.all()
+        barrio_form=Barrio.objects.all()
         domicilio_form=DomicilioForm()
+        estado_civil_form=Estado_Civil.objects.all()
         miembro_form=MiembroForm()
         tipo_telefono_form=Tipo_TelefonoForm()
         telefono_form=TelefonoForm()
         horario_form=Horario_DisponibleForm()
-        return render(request,'sistema/crearMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+        telefono_contacto_form=Miembro.objects.all()
+        return render(request,'sistema/crearMiembro.html',{'telefono_contacto_form':telefono_contacto_form,'estado_civil_form':estado_civil_form,'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio_form':barrio_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
 
 def editarMiembro(request,dni):
     miembro = Miembro.objects.get(dni= dni)
+    estado_civil_form = Estado_Civil.objects.all()
     id_domicilio=miembro.domicilio.id_domicilio
     domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
-
+    barrio = Barrio.objects.all()
+    localidad_form=Localidad.objects.all()
+    provincia_form=Provincia.objects.all()
     if miembro.telefono != None:
         id_telefono=miembro.telefono.id_telefono
         telefono=Telefono.objects.get(id_telefono=id_telefono)
@@ -115,6 +153,7 @@ def editarMiembro(request,dni):
     else: 
         telefono=None
         tipo_telefono=None
+
     id_horario=miembro.horario_disponible.id_horario_disponible
     horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=id_horario)
 
@@ -127,13 +166,21 @@ def editarMiembro(request,dni):
         else:
             tipo_telefono_form=Tipo_TelefonoForm()
             telefono_form=TelefonoForm()
+        
         horario_form=Horario_DisponibleForm(instance=horario_disponible)
+        barrio_form=BarrioForm()
+    
     else:
         miembro_form=MiembroForm(request.POST,instance=miembro)
         domicilio_form=DomicilioForm(request.POST,instance=domicilio)
         horario_form=Horario_DisponibleForm(request.POST,instance=horario_disponible)
         telefono_form=TelefonoForm(request.POST,instance=telefono)
         tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
+        estado_civil_form=request.POST.get('estado_civil')
+        print(estado_civil_form)
+        estado=Estado_Civil.objects.get(id_estado=estado_civil_form)
+        barrio_form = request.POST.get('barrio')
+        barrio=Barrio.objects.get(barrio=barrio_form)
         miembro=miembro_form.save(commit=False)
         
         fecha = datetime.datetime.strptime(str(miembro.fecha_nacimiento), '%Y-%m-%d')
@@ -148,33 +195,24 @@ def editarMiembro(request,dni):
                     telefono.tipo_telefono=tipo
                     telefono.save()
                     miembro.telefono=telefono
-                domicilio=domicilio_form.save()
+
+                miembro.estado_civil=estado
+
+                domicilio=domicilio_form.save(commit=False)
+                domicilio.barrio = barrio
+                domicilio.save()
+
                 horario=horario_form.save()
                 
                 miembro.nombre=miembro.nombre.capitalize()
                 miembro.apellido=miembro.apellido.upper()
                 miembro.save()
+
                 return redirect('/sistema/listarMiembro')
-
-        '''else:
-            if request.POST.get('prefijo') and request.POST.get('numero') != None:
-                tipo=request.POST.get('tipo')
-                empresa=request.POST.get('empresa')
-                prefijo=request.POST.get('prefijo')
-                numero=request.POST.get('numero')
-                whatsapp=request.POST.get('whatsapp')
-                tipo_telefono_form=Tipo_Telefono(tipo=tipo,empresa=empresa)
-                telefono_form=Telefono(prefijo=prefijo,numero=numero,whatsapp=whatsapp,tipo_telefono=tipo_telefono_form)
-        
-
-            telefono_form.tipo_telefono=tipo
-            miembro_form.telefono=telefono
-            miembro_form.horario_disponible=horario
-            miembro_form.domicilio=domicilio'''
                      
         
 
-    return render(request,'sistema/editarMiembro.html',{'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+    return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
 
 def eliminarMiembro(request,dni):
     miembroo = Miembro.objects.get(dni=dni)
@@ -251,23 +289,29 @@ def crearReunion(request):
     if request.method == 'POST':
         nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST)
+        barrio_form=request.POST.get('barrio')
+        barrio=Barrio.objects.get(barrio=barrio_form)
         domicilio_form=DomicilioForm(request.POST)
         if reunion_form.is_valid()and domicilio_form.is_valid():
             if Reunion.objects.filter(nombre=nombrecito).exists():
-                messages.error(request, 'fecha de nacimiento incorrecta')
+                messages.error(request, 'Nombre no disponible')
             else:
                 print('entre capa')
                 reunion=reunion_form.save(commit=False)
                 domicilio=domicilio_form.save(commit=False)
+                domicilio.barrio=barrio
                 print(domicilio)
                 domicilio.save()
                 reunion.domicilio=domicilio
                 reunion.save()
                 return redirect('/sistema/listarReunion')
     else:
+        provincia_form=Provincia.objects.all().order_by('provincia')
+        localidad_form=Localidad.objects.all()
+        barrio_form=Barrio.objects.all()
         reunion_form=ReunionForm()
         domicilio_form=DomicilioForm()
-    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+    return render(request,'sistema/crearReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'provincia_form':provincia_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
@@ -307,13 +351,26 @@ def eliminarReunion(request,id_reunion):
 
 def agregarAsistencia(request):
     if request.method == 'POST':
-        asistencia_form=AsistenciaForm(request.POST)
-        if asistencia_form.is_valid():
-            asistencia_form.save()
-            return redirect('home')
+        reunion_form = request.POST.get('reunion')
+        reunion=Reunion.objects.get(id_reunion=reunion_form)
+        print(reunion)
+        fecha = request.POST.get('fecha')
+        print('--------1--------')
+        for check in request.POST.getlist('check[]'):
+            miembro=Miembro.objects.get(dni=check)
+            asistencia=Asistencia()
+            asistencia.miembro=miembro
+            asistencia.fecha=fecha
+            asistencia.reunion=reunion
+            asistencia.presente=True
+            asistencia.save()
+            print(check)
+        return redirect('/sistema/agregarAsistencia/')
     else:
         asistencia_form=AsistenciaForm()
-    return render(request,'sistema/agregarAsistencia.html',{'asistencia_form':asistencia_form})
+        reunion_form=Reunion.objects.all()
+        miembro_form=Miembro.objects.all()
+    return render(request,'sistema/agregarAsistencia.html',{'miembro_form':miembro_form,'asistencia_form':asistencia_form,'reunion_form':reunion_form})
 
 def agregarHorario_Disponible(request):
     if request.method == 'POST':
@@ -354,3 +411,59 @@ def agregarRespuesta(request):
     else:
         respuesta_form=RespuestaForm()
     return render(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
+
+@csrf_exempt
+def provinciasList(request):
+    """
+    List all code serie, or create a new serie.
+    """
+    if request.method == 'GET':
+        provincia = Provincia.objects.all()
+        serializer = ProvinciaSerializer(provincia, many=True)
+        result = dict()
+        result = serializer.data
+        return JSONResponse(result)
+
+@csrf_exempt
+def localidadesList(request):
+    """
+    List all code serie, or create a new serie.
+    """
+    pv=request.GET.get('provincia',None)
+    prov=Provincia.objects.get(provincia=pv)
+    if request.method == 'GET':
+        localidad = Localidad.objects.filter(provincia=prov).order_by('localidad')
+        serializer = LocalidadSerializer(localidad, many=True)
+        result = dict()
+        result = serializer.data
+        return JSONResponse(result)
+
+@csrf_exempt
+def barriosList(request):
+    print('0')
+    lc=request.GET.get('localidad',None)
+    print('olii')
+    print(request.GET)
+    print(lc)
+    localidad=Localidad.objects.get(id_localidad=lc)
+    print('1')
+    if request.method == 'GET':
+        print('2')
+        barrio = Barrio.objects.filter(localidad=localidad).order_by('barrio')
+        print('3')
+        print(barrio)
+        serializer = BarrioSerializer(barrio, many=True)
+        result = dict()
+        result = serializer.data
+        return JSONResponse(result)
+
+@csrf_exempt
+def AsistenciaTable(request):
+    if request.method == 'GET':
+        asistencia= Asistencia.objects.all()
+        serializer = AsistenciaSerializer(asistencia, many=True)
+        result = dict()
+        result = serializer.data
+        #print("No ta")
+        return JSONResponse(result)
+

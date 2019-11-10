@@ -9,7 +9,30 @@ class Tipo_Reunion(models.Model):
     
     def __str__(self):
         return self.nombre 
-    
+
+class Provincia(models.Model):
+    id_provincia=models.AutoField(primary_key=True)
+    provincia=models.CharField('Provincia', max_length=50,blank=False,null=False)
+    borrado = models.BooleanField('borrado',default=False)
+    def __str__(self):
+        return self.provincia
+
+class Localidad(models.Model):
+    id_localidad = models.AutoField(primary_key = True)
+    localidad=models.CharField('Localidad', max_length=50,blank=False,null=False)
+    provincia=models.ForeignKey(Provincia,on_delete=models.PROTECT)
+    borrado = models.BooleanField('borrado',default=False)
+    def __str__(self):
+        return self.localidad
+
+class Barrio(models.Model):
+    id_barrio = models.AutoField(primary_key = True)
+    barrio=models.CharField('Barrio', max_length=50,blank=False,null=False)
+    localidad=models.ForeignKey(Localidad, on_delete=models.PROTECT)
+    borrado = models.BooleanField('borrado',default=False)
+    def __str__(self):
+        return self.barrio
+
 class Domicilio(models.Model):
     id_domicilio = models.AutoField(primary_key=True)
     calle=models.CharField('Calle', max_length=100,blank=False,null=False)
@@ -17,14 +40,11 @@ class Domicilio(models.Model):
     mz = models.CharField('Manzana', max_length=50,null=True,blank=True)
     departamento=models.CharField('Departamento', max_length=50,null=True,blank=True)
     piso=models.CharField('Piso', max_length=50,null=True,blank=True)
-    barrio = models.CharField('Barrio', max_length=100,blank=False,null=False)
-    localidad=models.CharField('Localidad', max_length=50,blank=False,null=False)
-    provincia=models.CharField('Provincia', max_length=50,blank=False,null=False)
+    barrio=models.ForeignKey(Barrio, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
-
     
     def __str__(self):
-        return self.barrio+'  calle '+self.calle+'  nro '+self.nro
+        return 'calle '+self.calle+'  nro '+self.nro
     
 class Horario_Disponible(models.Model):
     DIA=[
@@ -70,41 +90,33 @@ class Telefono(models.Model):
     whatsapp=models.BooleanField('Whatsapp',default=True)
     tipo_telefono=models.ForeignKey(Tipo_Telefono, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)    
-
+    # miembro no def :C contacto= models.ForeignKey(Miembro, on_delete=models.PROTECT,null=True) #tel de contacto en caso de necesitar
     def __str__(self):
-        return self.prefijo + self.numero
+        return 'naranja'
 
+class Estado_Civil(models.Model):
+    id_estado = models.AutoField(primary_key=True)
+    estado= models.CharField('soltero/a', max_length=20,blank=False, null=False)
+    
 class Miembro(models.Model):
-    TIPO=[
-        ('DNI','DNI'),
-        ('CUIL','CUIL'),
-        ('CUIT','CUIT'),
-        ('PASAPORTE','PASAPORTE')
-    ]
-    ESTADO_CIVIL=[
-        ('Soltero/a','Soltero/a'),
-        ('Casado/a','Casado/a'),
-        ('Divorciado/a','Divorciado/a'),
-        ('Viudo/a','Viudo/a')
-    ]
+   
     SEXO=[
         ('Masculino','Masculino'),
         ('Femenino','Femenino')
     ]
-    tipo_dni = models.CharField('Tipo de DNI', max_length=20,choices=TIPO)
     dni=models.BigIntegerField('Documento',primary_key=True)
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     apellido = models.CharField('Apellido',max_length=200,blank = False, null = False)
     fecha_nacimiento = models.DateField('Fecha de Nacimiento', auto_now=False, auto_now_add=False)
-    estado_civil = models.CharField('Estado Civil',max_length=20,choices=ESTADO_CIVIL,blank=False,null=False)
     cant_hijo = models.IntegerField('Cantidad de Hijos',null=True)
     trabaja = models.BooleanField('Trabaja',default=False)
     domicilio=models.ForeignKey(Domicilio, on_delete=models.PROTECT)
     correo=models.EmailField('e-mail', max_length=100,null=True,blank=True)
     sexo =models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
     telefono=models.ForeignKey(Telefono, on_delete=models.PROTECT,null=True)
-    horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.PROTECT,null=True)
+    horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
+    estado_civil=models.ForeignKey(Estado_Civil, on_delete=models.PROTECT)
 
 
     def __str__(self):
@@ -117,6 +129,10 @@ class Miembro(models.Model):
         edad = int(edad_numerica)
         return edad
 
+class Telefono_Contacto(models.Model):
+    id=models.AutoField(primary_key=True)
+    miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
+    
 class Grupo(models.Model):
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
@@ -127,8 +143,17 @@ class Grupo(models.Model):
         return self.nombre
 
 class Reunion(models.Model):
+    DIA=[
+        ('Lunes','Lunes'),
+        ('Martes','Martes'),
+        ('Miercoles','Miercoles'),
+        ('Jueves','Jueves'),
+        ('Viernes','Viernes'),
+        ('Sabado','Sabado'),
+        ('Domingo','Domingo')
+    ]
     id_reunion=models.AutoField(primary_key=True)
-    fecha = models.DateField('Fecha', auto_now=False, auto_now_add=False)
+    dia =models.CharField('dia',max_length=50,blank=False,null=False,choices=DIA)
     hora = models.TimeField('Horario', auto_now=False, auto_now_add=False)
     tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.PROTECT)
     nombre =models.CharField('Nombre', max_length=100,blank=False,null=True)
@@ -141,10 +166,12 @@ class Reunion(models.Model):
     
 class Asistencia(models.Model):
     id_asistencia=models.AutoField(primary_key=True)
-    presente=models.BooleanField('Presente',default=False)
-    justificacion=models.TextField('Justificacion',blank=False,null=True)
+    presente=models.BooleanField('Presente',default=False,null=True,blank=True)
+    #creo que justificaciones tiene que ir aparte jiji
+    justificacion=models.TextField('Justificacion',blank=True,null=True) #Este campo es util si la charla no se dio o si el lider falto
     miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
+    fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
         
 class Encuesta(models.Model):
     id_fecha_envio=models.AutoField(primary_key=True)

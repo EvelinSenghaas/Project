@@ -10,7 +10,12 @@
                             </div>
                             <form method="POST" class="form-horizontal">
                             
-                                <div class="card-body card-block">
+                                 <div class="card-body card-block">
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
+                                        <div class="col col-md-3"><input required type="text" id="dni" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                    </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
@@ -19,20 +24,6 @@
                                         <div class="col col-md-3"><input required type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                         
                                         
-                                    </div>
-
-                                    <div class="row form-group">
-                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Tipo de Documento</label></div>
-                                        <div class="col-12 col-md-4">
-                                            <select id="select" name='tipo_dni' class="form-control" required>
-                                                <option value="DNI">DNI</option>
-                                                <option value="CUIT">CUIT</option>
-                                                <option value="CUIL">CUIL</option>
-                                                <option value="PASAPORTE">PASAPORTE</option>
-                                            </select>
-                                        </div>
-                                        <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
-                                        <div class="col col-md-3"><input required type="text" id="dni" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     {% if messages %}
@@ -54,18 +45,17 @@
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
                                         <div class="col-12 col-md-4"><input required type="date" id="date-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
-
-                                    <div class="row form-group">   
-                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Estado Civil (*)</label></div>
-                                        <div class="col-12 col-md-4">
-                                            <select id="select1" name='estado_civil' class="form-control" required>
-                                                <option value="Soltero/a">Soltero/a</option>
-                                                <option value="Casado/a">Casado/a</option>
-                                                <option value="Divorciado/a">Divorciado/a</option>
-                                                <option value="Viudo/a">Viudo/a</option>
+                                    
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Estado_Civil (*)</label></div>
+                                        <div class="col col-md-4"><select name="estado_civil" id="estado_civil" class="form-control">
+                                            {% for estado in estado_civil_form %}
+                                                <option value={{estado.id_estado}}>{{estado.estado}}</option>
+                                            {% endfor %}
                                             </select>
                                         </div>
                                     </div>
+
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
@@ -159,21 +149,53 @@
                                        
                                     </div>
 
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label class="form-control-label">Telefono De concatco</label></div>
+                                        <div class="col col-md-4"><select id="select-miembro"  class="form-control">
+                                            <option selected value=None> --------------</option>
+                                            {% for miembroo in telefono_contacto_form %}
+                                                    <option name='miembro'value={{miembroo.dni}}>{{miembroo.nombre}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        </div>
+                                    </div>
+
                                     <br>
                                     <strong>DOMICILIO</strong>
                                     <br><br>
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
-                                        <div class="col col-md-4"><input required type="text" id="text-input" name="provincia" placeholder="" class="form-control"></small></div>
-                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
-                                        <div class="col col-md-4"><input required type="text" id="text-input" name="localidad" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
-                                    </div>
+                                        <div class="col col-md-4"><select id="select-provincia" name='provincia' class="form-control" required>
+                                            <option selected> --------------</option>
+                                            {% for provincia in provincia_form %}
+                                                    <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        </div>
+                                    </div>    
 
                                     <div class="row form-group">
+                                        
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
+                                        <div class="col col-md-4"><select id="select-localidad" name='localidad' class="form-control" required>
+                                            {% comment %}{% for localidad in localidad_form %}
+                                                    <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
+                                            {% endfor %}
+                                            {% endcomment %}
+                                            </select>
+                                        </div>
+
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
-                                        <div class="col col-md-10"><input required type="text" id="text-input" name="barrio" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-4"><select id="select-barrios" name='barrio' class="form-control" required>
+                                            <!--{% for barrio in barrio_form %}
+                                                    <option value='{{barrio.barrio}}'>{{barrio.barrio}}</option>
+                                            {% endfor %}-->
+                                            </select>
+                                        </div>
+                                        
                                     </div>
+                                    
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle (*)</label></div>
@@ -221,6 +243,9 @@
         </div>
     </form>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+
+    <script src="{% static 'assets/js/rerecustom.js'%}"></script>
+
     <script>
         $(document).ready(function(){
            $("#dni").change(function () {
@@ -244,6 +269,7 @@
        
            });
        });
-         </script>
+    </script>
+
 
 {% endblock body%}

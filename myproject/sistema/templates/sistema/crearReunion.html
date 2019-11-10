@@ -38,18 +38,37 @@
                         <strong>Lugar de la Reunion</strong>
                         <br><br>
 
-                        <div class="row form-group">
-                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia</label></div>
-                            <div class="col col-md-4">{{domicilio_form.provincia}}</div>
-                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad</label></div>
-                            <div class="col col-md-4">{{domicilio_form.localidad}}</small></div>
-                        </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
+                                        <div class="col col-md-4"><select id="provincias" name='provincia' class="form-control" required>
+                                                <option selected> --------------</option>
+                                                {% for provincia in provincia_form %}
+                                                        <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                                {% endfor %}
+                                            </select>
+                                            </div>
+                                    </div>    
 
-                        <div class="row form-group">
-                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio</label></div>
-                            <div class="col col-md-10">{{domicilio_form.barrio}}</div>
-                        </div>
+                                    <div class="row form-group">
+                                        
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
+                                        <div class="col col-md-4"><select id="select-localidades" name='localidad' class="form-control" required>
+                                            {% for localidad in localidad_form %}
+                                                    <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
+                                            {% endfor %}
+                                            
+                                            </select>
+                                        </div>
 
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
+                                        <div class="col col-md-4"><select id="select-barrio" name='barrio' class="form-control" required>
+                                           {% for barrio in barrio_form %}
+                                                    <option value='{{barrio.barrio}}'>{{barrio.barrio}}</option>
+                                            {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                    </div>
                         <div class="row form-group">
                             <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
                             <div class="col col-md-5">{{domicilio_form.calle}}</div>
@@ -76,3 +95,6 @@
         
       
 {% endblock body %}
+    <script src="{% static 'assets/js/recustom.js'%}"></script>
+
+

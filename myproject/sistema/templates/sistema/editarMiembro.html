@@ -11,6 +11,11 @@
                             <form method="POST" class="form-horizontal">
                             
                                 <div class="card-body card-block">
+                                    
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
+                                        <div class="col col-md-3"><input readonly="readonly" {{miembro_form.dni}}></div>
+                                    </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
@@ -19,14 +24,7 @@
                                         <div class="col col-md-3">{{miembro_form.apellido}}</div>
                                     </div>
 
-                                    <div class="row form-group">
-                                        <div class="col col-md-3"><label for="select" class=" form-control-label">Tipo de Documento</label></div>
-                                        <div class="col-12 col-md-4">
-                                            {{miembro_form.tipo_dni}}
-                                        </div>
-                                        <div><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
-                                        <div class="col col-md-3"><input readonly="readonly" {{miembro_form.dni}}></div>
-                                    </div>
+                                    
                                     {% if messages %}
                                         <div class="col-md-12">
                                         <ul class="messages">
@@ -48,14 +46,16 @@
 
                                     <div class="row form-group">   
                                         <div class="col col-md-3"><label for="select" class=" form-control-label">Estado Civil (*)</label></div>
-                                        <div class="col-12 col-md-4">
-                                            {{miembro_form.estado_civil}}
+                                        <div class="col col-md-4"><select name="estado_civil" id="estado_civil" class="form-control">
+                                            {% for estado in estado_civil_form %}
+                                                <option value="{{estado.id_estado}}">{{estado.estado}}</option>
+                                            {% endfor %}
                                         </div>
                                     </div>
 
                                     <div class="row form-group">
-                                        <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
-                                        <div class="col-12 col-md-9">{{miembro_form.correo}}<small class="form-text text-muted">Example@example.com</small></div>
+                                        <div class="col col-md-3"><label for="email-input" class=" form-control-label"> Email </label></div>
+                                        <div class="col col-md-9">{{miembro_form.correo}}<small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
@@ -114,14 +114,32 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
-                                        <div class="col col-md-4">{{domicilio_form.provincia}}</div>
+                                        <div class="col col-md-4"><select id="select-provincia" name='provincia' class="form-control" required>
+                                            {% for provincia in provincia_form %}
+                                                    <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        </div>
+                                    </div>  
+
+                                    <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
-                                        <div class="col col-md-4">{{domicilio_form.localidad}}</div>
+                                        <div class="col col-md-4"><select id="select-localidad" name='localidad' class="form-control" required>
+                                            {% for localidad in localidad_form %}
+                                                    <option value="{{localidad.localidad}}">{{localidad.localidad}}</option>
+                                            {% endfor %}
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
-                                        <div class="col col-md-10">{{domicilio_form.barrio}}</div>
+                                        <div class="col col-md-4"><select id="select-barrios" name='barrio' class="form-control" required>
+                                            {% for barrio in barrio %}
+                                                    <option value="{{barrio.barrio}}"">{{barrio.barrio}}</option>
+                                            {% endfor %}
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div class="row form-group">

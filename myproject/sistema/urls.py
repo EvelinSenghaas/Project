@@ -1,10 +1,11 @@
 from django.urls import path
-from .views import Asistencia,agregarAsistencia
+from .views import agregarAsistencia
 from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,eliminarTipo_Reunion
 from .views import crearReunion,editarReunion,listarReunion,eliminarReunion
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
 from .views import listarMiembro,crearMiembro,editarMiembro,eliminarMiembro,validarMiembro
 from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo
+from .views import provinciasList,localidadesList,barriosList,AsistenciaTable
 
 urlpatterns = [
     path('crearTipo_Reunion/',crearTipo_Reunion,name='crearTipo_Reunion'),
@@ -24,10 +25,13 @@ urlpatterns = [
     path('listarGrupo/',listarGrupo,name='listarGrupo'),
     path('editarGrupo/<int:id_grupo>',editarGrupo,name='editarGrupo'),
     path('eliminarGrupo/<int:id_grupo>',eliminarGrupo,name='eliminarGrupo'),
-    path('Asistencia/',Asistencia,name = 'Asistencia'),
     path('crearMiembro/',crearMiembro,name='crearMiembro'),
     path('listarMiembro/',listarMiembro,name='listarMiembro'),
     path('editarMiembro/<int:dni>',editarMiembro,name='editarMiembro'),
     path('eliminarMiembro/<int:dni>',eliminarMiembro, name='eliminarMiembro'),
-    path("validadMiembro/", validarMiembro, name="validarMiembro")
+    path("validadMiembro/", validarMiembro, name="validarMiembro"),
+    path("provinciasList/", provinciasList, name="provinciasList"),
+    path("localidadesList/", localidadesList, name="localidadesList"),
+    path("barriosList/", barriosList, name="barriosList"),
+    path("Asistencia/", AsistenciaTable, name="AsistenciaTable"),
 ]
