@@ -17,11 +17,13 @@
                                         <div class="col col-md-3"><input required type="text" id="dni" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
+                                   
+
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
-                                        <div class="col-md-4"><input required type="text" id="text-input" style="uppercase" name="nombre" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-md-4"><input required type="text" id="text-input" style="uppercase" name="nombre" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Apellido (*)</label></div>
-                                        <div class="col col-md-3"><input required type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input required type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
                                         
                                         
                                     </div>
@@ -245,6 +247,8 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
 
     <script src="{% static 'assets/js/rerecustom.js'%}"></script>
+
+    
 
     <script>
         $(document).ready(function(){

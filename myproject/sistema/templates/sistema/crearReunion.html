@@ -26,6 +26,12 @@
                                 </ul>
                             </div>
                         {% endif %}
+                        
+                        <div class="row form-group">
+                            <div "col col-md-3"><label for="text-input" class="form-control-label">Pruebita (*)</label></div>
+                            <div "col col-md-4"><input type="text" onkeypress="return Solo_Texto(event);" class="form-control"></div>
+
+                        </div>    
 
                         <div class="card-body card-block">
                         {% for field in reunion_form %}
@@ -93,8 +99,7 @@
             </div>
         </form>
         
-      
-{% endblock body %}
     <script src="{% static 'assets/js/recustom.js'%}"></script>
+{% endblock body %}
 
 
