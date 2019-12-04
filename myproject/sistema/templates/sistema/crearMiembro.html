@@ -269,4 +269,29 @@
            });
        });
     </script>
+    <script>
+        $(document).ready(function(){
+           $("#fecha").change(function () {
+             var fecha = $(this).val();
+             var f1=new Date(fecha);
+             var f2 = new Date();
+             if(f1 > f2){
+                alert("fecha de nacimiento incorrecta");
+                $("#fecha").val('')
+             }
+             /*$.ajax({
+               url: '{% url "sistema:validarMiembro" %}',
+               data: {
+                 'fecha': fecha
+               },
+               dataType: 'json',
+               success: function (data) {
+                 if (data.is_taken) {
+                   alert("fecha incorrecta");
+                 }
+               }
+             });*/
+           });
+       });
+    </script>
 {% endblock body%}

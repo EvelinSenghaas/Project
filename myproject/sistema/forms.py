@@ -1,6 +1,6 @@
 from django import forms
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Domicilio,Asistencia,Tipo_Telefono,Telefono,Horario_Disponible,Encuesta,Pregunta,Respuesta
-from . models import Barrio,Localidad,Provincia,Estado_Civil,Telefono_Contacto
+from .models import Barrio,Localidad,Provincia,Estado_Civil,Telefono_Contacto,Configuracion
 
 class GrupoForm(forms.ModelForm):
     def __init__(self,*args, **kwargs):
@@ -145,5 +145,15 @@ class RespuestaForm(forms.ModelForm):
         model = Respuesta
         fields = ['descripcion','puntaje','pregunta']
 
+class ConfiguracionForm(forms.ModelForm):
+    class Meta:
+        model= Configuracion
+        fields = ['titulo','telefono','direccion']
+        widgets={
+            'titulo':forms.TextInput(attrs={'class':'form-control'}),
+            'telefono':forms.TextInput(attrs={'class':'form-control'}),
+            'direccion':forms.TextInput(attrs={'class':'form-control'}),
+            #'logo':forms.TextInput(attrs={'class':'form-control'}),
+        }
 
 

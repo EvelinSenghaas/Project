@@ -1,0 +1,35 @@
+{% extends 'sistema/base_site.html' %}
+{% load static %}
+{% block titulo %}
+    Configuraciones
+{% endblock titulo %}
+{% block body %}
+        <form method="POST" class="form-horizontal">
+            <div class="col-lg-11">
+                {% csrf_token %}
+                <div class="card">
+                    <form method="POST" class="form-horizontal">
+                        <div class="card-header">
+                                <strong> Planilla de  </strong> Configuraciones
+                        </div>
+                        
+                        <div class="card-body card-block">
+                        {% for field in configuracion_form %}
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
+                            <div class = "col col-md-4">{{field}}</div>
+                        </div>
+                        {% endfor %}
+                        <br>
+                        
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                        </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </form>
+        
+    <script src="{% static 'assets/js/recustom.js'%}"></script>
+{% endblock body %}

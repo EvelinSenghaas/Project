@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import agregarAsistencia
+from .views import agregarAsistencia,configuracion
 from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,eliminarTipo_Reunion
 from .views import crearReunion,editarReunion,listarReunion,eliminarReunion
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
@@ -37,4 +37,5 @@ urlpatterns = [
     path("GrupoTable/", GrupoTable, name="GrupoTable"),
     path("MiembroTable/", MiembroTable, name="MiembroTable"),
     path("sexoList/", sexoList, name="sexoList"),
+    path("configuracion/", configuracion, name="configuracion")
 ]

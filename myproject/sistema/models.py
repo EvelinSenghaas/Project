@@ -191,7 +191,13 @@ class Respuesta(models.Model):
     pregunta=models.OneToOneField(Pregunta, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
     
-    
+class Configuracion(models.Model):
+    id=models.AutoField(primary_key=True)
+    titulo= models.CharField('Titulo', max_length=255,blank=False, null= False)
+    telefono = models.CharField('Telefono', max_length=255,blank=False, null= False)
+    direccion = models.CharField('Direccion', max_length=255,blank=False, null= False)
+    #logo=models.BinaryField('Logo',blank=False,null=False)
+
 
 
 

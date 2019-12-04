@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
-from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm
+from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm,ConfiguracionForm
 from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible
-from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia
+from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion
 from datetime import date
 import datetime
 from django.contrib import messages
@@ -27,6 +27,17 @@ class JSONResponse(HttpResponse):
 
 def Home(request):
     return render(request,'sistema/index.html')
+
+def configuracion(request):
+    if request.method == 'POST':
+        configuracion_form = ConfiguracionForm(request.POST)
+        print(configuracion_form)
+        if configuracion_form.is_valid():
+            configuracion_form.save()
+            return redirect('home')
+    else:
+        configuracion_form = ConfiguracionForm()
+    return render(request,'sistema/configuracion.html',{'configuracion_form':configuracion_form})
 
 def crearGrupo(request):
     miembros=Miembro.objects.all()
@@ -65,7 +76,8 @@ def listarMiembro(request):
     miembros = Miembro.objects.filter(borrado=False)
     for miembro in miembros:        
         miembro.fecha_nacimiento = miembro.edad(miembro.fecha_nacimiento)
-    return render(request,'sistema/listarMiembro.html',{'miembros':miembros})
+    configuracion_form = Configuracion.objects.all().last()
+    return render(request,'sistema/listarMiembro.html',{'miembros':miembros,'configuracion_form':configuracion_form})
 
 def crearMiembro(request):
     provincia_form=Provincia.objects.all()
@@ -247,7 +259,6 @@ def validarMiembro(request):
     print(data)
     return JsonResponse(data)
 
-
 def crearTipo_Reunion(request):
     if request.method == 'POST':
         tipo_reunion_form= Tipo_ReunionForm(request.POST)
@@ -348,7 +359,8 @@ def editarReunion(request,id_reunion):
 
 def listarReunion(request):
     reuniones = Reunion.objects.filter(borrado=False)
-    return render(request,'sistema/listarReunion.html',{'reuniones':reuniones})      
+    configuracion_form = Configuracion.objects.all().last()
+    return render(request,'sistema/listarReunion.html',{'reuniones':reuniones,'configuracion_form':configuracion_form})      
 
 def eliminarReunion(request,id_reunion):
     reunion=Reunion.objects.get(id_reunion=id_reunion)
