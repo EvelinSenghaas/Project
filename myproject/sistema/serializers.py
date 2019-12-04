@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Provincia,Localidad,Barrio,Asistencia
+from .models import Provincia,Localidad,Barrio,Asistencia, Miembro, Grupo
 
 class ProvinciaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,6 +17,20 @@ class BarrioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Barrio
         fields = ['id_barrio','barrio','localidad']
+
+class MiembroSerializer(serializers.ModelSerializer):
+    #grupo_set = GrupoSerializer(many=True)
+    class Meta:
+        model = Miembro
+        fields=['dni','nombre','apellido']
+
+
+class GrupoSerializer(serializers.ModelSerializer):
+    miembro = MiembroSerializer(many=True)
+    class Meta:
+        model = Grupo
+        fields=['miembro']
+
 
 class AsistenciaSerializer(serializers.ModelSerializer):
     #localidad = LocalidadSerializer()

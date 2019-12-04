@@ -14,7 +14,7 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
-                                        <div class="col col-md-3"><input required type="text" id="dni" name="dni" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input required type="text" id="dni" name="dni"  min ="1" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                    
@@ -45,7 +45,7 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
-                                        <div class="col-12 col-md-4"><input required type="date" id="date-input" name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4"><input required type="date" id="fecha"  name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
                                     
                                     <div class="row form-group">
@@ -66,7 +66,7 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos (*)</label></div>
-                                        <div class="col-12 col-md-4"><input required type="text" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4"><input required type="text" min="0" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
@@ -127,9 +127,9 @@
 
                                     <div class="row form-group">
                                         <div class="col-12 col-md-3"><label for="text-input" class=" form-control-label">Prefijo</label></div>
-                                        <div class="col col-md-4"><input type="text" id="text-input" name="prefijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-4"><input type="text" id="text-input" min="0" name="prefijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                         <div class="col col-md-1"><label for="text-input" class=" form-control-label">Nº Telefono</label></div>
-                                        <div class="col col-md-4"><input type="text" id="text-input" name="numero" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-4"><input type="text" id="text-input" min="0" name="numero" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
@@ -201,11 +201,11 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle (*)</label></div>
-                                        <div class="col col-md-5"><input required type="text" id="text-input" name="calle" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-5"><input required type="text" id="text-input" min="0" name="calle" placeholder="" class="form-control"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Nº (*)</label></div>
-                                        <div class="col col-md-2"><input required type="text" id="text-input" name="nro" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-2"><input required type="text" id="text-input" name="nro" min="0" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Mz</label></div>
-                                        <div class="col col-md-2"><input type="text" id="text-input" name="mz" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-2"><input type="text" id="text-input" name="mz" placeholder="" min="0" class="form-control"></small></div>
                                     </div>
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
@@ -242,7 +242,7 @@
                                 </button>
                             </div>
                         </div>
-        </div>
+        </div>´
     </form>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
 
@@ -254,26 +254,19 @@
         $(document).ready(function(){
            $("#dni").change(function () {
              var dni = $(this).val();
-             
              $.ajax({
-               
                url: '{% url "sistema:validarMiembro" %}',
                data: {
                  'dni': dni
                },
                dataType: 'json',
-               
                success: function (data) {
-                   
                  if (data.is_taken) {
                    alert("Este miembro ya existe");
                  }
                }
              });
-       
            });
        });
     </script>
-
-
 {% endblock body%}

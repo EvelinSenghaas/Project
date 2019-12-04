@@ -11,7 +11,7 @@ from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from .serializers import ProvinciaSerializer,LocalidadSerializer,BarrioSerializer,AsistenciaSerializer
+from .serializers import ProvinciaSerializer,LocalidadSerializer,BarrioSerializer,AsistenciaSerializer, GrupoSerializer, MiembroSerializer
 import json
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -74,6 +74,7 @@ def crearMiembro(request):
         miembro=miembro_form.save(commit=False)
 
         barrio_form=request.POST.get('barrio')
+        print(barrio_form)
         barrio=Barrio.objects.get(id_barrio=barrio_form)
 
         estado_civil_form=request.POST.get('estado_civil')
@@ -246,6 +247,7 @@ def validarMiembro(request):
     print(data)
     return JsonResponse(data)
 
+
 def crearTipo_Reunion(request):
     if request.method == 'POST':
         tipo_reunion_form= Tipo_ReunionForm(request.POST)
@@ -286,12 +288,18 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
     return redirect('/sistema/listarTipo_Reunion/')
 
 def crearReunion(request):
+
     if request.method == 'POST':
+
         nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST)
         barrio_form=request.POST.get('barrio')
         barrio=Barrio.objects.get(barrio=barrio_form)
         domicilio_form=DomicilioForm(request.POST)
+
+        horario_form=Horario_DisponibleForm(request.POST)
+        horario=horario_form.save()
+
         if reunion_form.is_valid()and domicilio_form.is_valid():
             if Reunion.objects.filter(nombre=nombrecito).exists():
                 messages.error(request, 'Nombre no disponible')
@@ -303,6 +311,7 @@ def crearReunion(request):
                 print(domicilio)
                 domicilio.save()
                 reunion.domicilio=domicilio
+                reunion.horario=horario
                 reunion.save()
                 return redirect('/sistema/listarReunion')
     else:
@@ -311,7 +320,8 @@ def crearReunion(request):
         barrio_form=Barrio.objects.all()
         reunion_form=ReunionForm()
         domicilio_form=DomicilioForm()
-    return render(request,'sistema/crearReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'provincia_form':provincia_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+        horario_form=Horario_DisponibleForm()
+    return render(request,'sistema/crearReunion.html',{'horario_form':horario_form,'barrio_form':barrio_form,'localidad_form':localidad_form,'provincia_form':provincia_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
@@ -440,26 +450,55 @@ def localidadesList(request):
 
 @csrf_exempt
 def barriosList(request):
-    print('0')
     lc=request.GET.get('localidad',None)
-    print('olii')
     print(request.GET)
-    print(lc)
     localidad=Localidad.objects.get(id_localidad=lc)
-    print('1')
     if request.method == 'GET':
-        print('2')
         barrio = Barrio.objects.filter(localidad=localidad).order_by('barrio')
-        print('3')
-        print(barrio)
         serializer = BarrioSerializer(barrio, many=True)
         result = dict()
         result = serializer.data
         return JSONResponse(result)
 
 @csrf_exempt
-def AsistenciaTable(request):
+def GrupoTable(request):
+    print(request.GET)
+    reunion= request.GET.get('grupo',None)
+    rn = Reunion.objects.get(id_reunion=reunion)
+    gr= rn.grupo
     if request.method == 'GET':
+        grupos = Grupo.objects.prefetch_related('miembro').filter(id_grupo=gr.id_grupo)
+        serializer = GrupoSerializer(grupos, many=True)
+        result = dict()
+        result = serializer.data
+        #print("No ta")
+        return JSONResponse(result)
+
+@csrf_exempt
+def MiembroTable(request):
+    print('0')
+    if request.method == 'GET':
+        miembros=Miembro.objects.prefetch_related('grupo_set')
+        serializer = MiembroSerializer(miembros, many=True)
+        result = dict()
+        result = serializer.data
+        #print("No ta")
+        return JSONResponse(result)
+
+@csrf_exempt
+def AsistenciaTable(request):
+    print('0')
+    if request.method == 'GET':
+        print('1')
+        reunion = request.GET.get('miembros',None)
+        rn=Reunion.objects.get(id_reunion=reunion)
+        print(rn)
+        print('2')
+        grupo=rn.grupo
+        miembros= grupo.miembro
+        mb= Grupo.objects.prefetch_related('miembro').filter(id_grupo=grupo.id_grupo)
+        print(mb)
+        print('3')
         asistencia= Asistencia.objects.all()
         serializer = AsistenciaSerializer(asistencia, many=True)
         result = dict()
@@ -467,3 +506,23 @@ def AsistenciaTable(request):
         #print("No ta")
         return JSONResponse(result)
 
+@csrf_exempt
+def sexoList(request):
+    sx = request.GET.get('mb',None)
+    print(sx)
+    print('0')
+    if request.method == 'GET':
+        miembros = None
+        if sx == 'Femenino':
+           miembros= Miembro.objects.filter(sexo='Femenino')
+        if sx == 'Masculino':
+            miembros = Miembro.objects.filter(sexo = 'Masculino')
+        if sx == 'Ambos': 
+            miembros = Miembro.objects.all()
+        print(miembros)
+        serializer = MiembroSerializer(miembros, many=True)
+        result = dict()
+        result = serializer.data
+        #print("No ta")
+        return JSONResponse(result)
+    

@@ -4,8 +4,8 @@ from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,elimi
 from .views import crearReunion,editarReunion,listarReunion,eliminarReunion
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
 from .views import listarMiembro,crearMiembro,editarMiembro,eliminarMiembro,validarMiembro
-from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo
-from .views import provinciasList,localidadesList,barriosList,AsistenciaTable
+from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo,sexoList
+from .views import provinciasList,localidadesList,barriosList,AsistenciaTable, GrupoTable, MiembroTable
 
 urlpatterns = [
     path('crearTipo_Reunion/',crearTipo_Reunion,name='crearTipo_Reunion'),
@@ -33,5 +33,8 @@ urlpatterns = [
     path("provinciasList/", provinciasList, name="provinciasList"),
     path("localidadesList/", localidadesList, name="localidadesList"),
     path("barriosList/", barriosList, name="barriosList"),
-    path("Asistencia/", AsistenciaTable, name="AsistenciaTable"),
+    path("AsistenciaTable/", AsistenciaTable, name="AsistenciaTable"),
+    path("GrupoTable/", GrupoTable, name="GrupoTable"),
+    path("MiembroTable/", MiembroTable, name="MiembroTable"),
+    path("sexoList/", sexoList, name="sexoList"),
 ]

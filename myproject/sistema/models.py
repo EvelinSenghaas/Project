@@ -134,6 +134,14 @@ class Telefono_Contacto(models.Model):
     miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
     
 class Grupo(models.Model):
+    SEXO=[
+        ('Masculino','Masculino'),
+        ('Femenino','Femenino'),
+        ('Ambos','Ambos')
+    ]
+    desde=models.IntegerField('edad',blank=False,null=True)
+    hasta=models.IntegerField('edad',blank=False,null=True)
+    sexo=models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
     borrado = models.BooleanField('borrado',default=False)
@@ -143,23 +151,14 @@ class Grupo(models.Model):
         return self.nombre
 
 class Reunion(models.Model):
-    DIA=[
-        ('Lunes','Lunes'),
-        ('Martes','Martes'),
-        ('Miercoles','Miercoles'),
-        ('Jueves','Jueves'),
-        ('Viernes','Viernes'),
-        ('Sabado','Sabado'),
-        ('Domingo','Domingo')
-    ]
+    
     id_reunion=models.AutoField(primary_key=True)
-    dia =models.CharField('dia',max_length=50,blank=False,null=False,choices=DIA)
-    hora = models.TimeField('Horario', auto_now=False, auto_now_add=False)
     tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.PROTECT)
     nombre =models.CharField('Nombre', max_length=100,blank=False,null=True)
     domicilio=models.ForeignKey(Domicilio,on_delete=models.PROTECT,blank=False,null=True)
     grupo=models.ForeignKey(Grupo, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)
+    horario= models.ForeignKey(Horario_Disponible, on_delete=models.CASCADE,blank=True, null=True)
 
     def __str__(self):
         return self.nombre        

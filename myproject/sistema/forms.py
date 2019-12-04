@@ -1,6 +1,7 @@
 from django import forms
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Domicilio,Asistencia,Tipo_Telefono,Telefono,Horario_Disponible,Encuesta,Pregunta,Respuesta
 from . models import Barrio,Localidad,Provincia,Estado_Civil,Telefono_Contacto
+
 class GrupoForm(forms.ModelForm):
     def __init__(self,*args, **kwargs):
             super(GrupoForm, self).__init__(*args, **kwargs)
@@ -8,10 +9,12 @@ class GrupoForm(forms.ModelForm):
              
     class Meta:
         model=Grupo
-        fields=['nombre','miembro']
+        fields=['nombre','miembro','sexo','desde','hasta']
         widgets={
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
-            'miembro':forms.CheckboxSelectMultiple(),
+            #'miembro':forms.CheckboxSelectMultiple(),
+            'desde':forms.TextInput(attrs={'class':'form-control','type':'number','min':'0'}),
+            'hasta':forms.TextInput(attrs={'class':'form-control','type':'number','max':'100'})
         }
         
 class Tipo_ReunionForm(forms.ModelForm):
@@ -35,14 +38,12 @@ class ReunionForm(forms.ModelForm):
              
     class Meta:
         model=Reunion
-        fields=['nombre','dia','hora','tipo_reunion','grupo']
+        fields=['nombre','tipo_reunion','grupo']
         labels={
-            'nombre':'Nombre','dia':'Dia'
+            'nombre':'Nombre'
         }
         widgets = {
-            'nombre': forms.TextInput(attrs={'class':'form-control'}),
-            'dia':forms.Select(attrs={'class':'form-control'}),
-            'hora':forms.DateTimeInput(attrs={'class':'form-control'}),
+            'nombre': forms.TextInput(attrs={'class':'form-control','onkeypress':'return Solo_Texto(event);'}),
         }
 
 class BarrioForm(forms.ModelForm):
@@ -101,7 +102,6 @@ class AsistenciaForm(forms.ModelForm):
         model=Asistencia
         fields=['miembro','reunion','fecha']
               
-
 class Tipo_TelefonoForm(forms.ModelForm): 
     class Meta:
         model = Tipo_Telefono

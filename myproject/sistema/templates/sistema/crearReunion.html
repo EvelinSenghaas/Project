@@ -27,11 +27,11 @@
                             </div>
                         {% endif %}
                         
-                        <div class="row form-group">
+                        {% comment %} <div class="row form-group">
                             <div "col col-md-3"><label for="text-input" class="form-control-label">Pruebita (*)</label></div>
                             <div "col col-md-4"><input type="text" onkeypress="return Solo_Texto(event);" class="form-control"></div>
 
-                        </div>    
+                        </div>     {% endcomment %}
 
                         <div class="card-body card-block">
                         {% for field in reunion_form %}
@@ -89,6 +89,18 @@
                             <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
                             <div class="col col-md-2">{{domicilio_form.piso}}</div>
                         </div>
+
+                         <br>
+                            <strong>HORARIO DISPONIBLE</strong>
+                        <br><br>
+                        {% if horario_form  %}
+                            {% for field in horario_form %}
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="{{field.id_for_label}}" class=" form-control-label" >{{field.html_name}} (*)</label></div>
+                                    <div class="col col-md-4">{{field}}</div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                                                 
                         <div class="card-body">
                             <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
