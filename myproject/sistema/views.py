@@ -15,6 +15,7 @@ from .serializers import ProvinciaSerializer,LocalidadSerializer,BarrioSerialize
 import json
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 class JSONResponse(HttpResponse):
     """
@@ -25,8 +26,22 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
+@login_required
 def Home(request):
-    return render(request,'sistema/index.html')
+    usuario = request.user
+    context ={'usuario':usuario}
+    return render(request,'sistema/index.html',context)
+
+
+def auditoriaMiembro(request):
+    auditoria_miembro = Miembro.history.all()
+    context = {'auditoria_miembro': auditoria_miembro}
+    return render(request, 'sistema/auditoriaMiembro.html', context)
+
+def auditoriaReunion(request):
+    auditoria_reunion = Reunion.history.all()
+    context = {'auditoria_reunion': auditoria_reunion}
+    return render(request, 'sistema/auditoriaReunion.html', context)
 
 def configuracion(request):
     if request.method == 'POST':
@@ -43,7 +58,8 @@ def crearGrupo(request):
     miembros=Miembro.objects.all()
     if request.method == 'POST':
         grupo_form = GrupoForm(request.POST)
-        print(grupo_form)
+        print(grupo_form.errors.as_data())
+        print(request.POST)
         if grupo_form.is_valid():
             grupo_form.save()
             return redirect('/sistema/listarGrupo')
@@ -82,8 +98,10 @@ def listarMiembro(request):
 def crearMiembro(request):
     provincia_form=Provincia.objects.all()
     if request.method == 'POST':
+        
         miembro_form=MiembroForm(request.POST)
         miembro=miembro_form.save(commit=False)
+        miembro.changeReason ='Creacion'
 
         barrio_form=request.POST.get('barrio')
         print(barrio_form)
@@ -195,7 +213,6 @@ def editarMiembro(request,dni):
         barrio_form = request.POST.get('barrio')
         barrio=Barrio.objects.get(barrio=barrio_form)
         miembro=miembro_form.save(commit=False)
-        
         fecha = datetime.datetime.strptime(str(miembro.fecha_nacimiento), '%Y-%m-%d')
         if fecha.date() > datetime.date.today():
             print(fecha.date())
@@ -219,6 +236,7 @@ def editarMiembro(request,dni):
                 
                 miembro.nombre=miembro.nombre.capitalize()
                 miembro.apellido=miembro.apellido.upper()
+                miembro.changeReason ='Modificacion'
                 miembro.save()
 
                 return redirect('/sistema/listarMiembro')
@@ -230,7 +248,6 @@ def editarMiembro(request,dni):
 def eliminarMiembro(request,dni):
     miembroo = Miembro.objects.get(dni=dni)
     if Grupo.objects.filter(miembro = miembroo,borrado=False).exists():
-        print('lina pone un msg chamiga')
         messages.error(request, 'NO SE PUEDE ELIMINAR AL MIEMBRO porque es parte de un grupo') 
         return redirect('/sistema/listarMiembro')
     id_domicilio=miembroo.domicilio.id_domicilio
@@ -244,6 +261,7 @@ def eliminarMiembro(request,dni):
     telefono.borrado=True
     tipo_telefono.borrado=True
     domicilio.save()
+    miembroo.changeReason ='Eliminacion'
     miembroo.save()
     telefono.save()
     tipo_telefono.save()
@@ -308,19 +326,21 @@ def crearReunion(request):
         barrio=Barrio.objects.get(barrio=barrio_form)
         domicilio_form=DomicilioForm(request.POST)
 
-        horario_form=Horario_DisponibleForm(request.POST)
+        horario_form= Horario_DisponibleForm(request.POST)
         horario=horario_form.save()
+        print('-0-')
+        print(horario)
 
         if reunion_form.is_valid()and domicilio_form.is_valid():
             if Reunion.objects.filter(nombre=nombrecito).exists():
                 messages.error(request, 'Nombre no disponible')
             else:
-                print('entre capa')
                 reunion=reunion_form.save(commit=False)
                 domicilio=domicilio_form.save(commit=False)
                 domicilio.barrio=barrio
                 print(domicilio)
                 domicilio.save()
+                reunion.changeReason ='Creacion'
                 reunion.domicilio=domicilio
                 reunion.horario=horario
                 reunion.save()
@@ -338,24 +358,31 @@ def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
     id = reunion.domicilio.id_domicilio
     domicilio=Domicilio.objects.get(id_domicilio = id)
+    idd= reunion.horario.id_horario_disponible
+    horario=Horario_Disponible.objects.get(id_horario_disponible=idd)
+    provincia_form=Provincia.objects.all().order_by('provincia')
+    localidad_form=Localidad.objects.all()
+    barrio_form=Barrio.objects.all()
     if request.method == 'GET':
         reunion_form=ReunionForm(instance = reunion)
         domicilio_form=DomicilioForm(instance = domicilio)
+        horario_form = Horario_DisponibleForm(instance=horario)
+        
     else:
         nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST,instance=reunion)
+        horario_form=Horario_DisponibleForm(request.POST,instance=horario)
         domicilio_form=DomicilioForm(instance = domicilio)
-        if Reunion.objects.filter(nombre=nombrecito).exists():
-                messages.error(request, 'Nombre Repetido: no se admiten nombres repetidos')
-        else:
-            if reunion_form.is_valid() and domicilio_form.is_valid():
-                    reunion=reunion_form.save(commit=False)
-                    domicilio=domicilio_form.save(commit=False)
-                    reunion.domicilio=domicilio
-                    domicilio.save()
-                    reunion.save()
-                    return redirect('/sistema/listarReunion')
-    return render(request,'sistema/crearReunion.html',{'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+        domicilio=domicilio_form.save(commit=False)
+        print(reunion_form.errors.as_data())
+        if reunion_form.is_valid():
+            reunion=reunion_form.save(commit=False)
+            reunion.domicilio=domicilio
+            domicilio.save()
+            reunion.changeReason ='Modificacion'
+            reunion.save()
+            return redirect('/sistema/listarReunion')
+    return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'provincia_form':provincia_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def listarReunion(request):
     reuniones = Reunion.objects.filter(borrado=False)
@@ -367,6 +394,7 @@ def eliminarReunion(request,id_reunion):
     domicilio=Domicilio.objects.get(id_domicilio=reunion.domicilio.id_domicilio)
     reunion.borrado=True
     domicilio.borrado=True
+    reunion.changeReason ='Eliminacion'
     reunion.save()
     domicilio.save()
     return redirect('/sistema/listarReunion/')
@@ -387,7 +415,7 @@ def agregarAsistencia(request):
             asistencia.presente=True
             asistencia.save()
             print(check)
-        return redirect('/sistema/agregarAsistencia/')
+        return redirect('home')
     else:
         asistencia_form=AsistenciaForm()
         reunion_form=Reunion.objects.all()

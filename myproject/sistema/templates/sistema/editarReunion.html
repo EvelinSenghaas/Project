@@ -1,17 +1,104 @@
 {% extends 'sistema/base_site.html' %}
+{% load static %}
 {% block titulo %}
     Crear Reunion
 {% endblock titulo %}
 {% block body %}
-    <form method="POST">
-        {% csrf_token %}
-        {{reunion_form.as_p}}
-        {{domicilio_form}}
-        <div class="card">
-                     
-            <div class="card-body">
-                <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+        <form method="POST" class="form-horizontal">
+            <div class="col-lg-11">
+                {% csrf_token %}
+                <div class="card">
+                    <form method="POST" class="form-horizontal">
+                        <div class="card-header">
+                                <strong>Planilla de Registro de </strong> Reuniones
+                        </div>
+                        
+                        
+                        {% comment %} <div class="row form-group">
+                            <div "col col-md-3"><label for="text-input" class="form-control-label">Pruebita (*)</label></div>
+                            <div "col col-md-4"><input type="text" onkeypress="return Solo_Texto(event);" class="form-control"></div>
+
+                        </div>     {% endcomment %}
+
+                        <div class="card-body card-block">
+                        {% for field in reunion_form %}
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
+                            <div class = "col col-md-4">{{field}}</div>
+                        </div>
+                        {% endfor %}
+                        <br>
+                        <strong>Lugar de la Reunion</strong>
+                        <br><br>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
+                                        <div class="col col-md-4"><select id="provincias" name='provincia' class="form-control" required>
+                                                <option selected> --------------</option>
+                                                {% for provincia in provincia_form %}
+                                                        <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                                {% endfor %}
+                                            </select>
+                                            </div>
+                                    </div>    
+
+                                    <div class="row form-group">
+                                        
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
+                                        <div class="col col-md-4"><select id="select-localidades" name='localidad' class="form-control" required>
+                                            {% for localidad in localidad_form %}
+                                                    <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
+                                            {% endfor %}
+                                            
+                                            </select>
+                                        </div>
+
+                                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
+                                        <div class="col col-md-4"><select id="select-barrio" name='barrio' class="form-control" required>
+                                           {% for barrio in barrio_form %}
+                                                    <option value='{{barrio.barrio}}'>{{barrio.barrio}}</option>
+                                            {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                    </div>
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
+                            <div class="col col-md-5">{{domicilio_form.calle}}</div>
+                            <div><label for="text-input" class=" form-control-label">Nº</label></div>
+                            <div class="col col-md-2">{{domicilio_form.nro}}</div>
+                            <div><label for="text-input" class=" form-control-label">Mz</label></div>
+                            <div class="col col-md-2">{{domicilio_form.mz}}</div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
+                            <div class="col col-md-2">{{domicilio_form.departamento}}</div>
+                            <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
+                            <div class="col col-md-2">{{domicilio_form.piso}}</div>
+                        </div>
+
+                         <br>
+                            <strong>HORARIO</strong>
+                        <br><br>
+                        {% if horario_form  %}
+                            {% for field in horario_form %}
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="{{field.id_for_label}}" class=" form-control-label" >{{field.html_name}} (*)</label></div>
+                                    <div class="col col-md-4">{{field}}</div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                                                
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                        </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
+        
+    <script src="{% static 'assets/js/recustom.js'%}"></script>
 {% endblock body %}
+
+

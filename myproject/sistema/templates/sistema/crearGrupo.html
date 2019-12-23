@@ -22,7 +22,7 @@
                                 <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input">Sexo(*)</label></div>
                                     <div class="col-md-5">
-                                        <select id="sexo" class="form-control">
+                                        <select id="sexo" class="form-control" name="sexo">
                                             <option value="null"> ------------</option>
                                             <option value='Femenino'>Femenino</option>
                                             <option value='Masculino'>Masculino</option>
@@ -48,10 +48,8 @@
                                 <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input"></label></div>
                                     <div class="col-md-4">
-                                    <select required id="select-miembro" name='miembro' class="form-control" multiple>
-                                        {% comment %} {% for miembro in miembros %}
-                                                <option value='{{miembro.dni}}'>{{miembro.apellido}}, {{miembro.nombre}}</option>
-                                        {% endfor %} {% endcomment %}
+                                    <select required id="select-miembro" name='miembro' class="js-example-basic-multiple" name="states[]" multiple="multiple">
+                                        
                                     </select>
                                     </div>
                                     
@@ -69,24 +67,42 @@
     </div>
         
     </form>
-{% comment %} <script src="{%static 'assets/js/jquery.multi-select.js'%}"></script>
 <script src="{%static 'assets/js/select2.min.js'%}"></script>
 <script src="{%static 'assets/js/jquery.multi-select.js'%}"></script>
-<script src="{%static 'assets/js/selectMul.js'%}"></script>
-<script src="{%static 'assets/js/selectMul2.js'%}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
-<script src="{% static 'assets/vendor/jquery/jquery.min.js' %}"></script>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.12/dist/js/select2.min.js"></script>
 
-<script>
-    $(document).ready(function() {
-        $('.js-example-basic-multiple').select2();
-    });
-</script> {% endcomment %}
+
 <script src="http://code.jquery.com/jquery-latest.js"></script>
-<script src="{%static 'assets/js/grupo.js'%}"></script>
-
-
+{% comment %} <script src="{%static 'assets/js/grupo.js'%}"></script> {% endcomment %}
+<script>
+$('#sexo').change(function() {
+    var sx = $(this).val();
+    console.log(sx);
+    $.ajax({
+        url: '/sistema/sexoList',
+        data: {
+            'mb': sx,
+        },
+        dataType: 'json',
+        success: function(data) {
+            var html = "";
+            console.log('wenas y wenardas');
+            console.log(data.length);
+            $('#select-miembro').html("");
+            for (var i = 0; i < data.length; i++) {
+                html += "<option value=" + data[i].dni + ">" + data[i].apellido +", "+data[i].nombre + "</option>";
+            }
+            $('#select-miembro').append(html);
+        }
+    })
+});
+</script>
+<script>
+$(document).ready(function() {
+    $('.js-example-basic-multiple').select2();
+});
+</script>
 {% endblock body%}
 

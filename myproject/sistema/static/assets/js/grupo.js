@@ -13,9 +13,12 @@ $('#sexo').change(function() {
             console.log(data.length);
             $('#select-miembro').html("");
             for (var i = 0; i < data.length; i++) {
-                html += "<option value=" + data[i].dni + ">" + data[i].apellido +", "+data[i].nombre + "</option>";
+                html += "<option value=" + data[i] + ">" + data[i].apellido +", "+data[i].nombre + "</option>";
             }
             $('#select-miembro').append(html);
         }
     })
+});
+$(document).ready(function() {
+    $('.js-example-basic-multiple').select2();
 });

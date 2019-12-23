@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import date
+from simple_history.models import HistoricalRecords
 
 class Tipo_Reunion(models.Model):
     id_tipo_reunion =  models.AutoField(primary_key = True)
@@ -117,6 +118,7 @@ class Miembro(models.Model):
     horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
     estado_civil=models.ForeignKey(Estado_Civil, on_delete=models.PROTECT)
+    history = HistoricalRecords()
 
 
     def __str__(self):
@@ -159,6 +161,7 @@ class Reunion(models.Model):
     grupo=models.ForeignKey(Grupo, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)
     horario= models.ForeignKey(Horario_Disponible, on_delete=models.CASCADE,blank=True, null=True)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.nombre        
@@ -197,7 +200,6 @@ class Configuracion(models.Model):
     telefono = models.CharField('Telefono', max_length=255,blank=False, null= False)
     direccion = models.CharField('Direccion', max_length=255,blank=False, null= False)
     #logo=models.BinaryField('Logo',blank=False,null=False)
-
 
 
 
