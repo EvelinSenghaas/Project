@@ -32,7 +32,6 @@ def Home(request):
     context ={'usuario':usuario}
     return render(request,'sistema/index.html',context)
 
-
 def auditoriaMiembro(request):
     auditoria_miembro = Miembro.history.all()
     context = {'auditoria_miembro': auditoria_miembro}
@@ -403,15 +402,22 @@ def agregarAsistencia(request):
     if request.method == 'POST':
         reunion_form = request.POST.get('reunion')
         reunion=Reunion.objects.get(id_reunion=reunion_form)
-        print(reunion)
+        grupo= reunion.grupo
+        miembros = Miembro.objects.filter(grupo=grupo)
+        print('--------------------')
+        print(miembros)
         fecha = request.POST.get('fecha')
         print('--------1--------')
-        for check in request.POST.getlist('check[]'):
-            miembro=Miembro.objects.get(dni=check)
+        for miembro in miembros:
             asistencia=Asistencia()
             asistencia.miembro=miembro
             asistencia.fecha=fecha
             asistencia.reunion=reunion
+            asistencia.presente=False
+            asistencia.save()
+        for check in request.POST.getlist('check[]'):
+            miembro=Miembro.objects.get(dni=check)
+            asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
             asistencia.presente=True
             asistencia.save()
             print(check)
@@ -421,6 +427,15 @@ def agregarAsistencia(request):
         reunion_form=Reunion.objects.all()
         miembro_form=Miembro.objects.all()
     return render(request,'sistema/agregarAsistencia.html',{'miembro_form':miembro_form,'asistencia_form':asistencia_form,'reunion_form':reunion_form})
+
+def verAsistencia(request):
+    if request.method == 'POST':
+        print('wenas')
+    else:
+        reunion=Reunion.objects.all()
+        asistencia = Asistencia.objects.all()
+    return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia})
+
 
 def agregarHorario_Disponible(request):
     if request.method == 'POST':

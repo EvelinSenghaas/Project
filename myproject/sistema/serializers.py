@@ -24,13 +24,11 @@ class MiembroSerializer(serializers.ModelSerializer):
         model = Miembro
         fields=['dni','nombre','apellido']
 
-
 class GrupoSerializer(serializers.ModelSerializer):
     miembro = MiembroSerializer(many=True)
     class Meta:
         model = Grupo
         fields=['miembro']
-
 
 class AsistenciaSerializer(serializers.ModelSerializer):
     #localidad = LocalidadSerializer()
