@@ -101,8 +101,7 @@ def crearMiembro(request):
         miembro_form=MiembroForm(request.POST)
         miembro=miembro_form.save(commit=False)
         miembro.changeReason ='Creacion'
-
-        barrio_form=request.POST.get('barrio')
+        
         print(barrio_form)
         barrio=Barrio.objects.get(id_barrio=barrio_form)
 
@@ -435,7 +434,6 @@ def verAsistencia(request):
         reunion=Reunion.objects.all()
         asistencia = Asistencia.objects.all()
     return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia})
-
 
 def agregarHorario_Disponible(request):
     if request.method == 'POST':
