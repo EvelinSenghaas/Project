@@ -11,7 +11,6 @@ from django.contrib import messages
 # Create your views here.
 
 class Login(FormView):
-    print("HOLA LINARDA")
     template_name = 'login.html'
     form_class = FormularioLogin
     success_url = reverse_lazy('home')

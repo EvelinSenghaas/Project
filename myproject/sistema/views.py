@@ -101,8 +101,8 @@ def crearMiembro(request):
         miembro_form=MiembroForm(request.POST)
         miembro=miembro_form.save(commit=False)
         miembro.changeReason ='Creacion'
-        
-        print(barrio_form)
+
+        barrio_form=request.POST.get('barrio')
         barrio=Barrio.objects.get(id_barrio=barrio_form)
 
         estado_civil_form=request.POST.get('estado_civil')
@@ -112,7 +112,6 @@ def crearMiembro(request):
         domicilio=domicilio_form.save(commit=False)
         domicilio.barrio=barrio
         domicilio.save()
-
 
         horario_form=Horario_DisponibleForm(request.POST)
         horario=horario_form.save()

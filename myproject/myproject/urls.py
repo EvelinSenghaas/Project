@@ -13,6 +13,9 @@ urlpatterns = [
     path('sistema/',include(('sistema.urls','sistema'))),
     path('Home/',Home,name = 'home'),
     path('accounts/login/', Login.as_view(), name='login'),
-    path('accounts/logout/', login_required(logoutUsuario), name='logout')
+    path('accounts/logout/', login_required(logoutUsuario), name='logout'),
+    path('accounts/', include('accounts.urls')), # new
+    path('accounts/', include('django.contrib.auth.urls')),
+
 ]
 

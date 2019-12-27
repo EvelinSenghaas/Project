@@ -1,10 +1,10 @@
 <!-- templates/signup.html -->
-{% extends 'base.html' %}
+{% extends 'sistema/base_site.html' %}
 
-{% block title %}Sign Up{% endblock %}
+{% block title %}ksi pagina de registro{% endblock %}
 
-{% block content %}
-  <h2>Sign up</h2>
+{% block body%}
+  <h2>ksi pagina de registro</h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

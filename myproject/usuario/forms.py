@@ -1,4 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm
+from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from .models import CustomUser
 
 class FormularioLogin(AuthenticationForm):
      def __init__(self, *args, **kwargs):
@@ -8,3 +11,8 @@ class FormularioLogin(AuthenticationForm):
 
        self.fields['password'].widget.attrs['class'] = 'form-control'
        self.fields['password'].widget.attrs['placeholder'] = 'Contraseña'
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'miembro', 'email')
