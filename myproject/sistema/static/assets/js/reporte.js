@@ -1,6 +1,6 @@
 $(document).ready(function() {    
 	// DataTable initialisation
-	$('#tabla-miembro').DataTable(
+	$('#tablita').DataTable(
         {
 			"dom": '<"dt-buttons"Bf><"clear">lirtp',
 			"paging": true,

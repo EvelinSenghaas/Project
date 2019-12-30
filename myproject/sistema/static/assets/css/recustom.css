@@ -1,0 +1,29 @@
+.cosito {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 100%;
+    font-weight: 400;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    width: 85%;
+    }
+
+  .cosito-presente {
+    color: #fff;
+    background-color: #28a745;
+  }
+
+  .cosito-falto {
+    color: #fff;
+    background-color: #dc3545;
+  }
+.presente {
+    background-color: #7cee95e8;
+}
+.falto {
+    background-color: rgba(245, 104, 104, 0.712);
+}

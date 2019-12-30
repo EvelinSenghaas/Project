@@ -432,7 +432,7 @@ def verAsistencia(request):
     else:
         reunion=Reunion.objects.all()
         asistencia = Asistencia.objects.all()
-    return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia})
+    return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia,'reunion':reunion})
 
 def agregarHorario_Disponible(request):
     if request.method == 'POST':
@@ -473,6 +473,23 @@ def agregarRespuesta(request):
     else:
         respuesta_form=RespuestaForm()
     return render(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
+
+def agregarProvincia(request):
+    provincia= request.POST.get('prov')
+    print(provincia)
+    print('0')
+    print(request.GET.get('prov',None))#agregue el None tengo que ver si anda
+    print('1')
+    print(request)
+    # provincia=provincia.capitalize()
+    if Provincia.objects.get(provincia=provincia).exists():
+        print('nombre repetido china')
+    else:
+        print('ya se va a agregar Lina tranqui')
+        # provincia.save()
+    return redirect('/sistema/crearMiembro')
+
+
 
 @csrf_exempt
 def provinciasList(request):
@@ -577,4 +594,5 @@ def sexoList(request):
         result = serializer.data
         #print("No ta")
         return JSONResponse(result)
-    
+
+
