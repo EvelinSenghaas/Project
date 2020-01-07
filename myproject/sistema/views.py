@@ -2,8 +2,8 @@ from django.shortcuts import render,redirect
 from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm,ConfiguracionForm
 from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
-from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible
-from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion
+from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible,Pregunta
+from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,TipoPregunta
 from datetime import date
 import datetime
 from django.contrib import messages
@@ -123,7 +123,7 @@ def crearMiembro(request):
             telefono=telefono_form.save(commit=False)
             telefono.tipo_telefono=tipo_telefono
             telefono.save()
-
+        
         fecha = datetime.datetime.strptime(str(miembro.fecha_nacimiento), '%Y-%m-%d')
         if fecha.date() > datetime.date.today():
             messages.error(request, 'fecha de nacimiento incorrecta')
@@ -149,7 +149,6 @@ def crearMiembro(request):
                 tel_contacto.miembro=miembro_cont
                 tel_contacto.save()
             miembro.save()
-
             return redirect('/sistema/listarMiembro')
         
     else:
@@ -456,13 +455,23 @@ def agregarEncuesta(request):
 
 def agregarPregunta(request):
     if request.method =='POST':
-        pregunta_form=PreguntaForm(request.POST)
-        if pregunta_form.is_valid:
-            pregunta_form.save()
-            return redirect('home')
+        pr=request.POST.get('descripcion')
+        tp =request.POST.get('tipo')
+        tipo = TipoPregunta.objects.get(tipo=tp)
+        print(tipo)
+        pregunta = Pregunta()
+        pregunta.descripcion=pr
+        pregunta.tipo=tipo
+        pregunta.borrado=False
+        print('*-----*')
+        print(pregunta)
+        pregunta.save()
+        print('*-----*')
+        return redirect('home')
     else:
         pregunta_form=PreguntaForm()
-    return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form})
+        tipo=TipoPregunta.objects.all()
+    return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form,'tipo':tipo})
 
 def agregarRespuesta(request):
     if request.method == 'POST':
@@ -488,7 +497,6 @@ def agregarProvincia(request):
         print('ya se va a agregar Lina tranqui')
         # provincia.save()
     return redirect('/sistema/crearMiembro')
-
 
 
 @csrf_exempt

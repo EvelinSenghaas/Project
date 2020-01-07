@@ -24,7 +24,7 @@
                                         </div>
 
                                         <div class="card-body">
-                                            <table id="tablita" class="table table-striped table-bordered">
+                                            <table id="tablitax" class="table table-striped table-bordered">
                                                 <thead>
                                                     <tr>
                                                         <th>Nombre</th>
@@ -35,18 +35,17 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody id="my-tabla"> 
+                                                
                                                     {% for ast in asistencia %}
                                                         <tr>
-                                                            
                                                             <td>{{ast.miembro.nombre}}</td>
                                                             <td>{{ast.miembro.apellido}}</td>
                                                             <td>{{ast.fecha}}</td>
                                                             <td>{{ast.reunion}}</td>
-                                                            
                                                             {% if ast.presente %}
-                                                            <td class="cosito cosito-presente">Presente</td>
+                                                                <td class="cosito cosito-presente">Presente</td>
                                                             {%else%}
-                                                            <td class="cosito cosito-falto">Faltó</td>
+                                                                <td class="cosito cosito-falto">Faltó</td>
                                                             {%endif%}
                                                             
                                                         </tr>
@@ -91,7 +90,7 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $('.filtrito').DataTable({
+            $('#tablitax').DataTable({
                 initComplete: function() {
                 this.api().columns().every(function() {
                     var column = this;

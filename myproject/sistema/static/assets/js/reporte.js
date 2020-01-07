@@ -42,8 +42,10 @@ $(document).ready(function() {
 					pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                     exportOptions: {
                         columns: "thead th:not(.noExport)"
-                    },
+					},
+						
 					customize: function (doc) {
+						
                         var titulo = $('.titulo_reporte').val();
                         console.log(titulo);
                         var telefono = $('.telefono_reporte').val();
@@ -119,7 +121,6 @@ $(document).ready(function() {
 								margin: 20
 							}
 						});
-						
 				}
 				}],
                 

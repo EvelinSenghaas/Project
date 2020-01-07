@@ -1,11 +1,45 @@
-{% extends 'sistema/base_site.html' %}
-{% block titulo %}
-    Agregar Pregunta
-{% endblock titulo %}
-{% block body %} 
+{% extends 'sistema/base_site.html'%}
+{% load static %}
+{% block titulo%}
+    Crear Preguntas
+{% endblock titulo%}
+{% block body%}
     <form method="POST">
-        {% csrf_token %}
-        {{pregunta_form.as_p}}
-        <button type ="submit">Crear</button>
+    {% csrf_token %}
+    <div class="col-lg-11">
+     
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Planilla de Registro de </strong> Preguntas
+                            </div>
+                            <form method="POST" class="form-horizontal">
+                                    
+                                <div class="row form-group">
+                                    <div class="col-md-3"><label for="text-input"> Pregunta (*)</label></div>
+                                    <div class="col-md-5" ><input type="text" class="form-control" name="descripcion" required></div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col-md-3"><label for="text-input"> Tipo de Pregunta (*)</label></div>
+                                    <div class="col-md-5">
+                                        <select id="tipo" class="form-control" name='tipo'required>
+                                            <option value="Abierta">Abierta</option>
+                                            <option value="Unica Opcion Positiva">Unica Opcion Positiva</option>
+                                            <option value="Unica Opcion Negativa">Unica Opcion Negativa</option>
+                                            <option value="Opcion multiple">Opcion multiple</option>
+                                        </select>
+                                    </div>
+                                </div>
+                     
+                                <div class="card">
+                                    <div class="card-body">
+                                        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+    </div>
+        
     </form>
-{% endblock body %}
+{% endblock body%}
+
