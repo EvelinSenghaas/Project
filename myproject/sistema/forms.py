@@ -138,7 +138,7 @@ class TipoPreguntaForm(forms.ModelForm):
 class EncuestaForm(forms.ModelForm): 
     class Meta:
         model = Encuesta
-        fields = ['fecha_envio','miembro','grupo']
+        fields = ['pregunta','envio','motivo','cantidad']
 
 class PreguntaForm(forms.ModelForm):
     class Meta:
@@ -147,6 +147,7 @@ class PreguntaForm(forms.ModelForm):
         widgets = {
             'descripcion':forms.TextInput(attrs={'class':'form-control'}),
         }
+
 class RespuestaForm(forms.ModelForm):
     class Meta:
         model = Respuesta

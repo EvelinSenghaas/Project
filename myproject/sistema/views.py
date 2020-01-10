@@ -6,6 +6,7 @@ from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Do
 from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,TipoPregunta
 from datetime import date
 import datetime
+from django.db.models import Max
 from django.contrib import messages
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
@@ -97,42 +98,90 @@ def listarMiembro(request):
 def crearMiembro(request):
     provincia_form=Provincia.objects.all()
     if request.method == 'POST':
+        if 'btn-add-provincia' in request.POST:
+            provincia=request.POST.get('prov',None)
+            provincia=provincia.capitalize()
+            if Provincia.objects.filter(provincia=provincia).exists():
+                print('nombre repetido china')
+            else:
+                id_max=Provincia.objects.all().aggregate(Max('id_provincia'))
+                id_max=id_max.get('id_provincia__max')
+                prv=Provincia.objects.create(id_provincia=id_max+1,provincia=provincia,borrado=False)
+                prv.save()
+            return redirect('/sistema/crearMiembro')
+
+        if 'btn-add-localidad' in request.POST:
+            localidad=request.POST.get('loca',None)
+            provincia=request.POST.get('prv',None)
+            print(provincia)
+            print('-------------------')
+            print(localidad)
+            print('-------------------')
+            prv=Provincia.objects.filter(provincia=provincia)
+            localidad=localidad.capitalize()
+            if Localidad.objects.filter(localidad=localidad).exists():
+                print('nombre repetido china')
+            else:
+                id_max=Localidad.objects.all().aggregate(Max('id_localidad'))
+                id_max=id_max.get('id_localidad__max')
+                lcl=Localidad.objects.create(id_localidad=id_max+1,localidad=localidad,provincia=prv,borrado=False)
+                lcl.save()
+            return redirect('/sistema/crearMiembro')
         
-        miembro_form=MiembroForm(request.POST)
-        miembro=miembro_form.save(commit=False)
-        miembro.changeReason ='Creacion'
-
-        barrio_form=request.POST.get('barrio')
-        barrio=Barrio.objects.get(id_barrio=barrio_form)
-
-        estado_civil_form=request.POST.get('estado_civil')
-        estado_civil=Estado_Civil.objects.get(id_estado=estado_civil_form)
-
-        domicilio_form=DomicilioForm(request.POST)
-        domicilio=domicilio_form.save(commit=False)
-        domicilio.barrio=barrio
-        domicilio.save()
-
-        horario_form=Horario_DisponibleForm(request.POST)
-        horario=horario_form.save()
+        if 'btn-add-barrio'in request.POST:
+            barrio=request.POST.get('barrio',None)
+            localidad=request.POST.get('lcl',None)
+            lcl=Localidad.objects.get(localidad=localidad)
+            print(barrio)
+            print('0')
+            barrio=barrio.capitalize()
+            if Barrio.objects.filter(barrio=barrio).exists():
+                print('nombre repetido china')
+            else:
+                id_max=Barrio.objects.all().aggregate(Max('id_barrio'))
+                id_max=id_max.get('id_barrio__max')
+                br=Barrio.objects.create(id_barrio=id_max+1,barrio=barrio,localidad=lcl,borrado=False)
+                br.save()
+            return redirect('/sistema/crearMiembro')
         
-        if Tipo_TelefonoForm(request.POST)!= None:
-            tipo_telefono_form=Tipo_TelefonoForm(request.POST)
-            tipo_telefono=tipo_telefono_form.save()
-            telefono_form=TelefonoForm(request.POST)
-            telefono=telefono_form.save(commit=False)
-            telefono.tipo_telefono=tipo_telefono
-            telefono.save()
-        
-        fecha = datetime.datetime.strptime(str(miembro.fecha_nacimiento), '%Y-%m-%d')
-        if fecha.date() > datetime.date.today():
-            messages.error(request, 'fecha de nacimiento incorrecta')
-            barrio = Barrio.objects.all()
-            localidad_form=Localidad.objects.all()
-            provincia_form=Provincia.objects.all()
+        if 'btn-crear-miembro' in request.POST:
+            miembro_form=MiembroForm(request.POST)
+            barrio_form=request.POST.get('barrio')
+            
             estado_civil_form=request.POST.get('estado_civil')
-            return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
-        else:
+            domicilio_form=DomicilioForm(request.POST)
+            horario_form=Horario_DisponibleForm(request.POST)
+            print(horario_form)
+            if not(miembro_form.is_valid() and horario_form.is_valid() and barrio_form!=None and domicilio_form.is_valid()):
+                print('-------------------')
+                print('Ta Todo Mal Lina')
+                print('-------------------')
+                messages.error(request, 'Debe completar todos los campos obligatorios')
+                return redirect('/sistema/crearMiembro')
+            
+            miembro=miembro_form.save(commit=False)
+            miembro.changeReason ='Creacion'
+
+            barrio=Barrio.objects.get(id_barrio=barrio_form)
+            
+            estado_civil=Estado_Civil.objects.get(id_estado=estado_civil_form)
+
+            domicilio=domicilio_form.save(commit=False)
+            domicilio.barrio=barrio
+            domicilio.save()
+
+            horario=horario_form.save()
+            
+            if Tipo_TelefonoForm(request.POST)!= None:
+                tipo_telefono_form=Tipo_TelefonoForm(request.POST)
+                tipo_telefono=tipo_telefono_form.save()
+                telefono_form=TelefonoForm(request.POST)
+                telefono=telefono_form.save(commit=False)
+                telefono.tipo_telefono=tipo_telefono
+                telefono.save()
+            
+            
+            #return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
             miembro.domicilio=domicilio
             miembro.estado_civil=estado_civil
             miembro.horario_disponible=horario
@@ -149,7 +198,7 @@ def crearMiembro(request):
                 tel_contacto.miembro=miembro_cont
                 tel_contacto.save()
             miembro.save()
-            return redirect('/sistema/listarMiembro')
+        return redirect('/sistema/listarMiembro')
         
     else:
         provincia_form=Provincia.objects.all()
@@ -483,21 +532,8 @@ def agregarRespuesta(request):
         respuesta_form=RespuestaForm()
     return render(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
 
-def agregarProvincia(request):
-    provincia= request.POST.get('prov')
-    print(provincia)
-    print('0')
-    print(request.GET.get('prov',None))#agregue el None tengo que ver si anda
-    print('1')
-    print(request)
-    # provincia=provincia.capitalize()
-    if Provincia.objects.get(provincia=provincia).exists():
-        print('nombre repetido china')
-    else:
-        print('ya se va a agregar Lina tranqui')
-        # provincia.save()
-    return redirect('/sistema/crearMiembro')
 
+    
 
 @csrf_exempt
 def provinciasList(request):

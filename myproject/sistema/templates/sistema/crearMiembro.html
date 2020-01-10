@@ -8,44 +8,42 @@
                             <div class="card-header">
                                 <strong>Planilla de Registro de </strong> Miembros
                             </div>
+                            {% if messages %}
+                                        <div class="col-md-12">
+                                        <ul class="messages">
+                                            {% for message in messages %}
+                                            <div class="alert alert-danger">
+                                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </ul>
+                                        </div>
+                            {% endif %}
                             <form method="POST" class="form-horizontal">
                             
                                  <div class="card-body card-block">
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
-                                        <div class="col col-md-3"><input required type="text" id="dni" name="dni"  min ="1" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input type="text" id="dni" name="dni"  min ="1" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                    
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
-                                        <div class="col-md-4"><input required type="text" id="text-input" style="uppercase" name="nombre" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
+                                        <div class="col-md-4"><input type="text" id="text-input" style="uppercase" name="nombre" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Apellido (*)</label></div>
-                                        <div class="col col-md-3"><input required type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3"><input type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
                                         
                                         
                                     </div>
 
-                                    {% if messages %}
-                                        <div class="col-md-12">
-                                        <ul class="messages">
-                                            {% for message in messages %}
-
-                                            <div class="alert alert-danger">
-                                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                                                <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-                                            </div>
-
-                                            {% endfor %}
-                                        </ul>
-                                        </div>
-                                    {% endif %}
-
+                            
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
-                                        <div class="col-12 col-md-4"><input required type="date" id="fecha"  name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4"><input type="date" id="fecha"  name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
                                     
                                     <div class="row form-group">
@@ -66,14 +64,14 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos (*)</label></div>
-                                        <div class="col-12 col-md-4"><input required type="text" min="0" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4"><input type="text" min="0" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label class="form-control-label">Trabaja (*)</label></div>
                                             <div class="col col-md">
                                                 <div class="form-check">
-                                                    <div class="radio" required>
+                                                    <div class="radio">
                                                         <label for="radio1" class="form-check-label ">
                                                             <input type="radio" id="Si" name="trabaja" value="True" class="form-check-input">Si
                                                         </label>
@@ -89,7 +87,7 @@
                                             <div><label class="form-control-label">Sexo (*)</label></div>
                                             <div class="col col-md">
                                                 <div class="form-check">
-                                                    <div class="radio" required>
+                                                    <div class="radio">
                                                         <label for="radio1" class="form-check-label ">
                                                             <input type="radio" id="F" name="sexo" value="Femenino" class="form-check-input">Femenino
                                                         </label>
@@ -169,7 +167,7 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
-                                        <div class="col col-md-4"><select id="select-provincia" name='provincia' class="form-control" required>
+                                        <div class="col col-md-4"><select id="select-provincia" name='provincia' class="form-control">
                                             <option selected> --------------</option>
                                             {% for provincia in provincia_form %}
                                                     <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
@@ -193,49 +191,127 @@
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                            <form method="POST" action="{% url 'sistema:agregarProvincia'%}" id="form1">
+                                            <form method="POST" id="form1">
                                                 <h4>Nombre</h4>
                                                 <input type="text" name="prov" class="form-control">
                                             </form>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                                <button class="btn btn-primary" type="submit" >Confirmar</button>
-                                                {% comment %} <a href=" {% url 'sistema:agregarProvincia'%}" type="submit" class="btn btn-primary" >Confirmar</a> {% endcomment %}
+                                                <button class="btn btn-primary" type="submit" name="btn-add-provincia">Confirmar</button>
                                             </div>
                                             </div>
                                         </div>
                                         </div>
                                         <!--Fin del modal-->
                                     </div> 
+                                    
+                                    
 
                                     <div class="row form-group">
                                         
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
-                                        <div class="col col-md-4"><select id="select-localidad" name='localidad' class="form-control" required>
+                                        <div class="col col-md-4"><select id="select-localidad" name='localidad' class="form-control">
                                             {% comment %}{% for localidad in localidad_form %}
                                                     <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
                                             {% endfor %}
                                             {% endcomment %}
                                             </select>
                                         </div>
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#localidadModal">
+                                        +
+                                        </button>
+                                        <!-- inicio del modal-->
+                                       
+                                        <div class="modal fade" id="localidadModal" tabindex="-1" role="dialog" aria-labelledby="localidadModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="localidadModalLabel">Agregar Localidad</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                            <form method="POST" id="form2">
+                                                <h4>Provincia</h4>
+                                                <div><select id="select-prv" name='prv' class="form-control">
+                                                    <option selected> --------------</option>
+                                                    {% for provincia in provincia_form %}
+                                                            <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                </div>
+                                                <br>
+                                                <h4>Nombre</h4>
+                                                <input type="text" name="loca" class="form-control">
+                                            </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button class="btn btn-primary" type="submit" name="btn-add-localidad">Confirmar</button>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <!--Fin del modal-->
+                                    </div>
 
+                                    <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
-                                        <div class="col col-md-4"><select id="select-barrios" name='barrio' class="form-control" required>
+                                        <div class="col col-md-4"><select id="select-barrios" name='barrio' class="form-control">
                                             <!--{% for barrio in barrio_form %}
                                                     <option value='{{barrio.barrio}}'>{{barrio.barrio}}</option>
                                             {% endfor %}-->
                                             </select>
                                         </div>
-                                        
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#barrioModal">
+                                        +
+                                        </button>
+                                        <!-- inicio del modal-->
+                                       
+                                        <div class="modal fade" id="barrioModal" tabindex="-1" role="dialog" aria-labelledby="barrioModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="barrioModalLabel">Agregar Barrio</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                            <form method="POST" id="form3">
+                                                <h4>Localidad</h4>
+                                                <div><select id="select-lcl" name='lcl' class="form-control">
+                                                    <option selected> --------------</option>
+                                                    {% for localidad in localidad_form %}
+                                                        <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                </div>
+                                                <br>
+                                                <h4>Nombre</h4>
+                                                <input type="text" name="barrio" class="form-control">
+                                            </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <button class="btn btn-primary" type="submit" name="btn-add-barrio">Confirmar</button>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <!--Fin del modal-->
                                     </div>
                                     
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle (*)</label></div>
-                                        <div class="col col-md-5"><input required type="text" id="text-input" min="0" name="calle" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-5"><input type="text" id="text-input" min="0" name="calle" placeholder="" class="form-control"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Nº (*)</label></div>
-                                        <div class="col col-md-2"><input required type="text" id="text-input" name="nro" min="0" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-2"><input type="text" id="text-input" name="nro" min="0" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Mz</label></div>
                                         <div class="col col-md-2"><input type="text" id="text-input" name="mz" placeholder="" min="0" class="form-control"></small></div>
                                     </div>
@@ -265,7 +341,7 @@
                                
                             <div class="card">
                                 <div class="card-body">
-                                    <button type="submit" class="btn btn-success btn-sm" name= "crear_miembro">Confirmar</button>
+                                    <button type="submit" class="btn btn-success btn-sm" name= "btn-crear-miembro">Confirmar</button>
                                 </div>
                             </div>
                             <div class="card-footer">
