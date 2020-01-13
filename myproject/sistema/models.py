@@ -183,6 +183,9 @@ class TipoPregunta(models.Model):
     id_tipo_pregunta=models.AutoField(primary_key=True)
     tipo=models.CharField('Tipo',max_length=50,choices=TIPO,blank=False,null=False)
     borrado=models.BooleanField('borrado',default=False)
+    
+    def __str__(self):
+        return self.tipo
 
 class Pregunta(models.Model):
     id_pregunta=models.AutoField(primary_key=True)
@@ -190,6 +193,9 @@ class Pregunta(models.Model):
     borrado = models.BooleanField('borrado',default=False)
     tipo= models.ForeignKey(TipoPregunta, on_delete=models.PROTECT)
     
+    def __str__(self):
+        return self.descripcion
+
 class Encuesta(models.Model):
     TIPO=[
         ('Faltas','Faltas'),
@@ -200,12 +206,14 @@ class Encuesta(models.Model):
         ('Mensualmente','Mensualmente'),
         ('Anualmente','Anualmente')
     ]
+    
     id_encuesta=models.AutoField(primary_key=True)
     envio = models.CharField('Envio',choices=ENVIO,blank=True,null=True, max_length=50)
     borrado = models.BooleanField('borrado',default=False)
     motivo = models.CharField('Motivo', max_length=50, choices=TIPO,null = False, blank=False)
     cantidad = models.IntegerField('Cantidad de Faltas',null=True, blank = True)
     pregunta=models.ForeignKey(Pregunta, on_delete=models.PROTECT)
+    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
     
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)
@@ -221,5 +229,14 @@ class Configuracion(models.Model):
     direccion = models.CharField('Direccion', max_length=255,blank=False, null= False)
     #logo=models.BinaryField('Logo',blank=False,null=False)
 
+class Estado_Miembro(models.Model):
+    id_estado_miembro=models.AutoField(primary_key=True)
+    fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
+    miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)  
+    estado=models.CharField('Estado', max_length=100)
 
-
+class Estado_Reunion(models.Model):
+    id_estado_reunion=models.AutoField(primary_key=True)
+    fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
+    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)  
+    estado=models.CharField('Estado', max_length=100)

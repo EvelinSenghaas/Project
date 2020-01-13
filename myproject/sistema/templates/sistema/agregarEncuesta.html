@@ -1,11 +1,117 @@
 {% extends 'sistema/base_site.html' %}
 {% block titulo %}
-    Agregar Encuesta
+Agregar Encuesta
 {% endblock titulo %}
 {% block body %}
-    <form method="POST">
+<form method="POST">
+    <div class="col-lg-11">
         {% csrf_token %}
-        {{encuesta_form.as_p}}
-        <button type="submit">Crear</button>
-    </form>
+        <div class="card">
+            <div class="card-header">
+                <strong>Planilla de Registro de </strong> Encuentas
+            </div>
+            <form method="POST" class="form-horizontal">
+                <div class="row form-group">
+                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">Tipo(*)</label></div>
+                    <div class="col col-md-4"><select id="tipo" name="tipo" class="form-control" required>
+                            <option selected value='None'>--------------</option>
+                            <option value='Faltas'>Faltas</option>
+                            <option value='Estado de las Reuniones'>Estado de las reuniones</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row form-group" id="envio">
+                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">Envio(*)</label></div>
+                    <div class="col col-md-4"><select id="envioo" name='envio' class="form-control" required>
+                            <option selected value='None'> --------------</option>
+                            <option value='Semanalmente'>Semanalmente</option>
+                            <option value='Mensualmente'>Mensualmente</option>
+                            <option value='Anualmente'>Anualmente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row form-group" id="cantidad">
+                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">Cada Cuantas Faltas?(*)</label></div>
+                    <div class="col col-md-4"><input id="cantidadd" type="text" name="cantidad" class="form-control"></div>
+                </div>
+
+                <div class="row form-group">
+                    <div class="col col-md-12">
+                        <table id="tabla-pregunta" class="table table-striped table-bordered" name="pregunta">
+                            <thead>
+                                <tr>
+                                    <th>Pregunta</th>
+                                    <th>Tipo</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="pregunta">
+                                {% for pregunta in pregunta %}
+                                    <tr>
+                                        <td>{{pregunta.descripcion}}</td>
+                                        <td>{{pregunta.tipo}}</td>
+                                        <td><input type="checkbox" name="check[]" value="{{pregunta}}" /></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</form>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#cantidad').hide();
+            $('#envio').hide();
+            $('#tipo').change(function(){
+                console.log('oliii');
+                var tipo = $(this).val();
+                console.log(tipo);
+                if (tipo=="Faltas"){
+                    $('#cantidad').show();
+                    $('#envio').hide();
+                }
+                else{
+                    $('#envio').show();
+                    $('#cantidad').hide();
+                }
+            });
+        });
+    </script>
+    {% comment %} <script>
+        $('#tipo').change(function(){
+            console.log('oliii');
+            var tp = $(this).val();
+            console.log(rn);
+            $.ajax({
+                url: '/sistema/EncuestaTable/',
+                data: {
+                    'tp': tipo,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var html = "";
+                    for (var i = 0; i < data[0]['miembro'].length; i++) {
+                        html += "<tr>"    
+                        html += "<td>" + data[0]['miembro'][i].nombre + "</td>";
+                        html += "<td>" + data[0]['miembro'][i].apellido + "</td>";
+                        html += "<td>" + "<input type='checkbox' name='check[]' value="+data[0]['miembro'][i].dni + ">"+"</td>";
+                        html += "</tr>"
+                    }
+                    $('#pregunta').html(html);
+                }
+            })
+        });
+    </script> {% endcomment %}
 {% endblock body %}

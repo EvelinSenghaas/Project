@@ -22,14 +22,12 @@
                             {% endif %}
                             <form method="POST" class="form-horizontal">
                             
-                                 <div class="card-body card-block">
+                                <div class="card-body card-block">
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
                                         <div class="col col-md-3"><input type="text" id="dni" name="dni"  min ="1" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
-
-                                   
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
@@ -39,7 +37,6 @@
                                         
                                         
                                     </div>
-
                             
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
@@ -55,7 +52,6 @@
                                             </select>
                                         </div>
                                     </div>
-
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
@@ -147,7 +143,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                       
                                     </div>
 
                                     <div class="row form-group">
@@ -174,40 +169,36 @@
                                             {% endfor %}
                                         </select>
                                         </div>
-                                       
                                         <!-- Button trigger modal -->
                                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                                         +
                                         </button>
                                         <!-- inicio del modal-->
-                                       
                                         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="exampleModalLabel">Agregar Provincia</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                                </button>
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLabel">Agregar Provincia</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                    <form method="POST">
+                                                        <h4>Nombre</h4>
+                                                        <input type="text" name="prov" class="form-control">
+                                                    </form>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                        <button class="btn btn-primary" type="submit" name="btn-add-provincia">Confirmar</button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="modal-body">
-                                            <form method="POST" id="form1">
-                                                <h4>Nombre</h4>
-                                                <input type="text" name="prov" class="form-control">
-                                            </form>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                                <button class="btn btn-primary" type="submit" name="btn-add-provincia">Confirmar</button>
-                                            </div>
-                                            </div>
-                                        </div>
                                         </div>
                                         <!--Fin del modal-->
                                     </div> 
                                     
-                                    
-
                                     <div class="row form-group">
                                         
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
@@ -223,35 +214,34 @@
                                         +
                                         </button>
                                         <!-- inicio del modal-->
-                                       
                                         <div class="modal fade" id="localidadModal" tabindex="-1" role="dialog" aria-labelledby="localidadModalLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="localidadModalLabel">Agregar Localidad</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                            <form method="POST" id="form2">
-                                                <h4>Provincia</h4>
-                                                <div><select id="select-prv" name='prv' class="form-control">
-                                                    <option selected> --------------</option>
-                                                    {% for provincia in provincia_form %}
-                                                            <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
-                                                    {% endfor %}
-                                                </select>
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="localidadModalLabel">Agregar Localidad</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                    </button>
                                                 </div>
-                                                <br>
-                                                <h4>Nombre</h4>
-                                                <input type="text" name="loca" class="form-control">
-                                            </form>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                                <button class="btn btn-primary" type="submit" name="btn-add-localidad">Confirmar</button>
-                                            </div>
+                                                <div class="modal-body">
+                                                    {% comment %} <form method="POST"> {% endcomment %}
+                                                        <h4>Provincia</h4>
+                                                        <div><select id="select-prv" name='prv' class="form-control">
+                                                            <option selected> --------------</option>
+                                                            {% for provincia in provincia_form %}
+                                                                    <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        </div>
+                                                        <br>
+                                                        <h4>Nombre</h4>
+                                                        <input type="text" name="localidad" class="form-control">
+                                                    {% comment %} </form> {% endcomment %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                    <button class="btn btn-primary" type="submit" name="btn-add-localidad">Confirmar</button>
+                                                </div>
                                             </div>
                                         </div>
                                         </div>
@@ -271,7 +261,6 @@
                                         +
                                         </button>
                                         <!-- inicio del modal-->
-                                       
                                         <div class="modal fade" id="barrioModal" tabindex="-1" role="dialog" aria-labelledby="barrioModalLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
@@ -282,7 +271,7 @@
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                            <form method="POST" id="form3">
+                                            {% comment %} <form method="POST"> {% endcomment %}
                                                 <h4>Localidad</h4>
                                                 <div><select id="select-lcl" name='lcl' class="form-control">
                                                     <option selected> --------------</option>
@@ -293,8 +282,8 @@
                                                 </div>
                                                 <br>
                                                 <h4>Nombre</h4>
-                                                <input type="text" name="barrio" class="form-control">
-                                            </form>
+                                                <input type="text" name="barrioo" class="form-control">
+                                            {% comment %} </form> {% endcomment %}
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -338,7 +327,7 @@
                                 </div>
 
                             </form>
-                               
+
                             <div class="card">
                                 <div class="card-body">
                                     <button type="submit" class="btn btn-success btn-sm" name= "btn-crear-miembro">Confirmar</button>
@@ -356,50 +345,37 @@
 
     <script src="{% static 'assets/js/rerecustom.js'%}"></script>
 
-    
+    <script>
+        $(document).ready(function(){
+            $("#dni").change(function () {
+                var dni = $(this).val();
+                $.ajax({
+                    url: '{% url "sistema:validarMiembro" %}',
+                    data: {
+                        'dni': dni
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.is_taken) {
+                            alert("Este miembro ya existe");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 
     <script>
         $(document).ready(function(){
-           $("#dni").change(function () {
-             var dni = $(this).val();
-             $.ajax({
-               url: '{% url "sistema:validarMiembro" %}',
-               data: {
-                 'dni': dni
-               },
-               dataType: 'json',
-               success: function (data) {
-                 if (data.is_taken) {
-                   alert("Este miembro ya existe");
-                 }
-               }
-             });
-           });
-       });
-    </script>
-    <script>
-        $(document).ready(function(){
-           $("#fecha").change(function () {
-             var fecha = $(this).val();
-             var f1=new Date(fecha);
-             var f2 = new Date();
-             if(f1 > f2){
-                alert("fecha de nacimiento incorrecta");
-                $("#fecha").val('')
-             }
-             /*$.ajax({
-               url: '{% url "sistema:validarMiembro" %}',
-               data: {
-                 'fecha': fecha
-               },
-               dataType: 'json',
-               success: function (data) {
-                 if (data.is_taken) {
-                   alert("fecha incorrecta");
-                 }
-               }
-             });*/
-           });
-       });
+            $("#fecha").change(function () {
+                var fecha = $(this).val();
+                var f1=new Date(fecha);
+                var f2 = new Date();
+                if(f1 > f2){
+                    alert("fecha de nacimiento incorrecta");
+                    $("#fecha").val('')
+                }
+            });
+        });
     </script>
 {% endblock body%}

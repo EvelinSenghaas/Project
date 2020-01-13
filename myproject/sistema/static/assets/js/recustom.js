@@ -20,7 +20,7 @@ $('#provincias').change(function() {
 $('#select-localidades').change(function() {
     var lc = document.getElementById("select-localidades").value;
     console.log(lc)
-    console.log('que onda mondonga')
+    console.log('que onda mondonga'),
     $.ajax({
         url: '/sistema/barriosList',
         data: {
@@ -28,6 +28,7 @@ $('#select-localidades').change(function() {
         },
         dataType: 'json',
         success: function(data) {
+            console.log(data[0]);
             var html = "";
             for (var i = 0; i < data.length; i++) {
                 html += "<option value='" + data[i].id_barrio + "'>" + data[i].barrio + "</option>";

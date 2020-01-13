@@ -12,7 +12,7 @@ class GrupoForm(forms.ModelForm):
         fields=['nombre','miembro','sexo','desde','hasta']
         widgets={
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
-            #'miembro':forms.CheckboxSelectMultiple(),
+            'miembro':forms.CheckboxSelectMultiple(),
             'desde':forms.TextInput(attrs={'class':'form-control','type':'number','min':'0'}),
             'hasta':forms.TextInput(attrs={'class':'form-control','type':'number','max':'100'})
         }
@@ -101,7 +101,7 @@ class AsistenciaForm(forms.ModelForm):
     class Meta:
         model=Asistencia
         fields=['miembro','reunion','fecha']
-              
+
 class Tipo_TelefonoForm(forms.ModelForm): 
     class Meta:
         model = Tipo_Telefono

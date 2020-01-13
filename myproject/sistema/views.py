@@ -3,7 +3,7 @@ from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horar
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm,ConfiguracionForm
 from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible,Pregunta
-from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,TipoPregunta
+from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,TipoPregunta,Encuesta
 from datetime import date
 import datetime
 from django.db.models import Max
@@ -12,7 +12,7 @@ from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from .serializers import ProvinciaSerializer,LocalidadSerializer,BarrioSerializer,AsistenciaSerializer, GrupoSerializer, MiembroSerializer
+from .serializers import ProvinciaSerializer,LocalidadSerializer,BarrioSerializer,AsistenciaSerializer, GrupoSerializer, MiembroSerializer,EncuestaSerializer
 import json
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -57,10 +57,21 @@ def configuracion(request):
 def crearGrupo(request):
     miembros=Miembro.objects.all()
     if request.method == 'POST':
+        print('------------')
         grupo_form = GrupoForm(request.POST)
-        print(grupo_form.errors.as_data())
+        print('------------')
+        # print(request.POST.get('miembro[]'))
+        # for check in request.POST.getlist('miembro[]'):
+        #     print(check)
+        #     print('------------')
+        #     miembro=Miembro.objects.get(dni=check)
+        print('------------')
         print(request.POST)
+        print('------------')
+        print(grupo_form)
+        print('000000000000')
         if grupo_form.is_valid():
+            print('kestapasanda')
             grupo_form.save()
             return redirect('/sistema/listarGrupo')
     else:
@@ -102,52 +113,53 @@ def crearMiembro(request):
             provincia=request.POST.get('prov',None)
             provincia=provincia.capitalize()
             if Provincia.objects.filter(provincia=provincia).exists():
-                print('nombre repetido china')
+                print('nombre repetido china')#vo tenes que cambiar esto michinita
             else:
-                id_max=Provincia.objects.all().aggregate(Max('id_provincia'))
-                id_max=id_max.get('id_provincia__max')
-                prv=Provincia.objects.create(id_provincia=id_max+1,provincia=provincia,borrado=False)
+                prv=Provincia.objects.create(provincia=provincia,borrado=False)
                 prv.save()
             return redirect('/sistema/crearMiembro')
 
         if 'btn-add-localidad' in request.POST:
-            localidad=request.POST.get('loca',None)
+            localidad=request.POST.get('localidad',None)
             provincia=request.POST.get('prv',None)
-            print(provincia)
-            print('-------------------')
-            print(localidad)
-            print('-------------------')
-            prv=Provincia.objects.filter(provincia=provincia)
+            prv1=Provincia.objects.filter(provincia=provincia)
+            prv=Provincia.objects.get(id_provincia=prv1[0].id_provincia)
+            print(prv)
             localidad=localidad.capitalize()
             if Localidad.objects.filter(localidad=localidad).exists():
                 print('nombre repetido china')
             else:
-                id_max=Localidad.objects.all().aggregate(Max('id_localidad'))
-                id_max=id_max.get('id_localidad__max')
-                lcl=Localidad.objects.create(id_localidad=id_max+1,localidad=localidad,provincia=prv,borrado=False)
+                lcl=Localidad.objects.create(localidad=localidad,provincia=prv,borrado=False)
                 lcl.save()
             return redirect('/sistema/crearMiembro')
         
         if 'btn-add-barrio'in request.POST:
-            barrio=request.POST.get('barrio',None)
+            barrio=request.POST.get('barrioo',None)
             localidad=request.POST.get('lcl',None)
-            lcl=Localidad.objects.get(localidad=localidad)
+            print(request.POST)
+            print('------------------------')
+            print(localidad)
+            print('------------------------')
+            lcl1=Localidad.objects.filter(localidad=localidad)
+            lcl=Localidad.objects.get(id_localidad=lcl1[0].id_localidad)
+            print(lcl)
+            print('---------0---------------')
             print(barrio)
-            print('0')
+            print('---------0---------------')
             barrio=barrio.capitalize()
             if Barrio.objects.filter(barrio=barrio).exists():
                 print('nombre repetido china')
             else:
-                id_max=Barrio.objects.all().aggregate(Max('id_barrio'))
-                id_max=id_max.get('id_barrio__max')
-                br=Barrio.objects.create(id_barrio=id_max+1,barrio=barrio,localidad=lcl,borrado=False)
+                br=Barrio.objects.create(barrio=barrio,localidad=lcl,borrado=False)
                 br.save()
             return redirect('/sistema/crearMiembro')
         
         if 'btn-crear-miembro' in request.POST:
             miembro_form=MiembroForm(request.POST)
             barrio_form=request.POST.get('barrio')
-            
+            print('---------1------------')
+            print(barrio_form)
+            print('---------2------------')
             estado_civil_form=request.POST.get('estado_civil')
             domicilio_form=DomicilioForm(request.POST)
             horario_form=Horario_DisponibleForm(request.POST)
@@ -494,13 +506,27 @@ def agregarHorario_Disponible(request):
 
 def agregarEncuesta(request):
     if request.method == 'POST':
-        encuesta_form=EncuestaForm(request.form)
-        if encuesta_form.is_valid():
-            encuesta_form.save()
-            return redirect('home')
+        tipo=request.POST.get('tipo')
+        pregunta=request.POST.get('pregunta')
+        encuesta=Encuesta.objects.filter(motivo=tipo).last()
+        for check in request.POST.getlist('check[]'):
+            pregunta=Pregunta.objects.filter(descipcion=check)
+            encuesta.pregunta=pregunta
+        if tipo=='Faltas':
+            cantidad=request.POST.get('cantidad')
+            encuesta.cantidad=cantidad
+        else:
+            envio=request.POST.get('envio')
+            encuesta.envio=envio
+        print('------------------')
+        print(pregunta)
+        print('------------------')
+        encuesta.save()
+        return redirect('home')
     else:
+        pregunta=Pregunta.objects.all()
         encuesta_form=EncuestaForm()
-    return render(request,'sistema/agregarEncuesta.html',{'encuesta_form':encuesta_form})
+        return render(request,'sistema/agregarEncuesta.html',{'encuesta_form':encuesta_form,'pregunta':pregunta})
 
 def agregarPregunta(request):
     if request.method =='POST':
@@ -622,12 +648,10 @@ def AsistenciaTable(request):
 @csrf_exempt
 def sexoList(request):
     sx = request.GET.get('mb',None)
-    print(sx)
-    print('0')
     if request.method == 'GET':
         miembros = None
         if sx == 'Femenino':
-           miembros= Miembro.objects.filter(sexo='Femenino')
+            miembros= Miembro.objects.filter(sexo='Femenino')
         if sx == 'Masculino':
             miembros = Miembro.objects.filter(sexo = 'Masculino')
         if sx == 'Ambos': 
@@ -639,4 +663,13 @@ def sexoList(request):
         #print("No ta")
         return JSONResponse(result)
 
-
+@csrf_exempt
+def EncuestaTable(request):
+    #tp=Request.POST.get('tp',None)
+    encuesta=Encuesta.objects.last()
+    if request.method == 'GET':
+        serializer = EncuestaSerializer(encuesta, many=True)
+        result = dict()
+        result = serializer.data
+        #print("No ta")
+        return JSONResponse(result)
