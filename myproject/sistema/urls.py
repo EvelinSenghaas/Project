@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import agregarAsistencia,configuracion,verAsistencia
+from .views import agregarAsistencia,configuracion,verAsistencia,validarGrupo
 from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,eliminarTipo_Reunion
 from .views import crearReunion,editarReunion,listarReunion,eliminarReunion,auditoriaReunion
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
@@ -30,7 +30,8 @@ urlpatterns = [
     path('listarMiembro/',listarMiembro,name='listarMiembro'),
     path('editarMiembro/<int:dni>',editarMiembro,name='editarMiembro'),
     path('eliminarMiembro/<int:dni>',eliminarMiembro, name='eliminarMiembro'),
-    path("validadMiembro/", validarMiembro, name="validarMiembro"),
+    path("validarMiembro/", validarMiembro, name="validarMiembro"),
+    path("validarGrupo/", validarGrupo, name="validarGrupo"),
     path("provinciasList/", provinciasList, name="provinciasList"),
     path("localidadesList/", localidadesList, name="localidadesList"),
     path("barriosList/", barriosList, name="barriosList"),

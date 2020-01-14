@@ -16,7 +16,20 @@
                                     
                                 <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input">Nombre del Grupo (*)</label></div>
-                                    <div class="col-md-5">{{grupo_form.nombre}}</div>
+                                    <div class="col-md-5"><input type="text" id="nombre" class="form-control" name="nombre"></div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col-md-3"><label for="text-input">Encargado(*)</label></div>
+                                    <div class="col-md-5">
+                                        <select required id="encargado" class="form-control" name="encargado">
+                                            <option value="null"> ------------</option>
+                                            {% for usuario  in usuarios %}
+                                                <option value='{{usuario.id}}'>{{usuario.miembro}}</option>
+                                            {% endfor %}
+                                            
+                                        </select>
+                                    </div>
                                 </div>
                                 
                                 <div class="row form-group">
@@ -97,10 +110,28 @@ $('#sexo').change(function() {
     })
 });
 </script>
+
+
 <script>
-$(document).ready(function() {
-    $('.js-example-basic-multiple').select2();
-});
-</script>
+    $(document).ready(function(){
+        $("#nombre").change(function () {
+            var nombre = $(this).val();
+            console.log("oli");
+            $.ajax({
+                url: '{% url "sistema:validarGrupo" %}',
+                data: {
+                    'nombre': nombre
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_taken) {
+                        $("#nombre").val('')
+                        alert("Este nombre de grupo ya existe, por favor elige otro nombre");
+                    }
+                }
+            });
+        });
+    });
+    </script>
 {% endblock body%}
 

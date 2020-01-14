@@ -6,6 +6,7 @@ from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Do
 from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,TipoPregunta,Encuesta
 from datetime import date
 import datetime
+from usuario.models import CustomUser
 from django.db.models import Max
 from django.contrib import messages
 from django.core import serializers
@@ -59,29 +60,28 @@ def crearGrupo(request):
     if request.method == 'POST':
         print('------------')
         grupo_form = GrupoForm(request.POST)
-        print('------------')
-        # print(request.POST.get('miembro[]'))
-        # for check in request.POST.getlist('miembro[]'):
-        #     print(check)
-        #     print('------------')
-        #     miembro=Miembro.objects.get(dni=check)
-        print('------------')
-        print(request.POST)
-        print('------------')
-        print(grupo_form)
-        print('000000000000')
-        if grupo_form.is_valid():
-            print('kestapasanda')
-            grupo_form.save()
-            return redirect('/sistema/listarGrupo')
+        grupo=grupo_form.save(commit=False)
+        grupo.encargado=request.POST.get('encargado')
+        grupo.save()
+        return redirect('/sistema/listarGrupo')
     else:
+        usuarios=CustomUser.objects.all()
         grupo_form=GrupoForm()
-    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'miembros':miembros})
+    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'miembros':miembros,'usuarios':usuarios})
 
 def listarGrupo(request):
     grupos = Grupo.objects.filter(borrado=False)
     return render(request,'sistema/listarGrupo.html',{'grupos':grupos})
 
+def validarGrupo(request):
+    nombre = request.GET.get('nombre')
+    data = {
+        'is_taken': Grupo.objects.filter(nombre=nombre).exists()
+    }
+    if data['is_taken']:
+        data['error_message'] = 'Este nombre de grupo ya existe, por favor elige otro nombre'
+    print(data)
+    return JsonResponse(data)
 def editarGrupo(request,id_grupo):
     grupo = Grupo.objects.get(id_grupo=id_grupo)
     if request.method =='GET':

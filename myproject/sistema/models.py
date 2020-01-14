@@ -140,13 +140,14 @@ class Grupo(models.Model):
         ('Femenino','Femenino'),
         ('Ambos','Ambos')
     ]
-    desde=models.IntegerField('edad',blank=False,null=True)
-    hasta=models.IntegerField('edad',blank=False,null=True)
+    desde=models.IntegerField('Desde',blank=False,null=True)
+    hasta=models.IntegerField('Hasta',blank=False,null=True)
     sexo=models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
     borrado = models.BooleanField('borrado',default=False)
     miembro=models.ManyToManyField(Miembro)
+    encargado=models.IntegerField('Encargado')
 
     def __str__(self):
         return self.nombre
