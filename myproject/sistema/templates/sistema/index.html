@@ -1,13 +1,19 @@
 {% extends 'sistema/base_site.html' %}
 {% load static %}
-{% block body %}
+
+{% block body %}  
         <!-- Content -->
         <div class="content">
             <center>
-            <h2><strong>Bienvenido {{usuario}}</strong> que tengas un lindo dia!</h2>
+            {% if sexo == "Femenino" %}
+                <h2><strong>Bienvenida {{usuario}}</strong> que tengas un lindo dia!</h2>
+            {% else %}
+                <h2><strong>Bienvenido {{usuario}}</strong> que tengas un lindo dia!</h2>
+
+            {% endif %}
             <br>
             </center>
-            
+
             <!-- Animated -->
             <div class="animated fadeIn">
                 <!-- Widgets  -->

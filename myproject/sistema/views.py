@@ -31,7 +31,14 @@ class JSONResponse(HttpResponse):
 @login_required
 def Home(request):
     usuario = request.user
-    context ={'usuario':usuario}
+    miembro = Miembro.objects.get(dni=usuario.miembro_id)
+    if miembro.sexo=="Femenino":
+        print("es nena")
+        sexo="Femenino"
+    else:
+        print("es nene")
+        sexo="Masculino"
+    context ={'usuario':usuario,'sexo':sexo}
     return render(request,'sistema/index.html',context)
 
 def auditoriaMiembro(request):
