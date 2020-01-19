@@ -65,23 +65,14 @@ def configuracion(request):
 def crearGrupo(request):
     miembros=Miembro.objects.all()
     if request.method == 'POST':
-        print('------------')
         grupo_form = GrupoForm(request.POST)
         grupo=grupo_form.save(commit=False)
         grupo.encargado=request.POST.get('encargado')
         grupo.changeReason ='Creacion'
-        print(request.POST)
-        print('------------')
-        #print(grupo.miembro)
-        print('------------')
-        print(request.POST.get('miembro'))
         grupo.save()
-        print('------------')
         for miembro in request.POST.getlist('miembro'):
             grupo.miembro.add(miembro)
             grupo.save()
-            print('se agrego a:', miembro)
-        print('------------ultimo -------------')
         return redirect('/sistema/listarGrupo')
     else:
         usuarios=CustomUser.objects.all()
@@ -159,16 +150,8 @@ def crearMiembro(request):
         if 'btn-add-barrio'in request.POST:
             barrio=request.POST.get('barrioo',None)
             localidad=request.POST.get('lcl',None)
-            print(request.POST)
-            print('------------------------')
-            print(localidad)
-            print('------------------------')
             lcl1=Localidad.objects.filter(localidad=localidad)
             lcl=Localidad.objects.get(id_localidad=lcl1[0].id_localidad)
-            print(lcl)
-            print('---------0---------------')
-            print(barrio)
-            print('---------0---------------')
             barrio=barrio.capitalize()
             if Barrio.objects.filter(barrio=barrio).exists():
                 print('nombre repetido china')
@@ -180,17 +163,10 @@ def crearMiembro(request):
         if 'btn-crear-miembro' in request.POST:
             miembro_form=MiembroForm(request.POST)
             barrio_form=request.POST.get('barrio')
-            print('---------1------------')
-            print(barrio_form)
-            print('---------2------------')
             estado_civil_form=request.POST.get('estado_civil')
             domicilio_form=DomicilioForm(request.POST)
             horario_form=Horario_DisponibleForm(request.POST)
-            print(horario_form)
             if not(miembro_form.is_valid() and horario_form.is_valid() and barrio_form!=None and domicilio_form.is_valid()):
-                print('-------------------')
-                print('Ta Todo Mal Lina')
-                print('-------------------')
                 messages.error(request, 'Debe completar todos los campos obligatorios')
                 return redirect('/sistema/crearMiembro')
             

@@ -367,12 +367,18 @@
 
     <script>
         $(document).ready(function(){
-            $("#fecha").change(function () {
+            $("#fecha").blur(function(){
                 var fecha = $(this).val();
                 var f1=new Date(fecha);
                 var f2 = new Date();
+                var a1= f1.getFullYear()
+                var a2= f2.getFullYear()
+                if(a2-a1 > 100){
+                    alert("fecha de nacimiento invalida");
+                    $("#fecha").val('')
+                }
                 if(f1 > f2){
-                    alert("fecha de nacimiento incorrecta");
+                    alert("fecha de nacimiento invalida");
                     $("#fecha").val('')
                 }
             });
