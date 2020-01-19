@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import date
 from simple_history.models import HistoricalRecords
+from django.core.validators import MinValueValidator
 
 class Tipo_Reunion(models.Model):
     id_tipo_reunion =  models.AutoField(primary_key = True)
@@ -112,7 +113,7 @@ class Miembro(models.Model):
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     apellido = models.CharField('Apellido',max_length=200,blank = False, null = False)
     fecha_nacimiento = models.DateField('Fecha de Nacimiento', auto_now=False, auto_now_add=False)
-    cant_hijo = models.IntegerField('Cantidad de Hijos',null=True)
+    cant_hijo = models.IntegerField('Cantidad de Hijos',null=True,validators=[MinValueValidator(0)])
     trabaja = models.BooleanField('Trabaja',default=False)
     domicilio=models.ForeignKey(Domicilio, on_delete=models.PROTECT)
     correo=models.EmailField('e-mail', max_length=100,null=True,blank=True)
