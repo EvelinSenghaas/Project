@@ -7,7 +7,8 @@ class Tipo_Reunion(models.Model):
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     descripcion = models.CharField('Descripcion',max_length=200,blank = False, null = True)
     borrado = models.BooleanField('borrado',default=False)
-    
+    history = HistoricalRecords()
+
     def __str__(self):
         return self.nombre 
 
@@ -15,6 +16,7 @@ class Provincia(models.Model):
     id_provincia=models.AutoField(primary_key=True)
     provincia=models.CharField('Provincia', max_length=50,blank=False,null=False)
     borrado = models.BooleanField('borrado',default=False)
+    history = HistoricalRecords()
     def __str__(self):
         return self.provincia
 
@@ -23,6 +25,7 @@ class Localidad(models.Model):
     localidad=models.CharField('Localidad', max_length=50,blank=False,null=False)
     provincia=models.ForeignKey(Provincia,on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
+    history = HistoricalRecords()
     def __str__(self):
         return self.localidad
 
@@ -31,6 +34,7 @@ class Barrio(models.Model):
     barrio=models.CharField('Barrio', max_length=50,blank=False,null=False)
     localidad=models.ForeignKey(Localidad, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
+    history = HistoricalRecords()
     def __str__(self):
         return self.barrio
 
@@ -148,6 +152,7 @@ class Grupo(models.Model):
     borrado = models.BooleanField('borrado',default=False)
     miembro=models.ManyToManyField(Miembro)
     encargado=models.IntegerField('Encargado')
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.nombre
@@ -173,49 +178,47 @@ class Asistencia(models.Model):
     miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
     fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
+    history = HistoricalRecords()
 
-class TipoPregunta(models.Model):
-    TIPO=[
-        ('Abierta','Abierta'),
-        ('Unica Opcion Positiva','Unica Opcion Positiva'),
-        ('Unica Opcion Negativa','Unica Opcion Negativa'),
-        ('Opcion multiple','Opcion multiple'),
-    ]
+class Tipo_Pregunta(models.Model):
     id_tipo_pregunta=models.AutoField(primary_key=True)
-    tipo=models.CharField('Tipo',max_length=50,choices=TIPO,blank=False,null=False)
+    tipo=models.CharField('Tipo',max_length=50,blank=False,null=False)
     borrado=models.BooleanField('borrado',default=False)
-    
+    history = HistoricalRecords()
     def __str__(self):
         return self.tipo
 
-class Pregunta(models.Model):
-    id_pregunta=models.AutoField(primary_key=True)
-    descripcion=models.CharField('Pregunta', max_length=50,blank=False,null=False)
-    borrado = models.BooleanField('borrado',default=False)
-    tipo= models.ForeignKey(TipoPregunta, on_delete=models.PROTECT)
-    
+class Tipo_Encuesta(models.Model):
+    id_tipo_encuesta= models.AutoField(primary_key=True)
+    tipo=models.CharField("Tipo de Encuesta", max_length=50)
+    history = HistoricalRecords()
     def __str__(self):
-        return self.descripcion
+        return self.tipo
 
 class Encuesta(models.Model):
-    TIPO=[
-        ('Faltas','Faltas'),
-        ('Estado de las Reuniones','Estado de las Reuniones')
-    ]
     ENVIO=[
         ('Semanalmente','Semanalmente'),
         ('Mensualmente','Mensualmente'),
         ('Anualmente','Anualmente')
     ]
-    
     id_encuesta=models.AutoField(primary_key=True)
     envio = models.CharField('Envio',choices=ENVIO,blank=True,null=True, max_length=50)
     borrado = models.BooleanField('borrado',default=False)
-    motivo = models.CharField('Motivo', max_length=50, choices=TIPO,null = False, blank=False)
     cantidad = models.IntegerField('Cantidad de Faltas',null=True, blank = True)
-    pregunta=models.ForeignKey(Pregunta, on_delete=models.PROTECT)
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
-    
+    tipo=models.OneToOneField(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
+    history = HistoricalRecords()
+
+class Pregunta(models.Model):
+    id_pregunta=models.AutoField(primary_key=True)
+    descripcion=models.CharField('Pregunta', max_length=50,blank=False,null=False)
+    borrado = models.BooleanField('borrado',default=False)
+    tipo= models.ForeignKey(Tipo_Pregunta, on_delete=models.PROTECT)
+    tipo_encuesta=models.OneToOneField(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
+    history = HistoricalRecords()
+    def __str__(self):
+        return self.descripcion    
+
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)
     descripcion=models.CharField('Respuesta', max_length=50,blank=False,null=False)
@@ -229,6 +232,7 @@ class Configuracion(models.Model):
     telefono = models.CharField('Telefono', max_length=255,blank=False, null= False)
     direccion = models.CharField('Direccion', max_length=255,blank=False, null= False)
     #logo=models.BinaryField('Logo',blank=False,null=False)
+    history = HistoricalRecords()
 
 class Estado_Miembro(models.Model):
     id_estado_miembro=models.AutoField(primary_key=True)

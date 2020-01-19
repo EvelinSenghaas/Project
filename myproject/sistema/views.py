@@ -3,7 +3,7 @@ from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horar
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm,ConfiguracionForm
 from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible,Pregunta
-from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,TipoPregunta,Encuesta
+from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,Tipo_Pregunta,Encuesta
 from datetime import date
 import datetime
 from usuario.models import CustomUser
@@ -69,7 +69,19 @@ def crearGrupo(request):
         grupo_form = GrupoForm(request.POST)
         grupo=grupo_form.save(commit=False)
         grupo.encargado=request.POST.get('encargado')
+        grupo.changeReason ='Creacion'
+        print(request.POST)
+        print('------------')
+        #print(grupo.miembro)
+        print('------------')
+        print(request.POST.get('miembro'))
         grupo.save()
+        print('------------')
+        for miembro in request.POST.getlist('miembro'):
+            grupo.miembro.add(miembro)
+            grupo.save()
+            print('se agrego a:', miembro)
+        print('------------ultimo -------------')
         return redirect('/sistema/listarGrupo')
     else:
         usuarios=CustomUser.objects.all()
@@ -89,6 +101,7 @@ def validarGrupo(request):
         data['error_message'] = 'Este nombre de grupo ya existe, por favor elige otro nombre'
     print(data)
     return JsonResponse(data)
+
 def editarGrupo(request,id_grupo):
     grupo = Grupo.objects.get(id_grupo=id_grupo)
     if request.method =='GET':
@@ -96,13 +109,16 @@ def editarGrupo(request,id_grupo):
     else:
         grupo_form=GrupoForm(request.POST,instance=grupo)
         if grupo_form.is_valid():
-            grupo_form.save()
+            grupo=grupo_form.save(commit=False)
+            grupo.changeReason='Modificacion'
+            grupo.save()
         return redirect('/sistema/listarGrupo')
     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
 
 def eliminarGrupo(request,id_grupo):
     grupo = Grupo.objects.get(id_grupo=id_grupo)
     grupo.borrado=True
+    grupo.changeReason='Eliminacion'
     grupo.save()
     return redirect('/sistema/listarGrupo')
 
@@ -304,7 +320,6 @@ def editarMiembro(request,dni):
                 miembro.save()
 
                 return redirect('/sistema/listarMiembro')
-                     
         
 
     return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
@@ -349,7 +364,9 @@ def crearTipo_Reunion(request):
             if Tipo_Reunion.objects.filter(nombre=nombrecito):
                 messages.error(request,'Nombre repetido')
             else:
-                tipo_reunion_form.save()
+                tipo_reunion=tipo_reunion_form.save(commit=False)
+                tipo_reunion.changeReason="Creacion"
+                tipo_reunion.save()
                 return redirect('/sistema/listarTipo_Reunion')
     else:
         tipo_reunion_form=Tipo_ReunionForm()
@@ -362,7 +379,9 @@ def editarTipo_Reunion(request,id_tipo_reunion):
     else:
         tipo_reunion_form=Tipo_ReunionForm(request.POST,instance=tipo_reunion)
         if tipo_reunion_form.is_valid():
-            tipo_reunion_form.save()
+            tipo_reunion=tipo_reunion_form.save(commit=False)
+            tipo_reunion.changeReason="Modificacion"
+            tipo_reunion.save()
         return redirect('/sistema/listarTipo_Reunion')
     return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
 
@@ -377,6 +396,7 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
         return redirect('/sistema/listarTipo_Reunion')    
     else:
         tipo_reunion.borrado=False
+        tipo_reunion.changeReason="Eliminacion"
         tipo_reunion.save()
     return redirect('/sistema/listarTipo_Reunion/')
 
@@ -484,6 +504,7 @@ def agregarAsistencia(request):
             miembro=Miembro.objects.get(dni=check)
             asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
             asistencia.presente=True
+            asistencia.changeReason="Creacion"
             asistencia.save()
             print(check)
         return redirect('home')
@@ -525,9 +546,10 @@ def agregarEncuesta(request):
         else:
             envio=request.POST.get('envio')
             encuesta.envio=envio
-        print('------------------')
-        print(pregunta)
-        print('------------------')
+        # print('------------------')
+        # print(pregunta)
+        # print('------------------')
+        encuenta.changeReason="Creacion"
         encuesta.save()
         return redirect('home')
     else:
@@ -539,20 +561,21 @@ def agregarPregunta(request):
     if request.method =='POST':
         pr=request.POST.get('descripcion')
         tp =request.POST.get('tipo')
-        tipo = TipoPregunta.objects.get(tipo=tp)
+        tipo = Tipo_Pregunta.objects.get(tipo=tp)
         print(tipo)
         pregunta = Pregunta()
         pregunta.descripcion=pr
         pregunta.tipo=tipo
         pregunta.borrado=False
-        print('*-----*')
-        print(pregunta)
+        # print('*-----*')
+        # print(pregunta)
+        pregunta.changeReason="Creacion"
         pregunta.save()
-        print('*-----*')
+        # print('*-----*')
         return redirect('home')
     else:
         pregunta_form=PreguntaForm()
-        tipo=TipoPregunta.objects.all()
+        tipo=Tipo_Pregunta.objects.all()
     return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form,'tipo':tipo})
 
 def agregarRespuesta(request):

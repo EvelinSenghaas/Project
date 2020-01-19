@@ -1,6 +1,6 @@
 from django import forms
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Domicilio,Asistencia,Tipo_Telefono,Telefono,Horario_Disponible,Encuesta,Pregunta,Respuesta
-from .models import Barrio,Localidad,Provincia,Estado_Civil,Telefono_Contacto,Configuracion,TipoPregunta
+from .models import Barrio,Localidad,Provincia,Estado_Civil,Telefono_Contacto,Configuracion,Tipo_Pregunta,Tipo_Encuesta
 
 class GrupoForm(forms.ModelForm):
     def __init__(self,*args, **kwargs):
@@ -130,20 +130,25 @@ class Horario_DisponibleForm(forms.ModelForm):
             'hasta':forms.TimeInput(attrs={'class':'form-control '})
         }
 
-class TipoPreguntaForm(forms.ModelForm):
+class Tipo_PreguntaForm(forms.ModelForm):
     class Meta:
-        model = TipoPregunta
+        model = Tipo_Pregunta
+        fields = ['tipo']
+
+class Tipo_EncuestaForm(forms.ModelForm):
+    class Meta:
+        model = Tipo_Encuesta
         fields = ['tipo']
 
 class EncuestaForm(forms.ModelForm): 
     class Meta:
         model = Encuesta
-        fields = ['pregunta','envio','motivo','cantidad']
+        fields = ['envio','cantidad','tipo']
 
 class PreguntaForm(forms.ModelForm):
     class Meta:
         model = Pregunta
-        fields = ['descripcion','tipo']
+        fields = ['descripcion','tipo','tipo_encuesta']
         widgets = {
             'descripcion':forms.TextInput(attrs={'class':'form-control'}),
         }
