@@ -145,8 +145,8 @@ class Grupo(models.Model):
         ('Femenino','Femenino'),
         ('Ambos','Ambos')
     ]
-    desde=models.IntegerField('Desde',blank=False,null=True)
-    hasta=models.IntegerField('Hasta',blank=False,null=True)
+    desde=models.IntegerField('Desde',blank=False,null=True,validators=[MinValueValidator(0)])
+    hasta=models.IntegerField('Hasta',blank=False,null=True,validators=[MinValueValidator(0)])
     sexo=models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
     id_grupo=models.AutoField(primary_key=True)
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
@@ -246,3 +246,8 @@ class Estado_Reunion(models.Model):
     fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)  
     estado=models.CharField('Estado', max_length=100)
+
+# class Rol(models.Model):
+#     id_rol=models.AutoField(primary_key=True)
+#     nombre=models.CharField(_("Nombre"), max_length=50)
+#     permisos
