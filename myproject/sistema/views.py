@@ -1,8 +1,8 @@
 from django.shortcuts import render,redirect
-from .forms import MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
+from .forms import RolForm,MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaForm,Horario_DisponibleForm,Tipo_TelefonoForm
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm,ConfiguracionForm
 from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
-from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible,Pregunta
+from .models import Rol,Permisos,Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible,Pregunta
 from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,Tipo_Pregunta,Encuesta
 from datetime import date
 import datetime
@@ -18,6 +18,7 @@ import json
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+
 
 class JSONResponse(HttpResponse):
     """
@@ -564,7 +565,26 @@ def agregarRespuesta(request):
         respuesta_form=RespuestaForm()
     return render(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
 
-
+def crearRol(request):
+    if request.method=='POST':
+        print('---------1--------')
+        nombre=request.POST.get('nombre')
+        rol=Rol(nombre=nombre)
+        rol.save()
+        print(request.POST.getlist('permisos'))
+        print('---------2--------')
+        print(request.POST)
+        for permiso in request.POST.getlist('permisos'):
+            print('---------xd--------')
+            rol.permisos.add(permiso)
+            rol.save()
+            print("agregando permiso: ",permiso)
+        print('---------FIN--------')
+        return redirect('home')
+    else:
+        permisos=Permisos.objects.all()
+        rol_form=RolForm()
+        return render(request,'sistema/crearRol.html',{'rol_form':rol_form,'permisos':permisos})
     
 
 @csrf_exempt

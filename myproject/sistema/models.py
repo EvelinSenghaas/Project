@@ -247,7 +247,11 @@ class Estado_Reunion(models.Model):
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)  
     estado=models.CharField('Estado', max_length=100)
 
-# class Rol(models.Model):
-#     id_rol=models.AutoField(primary_key=True)
-#     nombre=models.CharField(_("Nombre"), max_length=50)
-#     permisos
+class Permisos(models.Model):
+    id_permiso=models.AutoField(primary_key=True)
+    nombre=models.CharField('Permiso', max_length=100)
+
+class Rol(models.Model):
+    id_rol=models.AutoField(primary_key=True)
+    nombre=models.CharField("Nombre", max_length=50)
+    permisos=models.ManyToManyField(Permisos)

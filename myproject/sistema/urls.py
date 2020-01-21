@@ -4,7 +4,7 @@ from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,elimi
 from .views import crearReunion,editarReunion,listarReunion,eliminarReunion,auditoriaReunion
 from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
 from .views import listarMiembro,crearMiembro,editarMiembro,eliminarMiembro,validarMiembro
-from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo,sexoList,auditoriaMiembro
+from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo,sexoList,auditoriaMiembro,crearRol
 from .views import provinciasList,localidadesList,barriosList,AsistenciaTable, GrupoTable, MiembroTable,EncuestaTable
 
 
@@ -43,5 +43,6 @@ urlpatterns = [
     path("auditoriaMiembro/", auditoriaMiembro, name="auditoriaMiembro"),
     path("auditoriaReunion/", auditoriaReunion, name="auditoriaReunion"),
     path("verAsistencia/",verAsistencia,name="verAsistencia"),
-    path("EncuestaTable/", EncuestaTable, name="EncuestaTable")
+    path("EncuestaTable/", EncuestaTable, name="EncuestaTable"),
+    path("crearRol/", crearRol, name="crearRol")
 ]
