@@ -575,7 +575,7 @@ def crearRol(request):
         return render(request,'sistema/crearRol.html',{'rol_form':rol_form,'permisos':permisos})
     
 def verRol(request):
-    roles=Rol.objects.filter(borrado=False)
+    roles=Rol.objects.all()
     return render(request,'sistema/verRol.html',{'roles':roles})
 
 def editarRol(request,id_rol):
@@ -603,6 +603,22 @@ def eliminarRol(request,id_rol):
         rol.borrado=True
         rol.save()
         return redirect('/sistema/verRol/')
+
+def validarRol(request):
+    nombre = request.GET.get('nombre')
+    data = {
+        'is_taken': Rol.objects.filter(nombre=nombre).exists()
+    }
+    if data['is_taken']:
+        rol=Rol.objects.filter(nombre=nombre).last()
+        print(rol)
+        rol=Rol.objects.get(id_rol=rol.id_rol)
+        if rol.borrado==True:
+            data['error_message'] = 'Este nombre de rol ya existe, pero fue borrado, vaya "ver roles" y editar, o elija otro nombre'
+        else:
+            data['error_message']  = 'Este nombre de rol ya existe, por favor elige otro nombre'
+    print(data)
+    return JsonResponse(data)
 
 @csrf_exempt
 def provinciasList(request):

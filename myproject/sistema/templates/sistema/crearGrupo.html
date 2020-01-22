@@ -126,7 +126,7 @@
                 success: function (data) {
                     if (data.is_taken) {
                         $("#nombre").val('')
-                        alert("Este nombre de grupo ya existe, por favor elige otro nombre");
+                        alert(data);
                     }
                 }
             });

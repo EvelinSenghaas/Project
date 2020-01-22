@@ -41,4 +41,6 @@ urlpatterns = [
     path("verRol/", verRol, name="verRol"),
     path("editarRol/<int:id_rol>", editarRol, name="editarRol"),
     path("eliminarRol/<int:id_rol>", eliminarRol, name="eliminarRol"),
+    path("validarRol/", validarRol, name="validarRol"),
+
 ]
