@@ -15,4 +15,4 @@ class FormularioLogin(AuthenticationForm):
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ('username', 'miembro', 'email')
+        fields = ('username', 'miembro', 'email','rol')

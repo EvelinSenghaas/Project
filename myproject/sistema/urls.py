@@ -1,12 +1,5 @@
 from django.urls import path
-from .views import agregarAsistencia,configuracion,verAsistencia,validarGrupo
-from .views import crearTipo_Reunion,editarTipo_Reunion,listarTipo_Reunion,eliminarTipo_Reunion
-from .views import crearReunion,editarReunion,listarReunion,eliminarReunion,auditoriaReunion
-from .views import agregarEncuesta,agregarPregunta,agregarRespuesta,agregarHorario_Disponible
-from .views import listarMiembro,crearMiembro,editarMiembro,eliminarMiembro,validarMiembro
-from .views import crearGrupo,listarGrupo,editarGrupo,eliminarGrupo,sexoList,auditoriaMiembro,crearRol
-from .views import provinciasList,localidadesList,barriosList,AsistenciaTable, GrupoTable, MiembroTable,EncuestaTable
-
+from .views import *
 
 urlpatterns = [
     path('crearTipo_Reunion/',crearTipo_Reunion,name='crearTipo_Reunion'),
@@ -44,5 +37,8 @@ urlpatterns = [
     path("auditoriaReunion/", auditoriaReunion, name="auditoriaReunion"),
     path("verAsistencia/",verAsistencia,name="verAsistencia"),
     path("EncuestaTable/", EncuestaTable, name="EncuestaTable"),
-    path("crearRol/", crearRol, name="crearRol")
+    path("crearRol/", crearRol, name="crearRol"),
+    path("verRol/", verRol, name="verRol"),
+    path("editarRol/<int:id_rol>", editarRol, name="editarRol"),
+    path("eliminarRol/<int:id_rol>", eliminarRol, name="eliminarRol"),
 ]

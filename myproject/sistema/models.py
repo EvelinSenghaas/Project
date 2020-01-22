@@ -255,3 +255,7 @@ class Rol(models.Model):
     id_rol=models.AutoField(primary_key=True)
     nombre=models.CharField("Nombre", max_length=50)
     permisos=models.ManyToManyField(Permisos)
+    borrado=models.BooleanField(default=False)
+    def __str__(self):
+        return self.nombre
+    

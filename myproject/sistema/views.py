@@ -466,10 +466,7 @@ def agregarAsistencia(request):
         reunion=Reunion.objects.get(id_reunion=reunion_form)
         grupo= reunion.grupo
         miembros = Miembro.objects.filter(grupo=grupo)
-        print('--------------------')
-        print(miembros)
         fecha = request.POST.get('fecha')
-        print('--------1--------')
         for miembro in miembros:
             asistencia=Asistencia()
             asistencia.miembro=miembro
@@ -483,7 +480,6 @@ def agregarAsistencia(request):
             asistencia.presente=True
             asistencia.changeReason="Creacion"
             asistencia.save()
-            print(check)
         return redirect('home')
     else:
         asistencia_form=AsistenciaForm()
@@ -567,25 +563,46 @@ def agregarRespuesta(request):
 
 def crearRol(request):
     if request.method=='POST':
-        print('---------1--------')
         nombre=request.POST.get('nombre')
-        rol=Rol(nombre=nombre)
+        rol=Rol(nombre=nombre,borrado=False)
         rol.save()
-        print(request.POST.getlist('permisos'))
-        print('---------2--------')
-        print(request.POST)
-        for permiso in request.POST.getlist('permisos'):
-            print('---------xd--------')
-            rol.permisos.add(permiso)
-            rol.save()
-            print("agregando permiso: ",permiso)
-        print('---------FIN--------')
+        rol.permisos.set(request.POST.getlist('permisos'))
+        rol.save()
         return redirect('home')
     else:
         permisos=Permisos.objects.all()
         rol_form=RolForm()
         return render(request,'sistema/crearRol.html',{'rol_form':rol_form,'permisos':permisos})
     
+def verRol(request):
+    roles=Rol.objects.filter(borrado=False)
+    return render(request,'sistema/verRol.html',{'roles':roles})
+
+def editarRol(request,id_rol):
+    rol=Rol.objects.get(id_rol=id_rol)
+    if request.method =="POST":
+        nombre=request.POST.get('nombre')
+        rol.nombre=nombre
+        permisos=request.POST.getlist('permisos')
+        permisos=Permisos.objects.filter(id_permiso__in=permisos)
+        rol.permisos.set(permisos)
+        rol.save()
+        return redirect('home')
+    else:
+        rol_form=RolForm(instance=rol)
+        permisos=rol.permisos.all()
+        permisos_excluidos = Permisos.objects.exclude(id_permiso__in=permisos)
+        return render(request,'sistema/editarRol.html',{'rol_form':rol_form,'permisos':permisos,'permisos_excluidos':permisos_excluidos})
+
+def eliminarRol(request,id_rol):
+    rol=Rol.objects.get(id_rol=id_rol)
+    if CustomUser.objects.filter(rol = rol).exists():
+        messages.error(request, 'NO SE PUEDE ELIMINAR EL ROL: existen usuarios con dicho rol') 
+        return redirect('/sistema/verRol')
+    else:
+        rol.borrado=True
+        rol.save()
+        return redirect('/sistema/verRol/')
 
 @csrf_exempt
 def provinciasList(request):
