@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    $('#tbl').hide();
     $('#select-all').click(function(event) {
     console.log('olii');
     if(this.checked) { // Iterate each checkbox

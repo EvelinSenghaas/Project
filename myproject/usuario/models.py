@@ -5,3 +5,4 @@ from sistema.models import Miembro,Rol
 class CustomUser(AbstractUser):
     miembro= models.ForeignKey(Miembro, on_delete=models.PROTECT)
     rol=models.ForeignKey(Rol, on_delete=models.PROTECT)
+    faltas=models.IntegerField("Faltas",null=True,default='0')

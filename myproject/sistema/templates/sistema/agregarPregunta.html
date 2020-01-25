@@ -15,21 +15,20 @@
                                     
                                 <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input"> Pregunta (*)</label></div>
-                                    <div class="col-md-5" ><input type="text" class="form-control" name="descripcion" required></div>
+                                    <div class="col-md-5" ><input type="text" class="form-control" id="descripcion" name="descripcion" required></div>
                                 </div>
 
                                 <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input"> Tipo de Pregunta (*)</label></div>
                                     <div class="col-md-5">
-                                        <select id="tipo" class="form-control" name='tipo'required>
-                                            <option value="Abierta">Abierta</option>
-                                            <option value="Unica Opcion Positiva">Unica Opcion Positiva</option>
-                                            <option value="Unica Opcion Negativa">Unica Opcion Negativa</option>
-                                            <option value="Opcion multiple">Opcion multiple</option>
+                                        <select id="tipo" class="form-control" name='tipo' required>
+                                            {% for tipo in tipos %}
+                                                <option value="{{tipo.id_tipo_pregunta}}">{{tipo.tipo}}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
-                     
+
                                 <div class="card">
                                     <div class="card-body">
                                         <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
@@ -40,5 +39,26 @@
     </div>
         
     </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <script>
+        $("#descripcion").change(function () {
+        var nombre = $(this).val();
+        console.log("oli");
+        $.ajax({
+            url: '{% url "sistema:validarPregunta" %}',
+            data: {
+                'nombre': nombre
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.is_taken) {
+                    $("#descripcion").val('')
+                    alert(data['error_message'] );
+                }
+            }
+        });
+    });
+    </script>
 {% endblock body%}
 

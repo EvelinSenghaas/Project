@@ -15,26 +15,27 @@ Agregar Encuesta
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Tipo(*)</label></div>
                     <div class="col col-md-4"><select id="tipo" name="tipo" class="form-control" required>
                             <option selected value='None'>--------------</option>
-                            <option value='Faltas'>Faltas</option>
-                            <option value='Estado de las Reuniones'>Estado de las reuniones</option>
+                            {% for tipo in tipo_encuesta %}
+                                <option value="{{tipo.id_tipo_encuesta}}">{{tipo.tipo}}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
 
                 <div class="row form-group" id="envio">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Envio(*)</label></div>
-                    <div class="col col-md-4"><select id="envioo" name='envio' class="form-control" required>
+                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control" required>
                             <option selected value='None'> --------------</option>
-                            <option value='Semanalmente'>Semanalmente</option>
-                            <option value='Mensualmente'>Mensualmente</option>
-                            <option value='Anualmente'>Anualmente</option>
+                            <option value="7">Semanalmente</option>
+                            <option value='30'>Mensualmente</option>
+                            <option value='365'>Anualmente</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="row form-group" id="cantidad">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Cada Cuantas Faltas?(*)</label></div>
-                    <div class="col col-md-4"><input id="cantidadd" type="text" name="cantidad" class="form-control"></div>
+                    <div class="col col-md-4"><input id="cantidadd" type="text" name="cantidadd" class="form-control"></div>
                 </div>
 
                 <div class="row form-group">
@@ -52,7 +53,7 @@ Agregar Encuesta
                                     <tr>
                                         <td>{{pregunta.descripcion}}</td>
                                         <td>{{pregunta.tipo}}</td>
-                                        <td><input type="checkbox" name="check[]" value="{{pregunta}}" /></td>
+                                        <td><input type="checkbox" name="check[]" value="{{pregunta.id_pregunta}}" /></td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -78,40 +79,25 @@ Agregar Encuesta
                 console.log('oliii');
                 var tipo = $(this).val();
                 console.log(tipo);
-                if (tipo=="Faltas"){
+                if (tipo==2){
                     $('#cantidad').show();
                     $('#envio').hide();
+                    $("#cantidadd").prop('readonly', false);
                 }
                 else{
-                    $('#envio').show();
-                    $('#cantidad').hide();
+                    if (tipo==1){
+                        console.log("oli");
+                        $('#envio').hide();
+                        $('#cantidad').show();
+                        $('#cantidadd').val('1');
+                        $("#cantidadd").prop('readonly', true);
+                    }
+                    else{
+                        $('#envio').show();
+                        $('#cantidad').hide();
+                    }
                 }
             });
         });
     </script>
-    {% comment %} <script>
-        $('#tipo').change(function(){
-            console.log('oliii');
-            var tp = $(this).val();
-            console.log(rn);
-            $.ajax({
-                url: '/sistema/EncuestaTable/',
-                data: {
-                    'tp': tipo,
-                },
-                dataType: 'json',
-                success: function(data) {
-                    var html = "";
-                    for (var i = 0; i < data[0]['miembro'].length; i++) {
-                        html += "<tr>"    
-                        html += "<td>" + data[0]['miembro'][i].nombre + "</td>";
-                        html += "<td>" + data[0]['miembro'][i].apellido + "</td>";
-                        html += "<td>" + "<input type='checkbox' name='check[]' value="+data[0]['miembro'][i].dni + ">"+"</td>";
-                        html += "</tr>"
-                    }
-                    $('#pregunta').html(html);
-                }
-            })
-        });
-    </script> {% endcomment %}
 {% endblock body %}

@@ -138,17 +138,17 @@ class Tipo_PreguntaForm(forms.ModelForm):
 class Tipo_EncuestaForm(forms.ModelForm):
     class Meta:
         model = Tipo_Encuesta
-        fields = ['tipo']
+        fields = ['tipo','cantidad','preguntas']
 
 class EncuestaForm(forms.ModelForm): 
     class Meta:
         model = Encuesta
-        fields = ['envio','cantidad','tipo']
+        fields = ['tipo']
 
 class PreguntaForm(forms.ModelForm):
     class Meta:
         model = Pregunta
-        fields = ['descripcion','tipo','tipo_encuesta']
+        fields = ['descripcion','tipo']
         widgets = {
             'descripcion':forms.TextInput(attrs={'class':'form-control'}),
         }

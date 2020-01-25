@@ -1,11 +1,69 @@
 {% extends 'sistema/base_site.html' %}
 {% block titulo %}
-    Agregar Respuesta
+Responder Encuesta
 {% endblock titulo %}
 {% block body %}
-    <form method="POST">
+<form method="POST">
+    <div class="col-lg-11">
         {% csrf_token %}
-        {{respuesta_form.as_p}}
-        <button type = "submit">Agregar</button>
-    </form>
+        <div class="card">
+            <div class="card-header">
+                <strong>Planilla para Responder </strong> Encuentas
+            </div>
+
+            <form method="POST" class="form-horizontal">
+                <div class="row form-group">
+                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">{{Pregunta.descripcion}}</label></div>
+                    <div class="col col-md-4"><select id="tipo" name="tipo" class="form-control" required>
+                    {% for pregunta in preguntas %}
+                        {% if {{pregunta.tipo}} == 1%}
+                        <textarea name="{{forloop.counter}}" id="rsp" cols="30" rows="10"></textarea>
+                        {% elif {{pregunta.tipo}}==2%}
+                            <div class="col col-md">
+                                <div class="form-check">
+                                    <div class="radio">
+                                        <label for="radio1" class="form-check-label ">
+                                            <input type="radio" id="F" name="{{forloop.counter}}" value="True" class="form-check-input">Si
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label for="radio2" class="form-check-label ">
+                                            <input type="radio" id="M" name="{{forloop.counter}}" value="False" class="form-check-input">No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        {% elif {{pregunta.tipo}}==3 %}
+                            <div class="col col-md">
+                                <div class="form-check">
+                                    <div class="radio">
+                                        <label for="radio1" class="form-check-label ">
+                                            <input type="radio" id="F" name="{{forloop.counter}}" value="False" class="form-check-input">Si
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label for="radio2" class="form-check-label ">
+                                            <input type="radio" id="M" name="{{forloop.counter}}" value="True" class="form-check-input">No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                        <input type="range"> 
+                        {% endif %}
+                    {% endfor %}
+                    
+                
+
+                <div class="card">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</form>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+
 {% endblock body %}

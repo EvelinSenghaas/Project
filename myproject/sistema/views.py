@@ -3,7 +3,7 @@ from .forms import RolForm,MiembroForm,Tipo_ReunionForm,ReunionForm,AsistenciaFo
 from .forms import TelefonoForm,EncuestaForm,PreguntaForm,RespuestaForm,GrupoForm,DomicilioForm,ConfiguracionForm
 from .forms import LocalidadForm,ProvinciaForm,BarrioForm,Estado_CivilForm,Telefono_ContactoForm
 from .models import Rol,Permisos,Miembro,Grupo,Tipo_Reunion,Reunion,Tipo_Telefono,Telefono,Domicilio,Horario_Disponible,Pregunta
-from .models import Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,Tipo_Pregunta,Encuesta
+from .models import Tipo_Encuesta,Provincia, Localidad, Barrio,Estado_Civil,Telefono_Contacto,Asistencia,Configuracion,Tipo_Pregunta,Encuesta
 from datetime import date
 import datetime
 from usuario.models import CustomUser
@@ -196,7 +196,6 @@ def crearMiembro(request):
             #return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
             miembro.domicilio=domicilio
             miembro.estado_civil=estado_civil
-            miembro.horario_disponible=horario
             if  telefono != None:
                 miembro.telefono=telefono
             miembro.nombre=miembro.nombre.capitalize()
@@ -209,6 +208,8 @@ def crearMiembro(request):
                 tel_contacto=Telefono_Contacto()
                 tel_contacto.miembro=miembro_cont
                 tel_contacto.save()
+            miembro.save()
+            miembro.horario_disponible.add(horario)
             miembro.save()
         return redirect('/sistema/listarMiembro')
         
@@ -465,20 +466,34 @@ def agregarAsistencia(request):
         reunion_form = request.POST.get('reunion')
         reunion=Reunion.objects.get(id_reunion=reunion_form)
         grupo= reunion.grupo
-        miembros = Miembro.objects.filter(grupo=grupo)
+        
         fecha = request.POST.get('fecha')
-        for miembro in miembros:
+        if request.POST.get('ast-encargado') == True:
+            miembros = Miembro.objects.filter(grupo=grupo)
+            for miembro in miembros:
+                asistencia=Asistencia()
+                asistencia.miembro=miembro
+                asistencia.fecha=fecha
+                asistencia.reunion=reunion
+                asistencia.presente=False
+                asistencia.save()
+            for check in request.POST.getlist('check[]'):
+                miembro=Miembro.objects.get(dni=check)
+                asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
+                asistencia.presente=True
+                asistencia.changeReason="Creacion"
+                asistencia.save()
+        else:
+            miembro=CustomUser.objects.get(id=grupo.encargado)
+            miembro.faltas +=1
+            miembro.save()
+            miembro=miembro.miembro_id
+            miembro=Miembro.objects.get(dni=miembro)
             asistencia=Asistencia()
             asistencia.miembro=miembro
             asistencia.fecha=fecha
             asistencia.reunion=reunion
             asistencia.presente=False
-            asistencia.save()
-        for check in request.POST.getlist('check[]'):
-            miembro=Miembro.objects.get(dni=check)
-            asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
-            asistencia.presente=True
-            asistencia.changeReason="Creacion"
             asistencia.save()
         return redirect('home')
     else:
@@ -507,59 +522,95 @@ def agregarHorario_Disponible(request):
 
 def agregarEncuesta(request):
     if request.method == 'POST':
+        
         tipo=request.POST.get('tipo')
-        pregunta=request.POST.get('pregunta')
-        encuesta=Encuesta.objects.filter(motivo=tipo).last()
-        for check in request.POST.getlist('check[]'):
-            pregunta=Pregunta.objects.filter(descipcion=check)
-            encuesta.pregunta=pregunta
-        if tipo=='Faltas':
-            cantidad=request.POST.get('cantidad')
-            encuesta.cantidad=cantidad
+        if request.POST.get('cantidad',None)=='None':
+            cantidad=request.POST.get('cantidadd')
         else:
-            envio=request.POST.get('envio')
-            encuesta.envio=envio
+            cantidad=request.POST.get('cantidad')
+        print('---------')
+        print(tipo)
+        tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=tipo)
+        print(tipo)
+        tipo.cantidad=cantidad
+        pregunta=request.POST.get('pregunta')
+        encuesta=Encuesta(tipo=tipo,borrado=False)
+        encuesta.save()
+        encuesta.preguntas.set(request.POST.getlist('check[]'))
+        # for check in  request.POST.getlist('check[]'):
+        #     pregunta=Pregunta.objects.filter(descripcion=check)
+        #     encuesta.preguntas.add(pregunta)
+        
         # print('------------------')
         # print(pregunta)
         # print('------------------')
-        encuenta.changeReason="Creacion"
+        encuesta.changeReason="Creacion"
         encuesta.save()
         return redirect('home')
     else:
         pregunta=Pregunta.objects.all()
+        tipo_encuesta=Tipo_Encuesta.objects.all()
         encuesta_form=EncuestaForm()
-        return render(request,'sistema/agregarEncuesta.html',{'encuesta_form':encuesta_form,'pregunta':pregunta})
+        return render(request,'sistema/agregarEncuesta.html',{'encuesta_form':encuesta_form,'tipo_encuesta':tipo_encuesta,'pregunta':pregunta})
 
 def agregarPregunta(request):
     if request.method =='POST':
-        pr=request.POST.get('descripcion')
-        tp =request.POST.get('tipo')
-        tipo = Tipo_Pregunta.objects.get(tipo=tp)
-        print(tipo)
-        pregunta = Pregunta()
-        pregunta.descripcion=pr
-        pregunta.tipo=tipo
-        pregunta.borrado=False
-        # print('*-----*')
-        # print(pregunta)
+        pregunta = PreguntaForm(request.POST)
+        print("-----------------------------")
+        print(pregunta.errors)
+        print("-----------------------------")
         pregunta.changeReason="Creacion"
         pregunta.save()
-        # print('*-----*')
         return redirect('home')
     else:
         pregunta_form=PreguntaForm()
-        tipo=Tipo_Pregunta.objects.all()
-    return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form,'tipo':tipo})
+        tipos=Tipo_Pregunta.objects.all()
+    return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form,'tipos':tipos})
+
+def validarPregunta(request):
+    nombre = request.GET.get('nombre')
+    data = {
+        'is_taken': Pregunta.objects.filter(descripcion=nombre).exists()
+    }
+    if data['is_taken']:
+        data['error_message']  = 'Esta Pregunta ya existe, por favor haz otra pregunta'
+    print(data)
+    return JsonResponse(data)
 
 def agregarRespuesta(request):
     if request.method == 'POST':
-        respuesta_form=RespuestaForm(request.POST)
-        if respuesta_form.is_valid():
-            respuesta_form.save()
-            return redirect('home')
-    else:
-        respuesta_form=RespuestaForm()
-    return render(request,'sistema/agregarRespuesta.html',{'respuesta_form':respuesta_form})
+        i=0
+        preguntas=encuesta.tipo.preguntas.all()
+        for pregunta in preguntas:
+            i+=1
+            respuesta=request.POST.get(i)
+            if pregunta.tipo_pregunta == 1:
+                pregunta.respuesta=respuesta
+            elif pregunta.tipo_pregunta == 2 and respuesta==True:
+                pregunta.respuesta = 'Si'
+                respuesta.puntaje='10'
+            elif pregunta.tipo_pregunta == 2 and respuesta==False:
+                pregunta.respuesta = 'No'
+                respuesta.puntaje='0'
+            elif pregunta.tipo_pregunta == 3 and respuesta==True:
+                pregunta.respuesta = 'Si'
+                respuesta.puntaje='0'
+            elif pregunta.tipo_pregunta == 3 and respuesta==False:
+                pregunta.respuesta = 'No'
+                respuesta.puntaje='10'
+            else: 
+                pregunta.respuesta = respuesta
+                if respuesta=='Mal':
+                    respuesta.puntaje='0'
+            #asi sucesivamente
+
+    if(Encuesta.objects.filter(miembro_id=request.user.dni,respondio=false)).exists():
+        lista=Encuesta.objects.filter(miembro_id=request.user.dni,respondio=false)
+        for encuesta in lista:
+            preguntas=encuesta.tipo.preguntas.all()
+        print('tene si una pendiente ameo')
+        #respuesta_form=RespuestaForm()
+        return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
 
 def crearRol(request):
     if request.method=='POST':

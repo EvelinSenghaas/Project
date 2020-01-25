@@ -119,7 +119,7 @@ class Miembro(models.Model):
     correo=models.EmailField('e-mail', max_length=100,null=True,blank=True)
     sexo =models.CharField('Sexo', max_length=20,choices=SEXO,blank=False,null=True)
     telefono=models.ForeignKey(Telefono, on_delete=models.PROTECT,null=True)
-    horario_disponible=models.ForeignKey(Horario_Disponible, on_delete=models.PROTECT)
+    horario_disponible=models.ManyToManyField(Horario_Disponible)
     borrado = models.BooleanField('borrado',default=False)
     estado_civil=models.ForeignKey(Estado_Civil, on_delete=models.PROTECT)
     history = HistoricalRecords()
@@ -152,7 +152,7 @@ class Grupo(models.Model):
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
     borrado = models.BooleanField('borrado',default=False)
     miembro=models.ManyToManyField(Miembro)
-    encargado=models.IntegerField('Encargado')
+    encargado=models.IntegerField('Encargado')#aca guardo el id del usuario encargado
     history = HistoricalRecords()
 
     def __str__(self):
@@ -175,7 +175,6 @@ class Asistencia(models.Model):
     id_asistencia=models.AutoField(primary_key=True)
     presente=models.BooleanField('Presente',default=False,null=True,blank=True)
     #creo que justificaciones tiene que ir aparte jiji
-    justificacion=models.TextField('Justificacion',blank=True,null=True) #Este campo es util si la charla no se dio o si el lider falto
     miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
     fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
@@ -189,36 +188,35 @@ class Tipo_Pregunta(models.Model):
     def __str__(self):
         return self.tipo
 
-class Tipo_Encuesta(models.Model):
-    id_tipo_encuesta= models.AutoField(primary_key=True)
-    tipo=models.CharField("Tipo de Encuesta", max_length=50)
-    history = HistoricalRecords()
-    def __str__(self):
-        return self.tipo
-
-class Encuesta(models.Model):
-    ENVIO=[
-        ('Semanalmente','Semanalmente'),
-        ('Mensualmente','Mensualmente'),
-        ('Anualmente','Anualmente')
-    ]
-    id_encuesta=models.AutoField(primary_key=True)
-    envio = models.CharField('Envio',choices=ENVIO,blank=True,null=True, max_length=50)
-    borrado = models.BooleanField('borrado',default=False)
-    cantidad = models.IntegerField('Cantidad de Faltas',null=True, blank = True)
-    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
-    tipo=models.OneToOneField(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
-    history = HistoricalRecords()
-
 class Pregunta(models.Model):
     id_pregunta=models.AutoField(primary_key=True)
     descripcion=models.CharField('Pregunta', max_length=50,blank=False,null=False)
-    borrado = models.BooleanField('borrado',default=False)
+    borrado = models.BooleanField('borrado',default=False,null=True)
     tipo= models.ForeignKey(Tipo_Pregunta, on_delete=models.PROTECT)
-    tipo_encuesta=models.OneToOneField(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
     history = HistoricalRecords()
+
     def __str__(self):
-        return self.descripcion    
+        return self.descripcion  
+
+class Tipo_Encuesta(models.Model):
+    id_tipo_encuesta= models.AutoField(primary_key=True)
+    tipo=models.CharField("Tipo de Encuesta", max_length=50)
+    cantidad = models.IntegerField('Cantidad de Faltas',null=True, blank = True)
+    preguntas=models.ManyToManyField(Pregunta)
+    def __str__(self):
+        return self.tipo
+  
+class Encuesta(models.Model):
+    id_encuesta=models.AutoField(primary_key=True)
+    borrado = models.BooleanField('borrado',default=False)
+    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT,null=True)
+    tipo=models.ForeignKey(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
+    miembro = models.ForeignKey(Miembro, on_delete=models.CASCADE)
+    fecha_envio=models.DateField( auto_now=False, auto_now_add=False)
+    fecha_respuesta=models.DateField( auto_now=False, auto_now_add=False)
+    puntaje=models.IntegerField()
+    respondio=models.BooleanField()
+    history = HistoricalRecords()
 
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)
@@ -226,6 +224,7 @@ class Respuesta(models.Model):
     puntaje=models.IntegerField('Puntaje')
     pregunta=models.OneToOneField(Pregunta, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
+    encuesta=models.ForeignKey(Encuesta, on_delete=models.PROTECT)
     
 class Configuracion(models.Model):
     id=models.AutoField(primary_key=True)
@@ -234,18 +233,6 @@ class Configuracion(models.Model):
     direccion = models.CharField('Direccion', max_length=255,blank=False, null= False)
     #logo=models.BinaryField('Logo',blank=False,null=False)
     history = HistoricalRecords()
-
-class Estado_Miembro(models.Model):
-    id_estado_miembro=models.AutoField(primary_key=True)
-    fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
-    miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)  
-    estado=models.CharField('Estado', max_length=100)
-
-class Estado_Reunion(models.Model):
-    id_estado_reunion=models.AutoField(primary_key=True)
-    fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
-    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)  
-    estado=models.CharField('Estado', max_length=100)
 
 class Permisos(models.Model):
     id_permiso=models.AutoField(primary_key=True)
@@ -258,4 +245,3 @@ class Rol(models.Model):
     borrado=models.BooleanField(default=False)
     def __str__(self):
         return self.nombre
-    
