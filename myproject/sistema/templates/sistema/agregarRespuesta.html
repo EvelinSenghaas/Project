@@ -3,7 +3,45 @@
 Responder Encuesta
 {% endblock titulo %}
 {% block body %}
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
 <form method="POST">
+    <script>
+        function myFunction(){
+            var pr = $('#oculto').val();
+            console.log(pr);
+            $.ajax({
+                url: '/sistema/opcionesList',
+                data: {
+                    'pr': pr,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var html = "";
+                    var tipo= data[0]['pregunta']['tipo'];
+                    if(tipo==1){
+                        console.log(data)
+                        $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-la bel">'+data[0]['pregunta']['descripcion']+'</label></div> <textarea name="'+pr+'" id="rsp" cols="30" rows="10"></textarea></div>')
+                    }
+                    if(tipo==2){
+                        $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-label">'+data[0]['pregunta']['descripcion']+'</label></div> <div class="radio" id="add-radio"></div></div>')
+                        for (var i = 0; i < data.length; i++) {
+                            var text = data[i].opcion;
+                            $('#add-radio').append(' <input value="'+text+'" name="'+pr+'"type="radio"/> ' + text +'</br>' )
+                        }
+                    }
+                    if(tipo==3){
+                        $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-label">'+data[0]['pregunta']['descripcion']+'</label></div> <div class="radio" id="add-check"></div></div>')
+                        for (var i = 0; i < data.length; i++) {
+                        var text = data[i].opcion;
+                        $('#add-check').append('<input value="'+text+'" name="check[]" type="checkbox" /> ' + text + '<br />');
+                        }
+                    }
+                }
+                /*weno la idea es ponerle como name el id de la preguntita, entonces en el request.POST le llamo por ese id*/
+            })
+        };
+    </script>
     <div class="col-lg-11">
         {% csrf_token %}
         <div class="card">
@@ -12,58 +50,40 @@ Responder Encuesta
             </div>
 
             <form method="POST" class="form-horizontal">
-                <div class="row form-group">
-                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">{{Pregunta.descripcion}}</label></div>
-                    <div class="col col-md-4"><select id="tipo" name="tipo" class="form-control" required>
-                    {% for pregunta in preguntas %}
-                        {% if {{pregunta.tipo}} == 1%}
-                        <textarea name="{{forloop.counter}}" id="rsp" cols="30" rows="10"></textarea>
-                        {% elif {{pregunta.tipo}}==2%}
-                            <div class="col col-md">
-                                <div class="form-check">
-                                    <div class="radio">
-                                        <label for="radio1" class="form-check-label ">
-                                            <input type="radio" id="F" name="{{forloop.counter}}" value="True" class="form-check-input">Si
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label for="radio2" class="form-check-label ">
-                                            <input type="radio" id="M" name="{{forloop.counter}}" value="False" class="form-check-input">No
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        {% elif {{pregunta.tipo}}==3 %}
-                            <div class="col col-md">
-                                <div class="form-check">
-                                    <div class="radio">
-                                        <label for="radio1" class="form-check-label ">
-                                            <input type="radio" id="F" name="{{forloop.counter}}" value="False" class="form-check-input">Si
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label for="radio2" class="form-check-label ">
-                                            <input type="radio" id="M" name="{{forloop.counter}}" value="True" class="form-check-input">No
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        {% else %}
-                        <input type="range"> 
-                        {% endif %}
-                    {% endfor %}
-                    
-                
-
-                <div class="card">
-                    <div class="card-body">
-                        <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
-                    </div>
+                <div class="col col-md-12" id="add"> 
+                    <select id="oculto" class="form-control" name='tipo' required>
+                        {% for pregunta in preguntas %}
+                            <option selected value="{{pregunta.id_pregunta}}">{{pregunta.id_pregunta}}</option>
+                            <script>myFunction()</script>
+                        {% endfor %}
+                    </select>
                 </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                        </div>
+                    </div>
+                
             </form>
         </div>
     </div>
 </form>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+        $('#rango').change(function(){
+            console.log($(this).val());
+            //$('#rango').tooltip({'trigger':'focus', 'title': 'Password tooltip'});
+        });
+    </script>
+    <script>
+        $(document).ready(function(){
+            $('#oculto').hide();
+            $('#main-menu').remove(); 
+            $('#left-panel').remove();
+            $('#body').prop('class', "open");
+        });
+    </script> 
+    
 
+    
 {% endblock body %}

@@ -179,6 +179,7 @@ class Asistencia(models.Model):
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
     fecha=models.DateField('Fecha', auto_now=False, auto_now_add=False)
     history = HistoricalRecords()
+    justificado=models.BooleanField(null=True)
 
 class Tipo_Pregunta(models.Model):
     id_tipo_pregunta=models.AutoField(primary_key=True)
@@ -205,7 +206,7 @@ class Tipo_Encuesta(models.Model):
     preguntas=models.ManyToManyField(Pregunta)
     def __str__(self):
         return self.tipo
-  
+
 class Encuesta(models.Model):
     id_encuesta=models.AutoField(primary_key=True)
     borrado = models.BooleanField('borrado',default=False)
@@ -213,18 +214,24 @@ class Encuesta(models.Model):
     tipo=models.ForeignKey(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
     miembro = models.ForeignKey(Miembro, on_delete=models.CASCADE)
     fecha_envio=models.DateField( auto_now=False, auto_now_add=False)
-    fecha_respuesta=models.DateField( auto_now=False, auto_now_add=False)
-    puntaje=models.IntegerField()
-    respondio=models.BooleanField()
+    fecha_respuesta=models.DateField( auto_now=False, auto_now_add=False,null=True)
+    puntaje=models.IntegerField(null=True)
+    respondio=models.BooleanField(null=True)
     history = HistoricalRecords()
+
+class Opciones(models.Model):
+    id=models.AutoField(primary_key=True)
+    pregunta=models.ForeignKey(Pregunta, on_delete=models.PROTECT)
+    opcion=models.CharField(max_length=150,null=True)
+    puntaje=models.IntegerField()
+    borrado=models.BooleanField(default=False)
 
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)
-    descripcion=models.CharField('Respuesta', max_length=50,blank=False,null=False)
-    puntaje=models.IntegerField('Puntaje')
-    pregunta=models.OneToOneField(Pregunta, on_delete=models.PROTECT)
+    pregunta=models.ForeignKey(Pregunta, on_delete=models.PROTECT)
     borrado = models.BooleanField('borrado',default=False)
     encuesta=models.ForeignKey(Encuesta, on_delete=models.PROTECT)
+    opcion=models.ForeignKey(Opciones,on_delete=models.PROTECT)
     
 class Configuracion(models.Model):
     id=models.AutoField(primary_key=True)

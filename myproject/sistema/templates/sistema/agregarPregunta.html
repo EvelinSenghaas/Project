@@ -29,36 +29,179 @@
                                     </div>
                                 </div>
 
+                                <div class="col col-md-5" id="radio">
+                                    <div class="row form-group">
+                                        <div class="col-md-3"><label for="text-input">Opcion</label></div>
+                                        <div class="col-md-5"><input type="text" id="newRadio"/></div>
+                                    </div>
+
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Valor</label></div>
+                                        <div class="col-12 col-md-9"><input type="number" id="punto-r" name="text-input"  class="form-control"><small class="form-text text-muted">Por favor ingrese valores positivos</small></div>
+                                    </div>
+                                    <br>
+                                    <button type="button" id="addRadio" class="btn btn-primary">+</button>
+                                </div>
+
+                                <div class="row form-group">
+                                    <div class="col col-md-9">
+                                        <div class="form-check" id="add-radio">
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-md-5" id="check">
+                                    <div class="row form-group">
+                                        <div class="col-md-3"><label for="text-input">Opcion</label></div>
+                                        <div class="col-md-5"><input type="text" id="newCheck"/></div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Valor</label></div>
+                                        <div class="col-12 col-md-9"><input type="number" id="punto-c" name="text-input"  class="form-control"><small class="form-text text-muted">Por favor ingrese valores positivos</small></div>
+                                    </div>
+                                    <br>
+                                    <button type="button" id="addCheckbox" class="btn btn-primary">+</button>
+                                </div>
+
+                                <div class="row form-group" id="oculto2">
+                                    <div class="col col-md-5">  
+                                        <div class="form-check" id="add-check">
+                                            <div id="add-check">
+
+                                            </div>
+                                        </div>
+                                    </div>  
+                                </div>
+
+                                <div id="oculto" >
+                                    <select name="puntos" id="puntos" multiple="multiple">
+                                    
+                                    </select>
+                                    <select name="radiosList" id="radiosList" multiple="multiple">
+                                    
+                                    </select>
+                                </div>
+
+                                
                                 <div class="card">
                                     <div class="card-body">
                                         <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                                        <button type="reset" id="limpiar"class="btn btn-danger btn-sm">
+                                            <i class="fa fa-ban"></i> Limpiar
                                     </div>
                                 </div>
+                                
+                            </div>
                             </form>
                         </div>
     </div>
-        
+            
     </form>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
     <script>
+    $(document).ready(function(){
+        ///$('#oculto').hide();
+        $('#oculto1').hide();
+        $('#oculto2').hide();
+        $('#check').hide();
+        $('#radio').hide();
+    });
+    </script>
+
+    <script>
         $("#descripcion").change(function () {
-        var nombre = $(this).val();
-        console.log("oli");
-        $.ajax({
-            url: '{% url "sistema:validarPregunta" %}',
-            data: {
-                'nombre': nombre
-            },
-            dataType: 'json',
-            success: function (data) {
-                if (data.is_taken) {
-                    $("#descripcion").val('')
-                    alert(data['error_message'] );
+            var nombre = $(this).val();
+            console.log("oli");
+            $.ajax({
+                url: '{% url "sistema:validarPregunta" %}',
+                data: {
+                    'nombre': nombre
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_taken) {
+                        $("#descripcion").val('');
+                        alert(data['error_message'] );
+                    }
                 }
+            });
+        });
+        $( "#limpiar" ).click(function() {
+                $('#add-radio').remove();
+                $('#add-check').remove();
+                $('#puntos').empty();
+                $('#radiosList').empty();
+                $('#oculto1').hide();
+                $('#oculto2').hide();
+                $('#check').hide();
+                $('#radio').hide();
+                $('#oculto').hide();
+        });
+    </script>
+
+    <script>
+        $('#tipo').change(function(){
+            var tipo = $(this).val();
+            console.log(tipo)
+            if(tipo==1){
+                $('#add-radio').remove();
+                $('#add-check').remove();
+                $('#puntos').empty();
+                $('#radiosList').empty();
+                $('#oculto1').hide();
+                $('#oculto2').hide();
+                $('#check').hide();
+                $('#radio').hide();
+                $('#oculto').hide();
+            }
+
+            if(tipo==2){
+                $('#oculto1').show()
+                $('#oculto2').hide()
+                $('#check').hide();
+                $('#add-check').remove();
+                $('#radio').show();
+                $('add-radio').show();
+                $('#puntos').empty();
+            }
+
+            if(tipo==3){
+                console.log('wenitas')
+                $('#puntos').empty();
+                $('#radiosList').empty();
+                $('#oculto2').show()
+                $('#add-radio').remove();
+                $('#oculto1').hide()
+                $('#check').show();
+                $('#radio').hide();
             }
         });
-    });
+
+        $('#addRadio').click(function() {
+            var text = $('#newRadio').val();
+            var punto= $('#punto-r').val();
+            console.log(punto)
+            var html = "";
+            html += "<option selected name='puntos[]' value=" + punto + ">" + punto + "</option>";
+            $('#puntos').append(html);
+            html="";
+            html += "<option selected name='radios' >" + text + "</option>";
+            $('#radiosList').append(html);
+            $('#add-radio').append('<div class="radio"> <input name="radio[]" type="radio"/> ' + text + '<br/>'+'</div>');
+        });
+
+        $('#addCheckbox').click(function() {
+            var text = $('#newCheck').val();
+            var punto= $('#punto-c').val();
+            console.log(punto)
+            var html = "";
+            html += "<option selected name='puntos[]' value=" + punto + ">" + punto + "</option>";
+            $('#puntos').append(html);
+            $('#add-check').append('<input onclick="return false" checked="True" name="check[]" type="checkbox" /> ' + text + '<br />');
+        });
+
     </script>
 {% endblock body%}
 

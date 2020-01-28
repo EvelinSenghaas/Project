@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Provincia,Localidad,Barrio,Asistencia, Miembro, Grupo,Reunion
-from .models import Pregunta,Encuesta
+from .models import *
 
 class ProvinciaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,10 +44,16 @@ class ReunionSerializer(serializers.ModelSerializer):
 class PreguntaSerializer(serializers.ModelSerializer):
     class Meta:
         model=Pregunta
-        fields=['descripcion','tipo']
+        fields=['descripcion','tipo','id_pregunta']
 
 class EncuestaSerializer(serializers.ModelSerializer):
     pregunta=PreguntaSerializer()
     class Meta:
         model=Encuesta
         fields=['tipo','pregunta']
+
+class OpcionesSerializer(serializers.ModelSerializer):
+    pregunta=PreguntaSerializer()
+    class Meta:
+        model=Opciones
+        fields=['opcion','puntaje','pregunta']

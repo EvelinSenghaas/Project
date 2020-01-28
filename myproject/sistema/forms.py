@@ -35,7 +35,7 @@ class ReunionForm(forms.ModelForm):
             super(ReunionForm, self).__init__(*args, **kwargs)
             self.fields['grupo'].queryset = Grupo.objects.filter(borrado=False)
             self.fields['tipo_reunion'].queryset = Tipo_Reunion.objects.filter(borrado=False)
-             
+            
     class Meta:
         model=Reunion
         fields=['nombre','tipo_reunion','grupo']
@@ -156,7 +156,7 @@ class PreguntaForm(forms.ModelForm):
 class RespuestaForm(forms.ModelForm):
     class Meta:
         model = Respuesta
-        fields = ['descripcion','puntaje','pregunta']
+        fields = []
 
 class ConfiguracionForm(forms.ModelForm):
     class Meta:
