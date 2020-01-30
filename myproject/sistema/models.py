@@ -64,7 +64,7 @@ class Horario_Disponible(models.Model):
     ]
     id_horario_disponible=models.AutoField(primary_key=True)
     dia=models.CharField('dia',max_length=50,blank=True,null=True,choices=DIA)
-    desde=models.TimeField('Desde', auto_now=False, auto_now_add=False,null=True,blank=True)
+    desde=models.TimeField('Desd e', auto_now=False, auto_now_add=False,null=True,blank=True)
     hasta=models.TimeField('Hasta', auto_now=False, auto_now_add=False,null=True,blank=True)
     borrado = models.BooleanField('borrado',default=False)
 

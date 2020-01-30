@@ -510,7 +510,7 @@ def agregarAsistencia(request):
             asistencia.fecha=fecha
             asistencia.reunion=reunion
             asistencia.presente=False
-            justificado=False
+            asistencia.justificado=False
             asistencia.save()
         return redirect('home')
     else:
@@ -545,23 +545,25 @@ def agregarEncuesta(request):
             cantidad=request.POST.get('cantidadd')
         else:
             cantidad=request.POST.get('cantidad')
-        print('---------')
-        print(tipo)
+        
         tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=tipo)
-        print(tipo)
         tipo.cantidad=cantidad
         pregunta=request.POST.get('pregunta')
         tipo.save()
         tipo.preguntas.set(request.POST.getlist('check[]'))
-        # for check in  request.POST.getlist('check[]'):
-        #     pregunta=Pregunta.objects.filter(descripcion=check)
-        #     tipo.preguntas.add(pregunta)
-        
-        # print('------------------')
-        # print(pregunta)
-        # print('------------------')
         tipo.changeReason="Creacion"
         tipo.save()
+        '''if tipo== 2:
+            reuniones=Reunion.objects.filter(borrado=False)
+            fecha=date.today()
+            for reunion in reuniones:
+                usuario=reunion.grupo.encargado #el encargado es el lider, es un usuario
+                usuario=Usuario.objects.get(id=usuario) #obtengo el objeto usuario de la bd y el usuario tiene asosiado un miembro
+                miembro=usuario.miembro
+                Encuesta(borrado=False,fecha_envio=fecha,reunion=reunion,tipo=tipo,miembro=miembro,respondio=False)
+            Bueno la idea aca es obtener una opinion del encargado
+            mandarle por whatsapp a los otros miembros un link donde puedan responder, y eso no tengo todavia
+            tengo que ver el enviarle a las personas cada xx tiempo'''
         return redirect('home')
     else:
         pregunta=Pregunta.objects.filter(borrado=False)
@@ -646,6 +648,7 @@ def agregarRespuesta(request):
             opcion=request.POST.get(str(pregunta.id_pregunta))
             print('----------------------------')
             print(opcion)
+            print('---------------')
             if pregunta.tipo.id_tipo_pregunta==1:
                 opcion=Opciones(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion,puntaje=0)
                 opcion.save()
@@ -663,10 +666,117 @@ def agregarRespuesta(request):
         ast=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion_id=reunion).last()
         ast.justificado=True
         ast.save()
-        return redirect('home')
+        #----Esto es el modulo inteligente para ver el estado de la personas
+        #Bueno la persona termino de responder y pum tengo que determinar su estado... para eso que hago? 
+        #bueno voy a ver las respuestas que esten dentro de esta encuesta, obtengo la pregunta y el tipo, si es abierta la ignoro, si es cerrada
+        #agarro la que tenia maximo valor y sumo, una vez
+        #si la pregunta es multiple sumo todos los valores, todo esto guardo en un puntos_total
+        puntos_total=0
+        respuestas=Respuesta.objects.filter(encuesta_id=encuesta.id_encuesta)
+        for respuesta in respuestas:
+            if respuesta.pregunta.tipo==2: 
+                opt=Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Max('puntaje'))
+                print('--------------------')
+                print(opt)
+                print('------------------')
+                puntos_total+=opt
+            if respuesta.pregunta.tipo==3:
+                opt= Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Sum('puntaje'))
+                puntos_total += opt
+        #bien ahora tengo los puntos totales, lo que tengo que hacer es ver en que rango esa la persona y para ello facil
+        #si obtuvo un puntaje mayor que la mitad de los puntos totales esta pasable
+        #si obtuvo la mitad esta en control
+        #si obtuvo cero deberia estar suspendido...
+        #----------si obtuvo cero entra en juego mi modulo inteligente de reasignacion de miembros
+        usuario=request.user.id
+        usr_recomendados=[]
+        mb_recomendados=[]
+        rn_recomendada=[]
+        print('puntos:',puntos_total)
+        print('-----hasta aca llego--------')
+        if puntos <= puntos_total/4:
+            print('criticon xd')
+            # bueno la idea es ahora obtener todos los grupos donde esta esa persona
+            # para eso voy a obtener todos los grupos donde esta el encargado
+            # el encargado es el usuario que esta actualmente loggeado
+            grupos=Grupo.objects.filter(encargado=usuario)
+            for grupo in grupos:
+                #tengo que ver en que reunion esta este grupo
+                reuniones=Reunion.objects.filter(grupo_id=grupo.id_grupo)
+                for reunion in reuniones:
+                    #bueno la idea ahora es ver en que horario se da esta reunion y ver que usuario tiene libre ese horario
+                    #si ninguno tiene, entonces vemos el domicilio, a ver a quien le queda mas cerca
+                    #y ver a que grupo de personas atiende esa persona tmb, por ejemplo si el grupo es femenino vemos una chica
+                    hs_rn=reunion.horario
+                    if Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta).exists():
+                        horarios=Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta)
+                        for horario in horarios:
+                            if Miembro.objects.filter(horario_disponible=horario).exists():
+                                miembros=Miembro_Horario_Disponible.objects.filter(horario=horario)
+                                for miembro in miembros:
+                                    if Usuario.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro).exists():
+                                        usrs=Usuario.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro)
+                                        for usr in usrs: #por cada usuario que tenga asosiado un miembro con horario disponible
+                                            # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
+                                            if mb.sexo == grupo.sexo or grupo.sexo=="Ambos": #si los sexos coinciden entonces recomiendo
+                                                usr_recomendados.append(usr)
+                                                rn_recomendada.append(reunion) #el usr_recomendado[i] es para la rn_recoemndada[i]
+                                            
+                                    else: #aca no hay ningun user, entonces... vamos por miembros del mismo genero
+                                            if mb.sexo == grupo.sexo or grupo.sexo=="Ambos":
+                                                miembro_recomendados.append(miembro)
+                                                rn_recomendada.append(reunion)
+                            else: #osea si ningun MIEMBRO tiene hs disponibles
+                                #pregunto por el domicilio, por el barrio no mas
+                                dm_rn= reunion.domicilio
+                                domicilios=Domicilio.objects.filter(barrio=dm_rn.barrio) #obtengo todos los domicilios que tiene ese barrio
+                                for domicilio in domicilios: 
+                                    if Miembro.objects.filter(domicilio= domicilio).exclude(dni = request.user.miembro.dni).exists(): #veo si algun mb esta en el barrio
+                                        miembros=Miembro.objects.filter(domicilio= domicilio).exclude(dni = request.user.miembro.dni)
+                                        for miembro in miembros:
+                                            if CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro).exists(): #veo si alguno de esos miembros es un usr
+                                                usrs=CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro)
+                                                for usr in usrs: #por cada usuario que tenga asosiado un miembro con el domicilio en ese barrio
+                                                    mb = usr.miembro
+                                                    # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
+                                                    if mb.sexo == grupo.sexo or grupo.sexo=="Ambos": #si los sexos coinciden entonces recomiendo
+                                                        usr_recomendados.append(usr)
+                                                        rn_recomendada.append(reunion)
+                                            else: #aca hay cura, no tienen hs disponible, no hay usr, pero hay miembros
+                                                    if miembro.sexo == grupo.sexo or grupo.sexo=="Ambos":
+                                                        mb_recomendados.append(miembro)
+                                                        rn_recomendada.append(reunion)
+                                        
+                                    else: #aca no tienen ni hs ni domicilio nadie de nadie osea fritos #pero no es el ultimo ciclo lina
+                                        print('---en esta vuelta no hay nadie pero ntp, respira---')
+                                
+                    if not(usr_recomendados): 
+                        print('no hay nadie de nadie cabeza') #en este punto tengo todas las rn y grupos
+                        #puedo ver el rango etario xd
+                        if Grupo.objects.filter(desde__gte=grupo.desde,hasta__lte=grupo.hasta).exclude(id_grupo=grupo.id_grupo).exists():
+                            grupos_etarios= Grupo.objects.filter(sexo=grupo.sexo, desde__gte=grupo.desde,hasta__lte=grupo.hasta).exclude(id_grupo=grupo.id_grupo)#excluyo el grupo actual porque es el que necesita ser reubicado
+                            for grupito in grupos_etarios:
+                                    usr_recomendados.append(grupito.encargado)
+                        print('grupo.sexo: ', grupo.sexo)
+                        if not(usr_recomendados) and not(mb_recomendados): #aca si que no hay nada de nada, entonces vamos a darle usr del mismo genero
+                            if CustomUser.objects.filter(miembro__sexo=grupo.sexo).exclude(id=request.user.id).exists():
+                                usr_recomendados.append(CustomUser.objects.filter(miembro__sexo=grupo.sexo).exclude(id=request.user.id))
+                            else:
+                                print('weno esto si que ya es imposible china xd')     
+                        print('usr: ',usr_recomendados)
+                        print('mb: ',mb_recomendados)
+                        print('rn: ',rn_recomendada)                                      
+
+        if puntos <= puntos_total/2 and puntos > puntos_total/4:
+            print('wea-ta mas o menos safable un 5 ')
+        if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
+            print('safaroni + de 5')
+        if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
+            print('Re bien!!')
 
     return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
     
+def verRespuesta(request):
     
 
 def crearRol(request):
