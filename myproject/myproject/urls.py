@@ -11,6 +11,7 @@ from usuario.views import Login, logoutUsuario
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('sistema/',include(('sistema.urls','sistema'))),
+    path("mensajeria/",include(('mensajeria.urls','mensajeria'))),
     path('Home/',Home,name = 'home'),
     path('accounts/login/', Login.as_view(), name='login'),
     path('accounts/logout/', login_required(logoutUsuario), name='logout'),

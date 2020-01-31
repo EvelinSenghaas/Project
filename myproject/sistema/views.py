@@ -28,6 +28,7 @@ class JSONResponse(HttpResponse):
 
 def days_between(d1, d2):
     return abs(d2 - d1).days
+    
 @login_required
 def Home(request):
     #Tengo que ver de recuperar el ultimo registro de asistencia por reunion, si pasaron mas de 7 dias 

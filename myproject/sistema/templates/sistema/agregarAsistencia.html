@@ -93,7 +93,6 @@
                 dataType: 'json',
                 success: function(data) {
                     var html = "";
-                    
                     for (var i = 0; i < data[0]['miembro'].length; i++) {
                         html += "<tr>"    
                         html += "<td>" + data[0]['miembro'][i].nombre + "</td>";
