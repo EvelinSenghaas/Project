@@ -3,7 +3,7 @@ from .forms import *
 from .models import *
 from datetime import date
 import datetime
-from usuario.models import CustomUser
+from usuario.models import *
 from django.db.models import Max
 from django.contrib import messages
 from django.core import serializers
@@ -26,6 +26,8 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
+def days_between(d1, d2):
+    return abs(d2 - d1).days
 @login_required
 def Home(request):
     #Tengo que ver de recuperar el ultimo registro de asistencia por reunion, si pasaron mas de 7 dias 
@@ -33,12 +35,39 @@ def Home(request):
     usuario = request.user
     miembro = Miembro.objects.get(dni=usuario.miembro_id)
     if miembro.sexo=="Femenino":
-        print("es nena")
         sexo="Femenino"
     else:
-        print("es nene")
         sexo="Masculino"
     context ={'usuario':usuario,'sexo':sexo}
+
+    #tengo que ver si el usr no tiene una falta que no ingreso para eso
+    #obtengo todas sus reuniones
+    tipo= Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
+    cant=tipo.cantidad #obtendo la cantidad de faltas consecutivas actuales admisibles
+    reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
+    for reunion in reuniones: #ahora por cada reunion comparo las fechas de los ultimos registros con hoy
+        if Asistencia.objects.filter(reunion=reunion.id_reunion).exists():
+            asistencia=Asistencia.objects.filter(reunion=reunion.id_reunion).last()
+            fecha_rn=asistencia.fecha
+            hoy=date.today()
+            print(days_between(hoy, fecha_rn))
+            dias=days_between(hoy, fecha_rn)
+            if dias > 7: #si paso una semana y no se puso asistencia a la reunion entonces.... miembro lo defini bien arriba para ver su genero
+                ast=Asistencia(miembro=miembro,presente=False,justificado=False,reunion=reunion,fecha=hoy)
+                ast.save()
+        #ahora que le puse la falta es el momento de contar cuantas faltas CONSECUTIVAS TIENE
+        consulta=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion=reunion.id_reunion).order_by('fecha')[:cant]
+        cantidad = len (list(consulta)) #paso la cantidad de registros de faltas que encontro a cantidad
+        if cantidad >= cant: #si la cantidad es >= al numero admisible de consecutivas entonces le creo una encuesta pendiente
+            encuesta= Encuesta()
+            encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
+            encuesta.miembro=miembro
+            encuesta.fecha_envio=date.today()
+            encuesta.respondio=False
+            encuesta.reunion=reunion
+            encuesta.save()
+            return redirect('/sistema/agregarRespuesta')
+
     if Asistencia.objects.filter(miembro=miembro,justificado=False).exists():
         #tiene que haber un counter lo necesito para elegir el tipo xd
         #aca tengo que contar cuantas faltas tiene por ahora es cada 1 y poner la reunion jiji
@@ -50,9 +79,30 @@ def Home(request):
         encuesta.respondio=False
         ast=Asistencia.objects.filter(miembro=miembro,justificado=False).last()
         encuesta.reunion=ast.reunion
-        encuesta.save()
+        encuesta.save() #Esto quiere decir que tenia una falta no mas
+        #aca deberia notificarle o algo, de que tiene una encuesta pendiente
         #return redirect('agregarRespuesta') asi estaba antes
-        return redirect('/sistema/agregarRespuesta')
+
+    #Bueno esto no es lo mejor pero la idea es ver cuando fue la ultima vez que envie la encuesta tipo 2 osea estado de las reuniones
+    #Para eso obtengo el ultimo registro de encuesta.tipo==2 veo cuantos dias pasaron y si pasa a la cantidad especificada
+    #pum envio encuestas para todos!!! yupi
+    if Encuesta.objects.filter(tipo_id=2).exists():
+        encuesta=Encuesta.objects.filter(tipo_id=2).last()
+        fecha=encuesta.fecha_envio
+        hoy=date.today()
+        print(days_between(hoy, fecha))
+        dias=days_between(hoy, fecha)
+        tipo= Tipo_Encuesta.objects.get(id_tipo_encuesta=2)
+        cant=tipo.cantidad
+        if dias >= cant:
+            print("tamos fritos xd") 
+            #aca llamo a otra vista ni no vimo
+            #A cada miembro en las reuniones tendria que mandarle una encuesta a su wss, osea el link
+            #Pero deberia crear una encuesta por miembro?? o simplemente le envio el link y si respondo cuento cuantos respondieron
+            #eso me parece las obvio, entonces le mando el enlace y a medida que van entrando le creo
+            #localhost:8000/sistema/agregarRespuesta/reunion=1 y pum envio
+    else:
+        print('weno alguien tiene que empezar no?')
     return render(request,'sistema/index.html',context)
 
 def auditoriaMiembro(request):
@@ -640,8 +690,100 @@ def agregarRespuesta(request):
         # encuesta=Encuesta.objects.get()
         preguntas=encuesta.tipo.preguntas.filter(borrado=False)
         print('tene si una pendiente ameo')
-        
-    
+
+    if request.method == 'POST':
+        if encuesta.tipo.id_tipo_encuesta==3:
+            puntos=0
+            for pregunta in preguntas: 
+                opcion=request.POST.get(str(pregunta.id_pregunta))
+                print('----------------------------')
+                print(opcion)
+                print('---------------')
+                if pregunta.tipo.id_tipo_pregunta==1: #es una pregunta abierta, no suma puntos, y por cada pregunta abierta creo una nueva respuesta
+                    opcion=Opciones(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion,puntaje=0)
+                    opcion.save()
+                    respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
+                    respuesta.save()        
+                else:
+                    opcion=Opciones.objects.filter(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion).first()
+                    #busco la opcion que coincida con la opcion que me mandaron por el request.POST
+                    respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
+                    puntos+=opcion.puntaje
+                    respuesta.save()
+            fecha=date.today()
+            encuesta.fecha_respuesta=fecha
+            encuesta.respondio=True
+            encuesta.puntaje=puntos
+            encuesta.save()
+            reunion=encuesta.reunion.id_reunion
+            cant=encuesta.tipo.cantidad
+            asistencias=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion_id=reunion).order_by('fecha')[:cant]
+            for ast in asistencias:    
+                ast.justificado=True
+                ast.save()
+            #----Esto es el modulo inteligente para ver el estado de la personas
+            #Bueno la persona termino de responder y pum tengo que determinar su estado... para eso que hago? 
+            #bueno voy a ver las respuestas que esten dentro de esta encuesta, obtengo la pregunta y el tipo, si es abierta la ignoro, si es cerrada
+            #agarro la que tenia maximo valor y sumo, una vez
+            #si la pregunta es multiple sumo todos los valores, todo esto guardo en un puntos_total
+            puntos_total=0
+            respuestas=Respuesta.objects.filter(encuesta_id=encuesta.id_encuesta)
+            print('respuestas: ',respuestas)
+            for respuesta in respuestas:
+                if respuesta.pregunta.tipo.id_tipo_pregunta==2: 
+                    opt=Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Max('puntaje'))
+                    print('--------------------////////------------------')
+                    opt=opt['puntaje__max']
+                    print(opt)
+                    print('--------------------////////------------------')
+                    puntos_total+=opt
+                if respuesta.pregunta.tipo.id_tipo_pregunta==3:
+                    opt= Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Sum('puntaje'))
+                    print('--------------------////////------------------')
+                    print(opt)
+                    print('--------------------////////------------------')
+                    puntos_total += opt
+            #bien ahora tengo los puntos totales, lo que tengo que hacer es ver en que rango esa la persona y para ello facil
+            #si obtuvo un puntaje mayor que la mitad de los puntos totales esta pasable
+            #si obtuvo la mitad esta en control
+            #si obtuvo cero deberia estar suspendido...
+            #----------si obtuvo cero entra en juego mi modulo inteligente de reasignacion de miembros o lideres
+            usuario=request.user.id
+            print('puntos:',puntos_total)
+            print('-----hasta aca llego--------')
+            if puntos <= puntos_total/4:
+                print('critico')
+                #tengo que crear ese estado critico y que quede en la espera de confirmacion
+                #para la baja
+                estado=Estado(usuario=request.user,estado="Pendiente",confirmado=False)
+                estado.save()
+                #aca pum ya notifico
+            if puntos <= puntos_total/2 and puntos > puntos_total/4:
+                print("medio")
+                estado=Estado(usuario=request.user,estado="Medio")
+                estado.save()
+            if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
+                print("Bueno")
+                estado=Estado(usuario=request.user,estado="Bueno")
+                estado.save()
+            if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
+                print('Re bien!!')
+                estado=Estado(usuario=request.user,estado="Muy Bueno")
+                estado.save()
+            
+            return redirect('home')
+
+    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
+
+def agregarRespuestaReunion(request,id_reunion):
+    reunion=Reunion.objects.get(reunion=id_reunion)
+    encuesta= Encuesta()
+    encuesta.borrado=False #ver si realmente puedo borrar una encuesta xd creeria que no se debe
+    encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=2)
+    encuesta.fecha_envio=date.today()
+    encuesta.respondio=False
+    encuesta.reunion=reunion
+    encuesta.save()   
     if request.method == 'POST':
         puntos=0
         for pregunta in preguntas: 
@@ -649,54 +791,84 @@ def agregarRespuesta(request):
             print('----------------------------')
             print(opcion)
             print('---------------')
-            if pregunta.tipo.id_tipo_pregunta==1:
+            if pregunta.tipo.id_tipo_pregunta==1: #es una pregunta abierta, no suma puntos, y por cada pregunta abierta creo una nueva respuesta
                 opcion=Opciones(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion,puntaje=0)
                 opcion.save()
+                respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
+                respuesta.save()        
             else:
-                opcion=Opciones.objects.filter(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion).last()
-            respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
-            puntos+=opcion.puntaje
-        respuesta.save()
+                opcion=Opciones.objects.filter(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion).first()
+                #busco la opcion que coincida con la opcion que me mandaron por el request.POST
+                respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
+                puntos+=opcion.puntaje
+                respuesta.save()
         fecha=date.today()
         encuesta.fecha_respuesta=fecha
         encuesta.respondio=True
         encuesta.puntaje=puntos
         encuesta.save()
-        reunion=encuesta.reunion.id_reunion
-        ast=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion_id=reunion).last()
-        ast.justificado=True
-        ast.save()
-        #----Esto es el modulo inteligente para ver el estado de la personas
-        #Bueno la persona termino de responder y pum tengo que determinar su estado... para eso que hago? 
-        #bueno voy a ver las respuestas que esten dentro de esta encuesta, obtengo la pregunta y el tipo, si es abierta la ignoro, si es cerrada
-        #agarro la que tenia maximo valor y sumo, una vez
-        #si la pregunta es multiple sumo todos los valores, todo esto guardo en un puntos_total
+            #----Esto es el modulo inteligente para ver el estado de la Reunion
+            #Bueno la persona termino de responder y pum tengo que determinar su estado... para eso que hago? 
+            #bueno voy a ver las respuestas que esten dentro de esta encuesta, obtengo la pregunta y el tipo, si es abierta la ignoro, si es cerrada
+            #agarro la que tenia maximo valor y sumo, una vez
+            #si la pregunta es multiple sumo todos los valores, todo esto guardo en un puntos_total
         puntos_total=0
         respuestas=Respuesta.objects.filter(encuesta_id=encuesta.id_encuesta)
+        print('respuestas: ',respuestas)
         for respuesta in respuestas:
-            if respuesta.pregunta.tipo==2: 
+            if respuesta.pregunta.tipo.id_tipo_pregunta==2: 
                 opt=Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Max('puntaje'))
-                print('--------------------')
+                print('--------------------////////------------------')
+                opt=opt['puntaje__max']
                 print(opt)
-                print('------------------')
+                print('--------------------////////------------------')
                 puntos_total+=opt
-            if respuesta.pregunta.tipo==3:
+            if respuesta.pregunta.tipo.id_tipo_pregunta==3:
                 opt= Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Sum('puntaje'))
+                print('--------------------////////------------------')
+                print(opt)
+                print('--------------------////////------------------')
                 puntos_total += opt
-        #bien ahora tengo los puntos totales, lo que tengo que hacer es ver en que rango esa la persona y para ello facil
-        #si obtuvo un puntaje mayor que la mitad de los puntos totales esta pasable
-        #si obtuvo la mitad esta en control
-        #si obtuvo cero deberia estar suspendido...
-        #----------si obtuvo cero entra en juego mi modulo inteligente de reasignacion de miembros
+            #bien ahora tengo los puntos totales, lo que tengo que hacer es ver en que rango esa la persona y para ello facil
+            #si obtuvo un puntaje mayor que la mitad de los puntos totales esta pasable
+            #si obtuvo la mitad esta en control
+            #si obtuvo cero deberia estar suspendido...
+            #----------si obtuvo cero entra en juego mi modulo inteligente de reasignacion de miembros o lideres
         usuario=request.user.id
-        usr_recomendados=[]
-        mb_recomendados=[]
-        rn_recomendada=[]
         print('puntos:',puntos_total)
-        print('-----hasta aca llego--------')
-        if puntos <= puntos_total/4:
-            print('criticon xd')
-            # bueno la idea es ahora obtener todos los grupos donde esta esa persona
+        print('-----hasta aca llego--------') #mi modulito xd
+            #a partir de aca tengo que empezar a ver depende de cuantos me respondieron
+            # if puntos <= puntos_total/4:
+            #     print('critico')
+            #     #tengo que crear ese estado critico y que quede en la espera de confirmacion
+            #     #para la baja
+            #     estado=Estado(usuario=request.user,estado="Pendiente",confirmado=False)
+            #     estado.save()
+            #     #aca pum ya notifico
+            # if puntos <= puntos_total/2 and puntos > puntos_total/4:
+            #     print("medio")
+            #     estado=Estado(usuario=request.user,estado="Medio")
+            #     estado.save()
+            # if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
+            #     print("Bueno")
+            #     estado=Estado(usuario=request.user,estado="Bueno")
+            #     estado.save()
+            # if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
+            #     print('Re bien!!')
+            #     estado=Estado(usuario=request.user,estado="Muy Bueno")
+            #     estado.save()
+    return redirect('home')    
+# def verRespuesta(request):
+'''def reasignarMiembro(request):
+    #la idea aca es ver si se puede reasignar miembros en primer lugar
+    print('xd')
+
+
+def reasignarLider(request):
+    usr_recomendados=[]
+    mb_recomendados=[]
+    rn_recomendada=[]
+    # bueno la idea es ahora obtener todos los grupos donde esta esa persona
             # para eso voy a obtener todos los grupos donde esta el encargado
             # el encargado es el usuario que esta actualmente loggeado
             grupos=Grupo.objects.filter(encargado=usuario)
@@ -765,20 +937,8 @@ def agregarRespuesta(request):
                                 print('weno esto si que ya es imposible china xd')     
                         print('usr: ',usr_recomendados)
                         print('mb: ',mb_recomendados)
-                        print('rn: ',rn_recomendada)                                      
-
-        if puntos <= puntos_total/2 and puntos > puntos_total/4:
-            print('wea-ta mas o menos safable un 5 ')
-        if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
-            print('safaroni + de 5')
-        if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
-            print('Re bien!!')
-
-    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
-    
-def verRespuesta(request):
-    
-
+                        print('rn: ',rn_recomendada)        
+'''
 def crearRol(request):
     if request.method=='POST':
         nombre=request.POST.get('nombre')
@@ -953,11 +1113,17 @@ def EncuestaTable(request):
 
 @csrf_exempt
 def opcionesList(request):
-    pregunta=request.GET.get('pr')
-    print(pregunta)
+    pr=request.GET.get('pr')
     if request.method == 'GET':
-        opciones=Opciones.objects.filter(borrado=False,pregunta_id=pregunta)
-        print(opciones)
+        pregunta=Pregunta.objects.get(id_pregunta=pr)
+        if pregunta.tipo_id==1:
+            if Opciones.objects.filter(borrado=False,pregunta_id=pr).exists():
+                opciones=Opciones.objects.filter(borrado=False,pregunta_id=pr)[:1]
+            else:
+                opciones= Opciones(pregunta=pregunta,opcion="Abierta",puntaje=0)
+                opciones.save()
+        else:
+            opciones=Opciones.objects.filter(borrado=False,pregunta_id=pr)
         serializer=OpcionesSerializer(opciones,many=True)
         result=dict()
         result = serializer.data

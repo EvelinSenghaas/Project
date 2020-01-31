@@ -191,7 +191,7 @@ class Tipo_Pregunta(models.Model):
 
 class Pregunta(models.Model):
     id_pregunta=models.AutoField(primary_key=True)
-    descripcion=models.CharField('Pregunta', max_length=50,blank=False,null=False)
+    descripcion=models.CharField('Pregunta', max_length=200,blank=False,null=False)
     borrado = models.BooleanField('borrado',default=False,null=True)
     tipo= models.ForeignKey(Tipo_Pregunta, on_delete=models.PROTECT)
     history = HistoricalRecords()
@@ -212,7 +212,7 @@ class Encuesta(models.Model):
     borrado = models.BooleanField('borrado',default=False)
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT,null=True)
     tipo=models.ForeignKey(Tipo_Encuesta, on_delete=models.PROTECT,null=True)
-    miembro = models.ForeignKey(Miembro, on_delete=models.CASCADE)
+    miembro = models.ForeignKey(Miembro, on_delete=models.CASCADE,null=True)
     fecha_envio=models.DateField( auto_now=False, auto_now_add=False)
     fecha_respuesta=models.DateField( auto_now=False, auto_now_add=False,null=True)
     puntaje=models.IntegerField(null=True)
@@ -225,6 +225,8 @@ class Opciones(models.Model):
     opcion=models.CharField(max_length=150,null=True)
     puntaje=models.IntegerField()
     borrado=models.BooleanField(default=False)
+    def __str__(self):
+        return self.opcion 
 
 class Respuesta(models.Model):
     id_respuesta=models.AutoField(primary_key=True)

@@ -9,7 +9,6 @@ Responder Encuesta
     <script>
         function myFunction(){
             var pr = $('#oculto').val();
-            console.log(pr);
             $.ajax({
                 url: '/sistema/opcionesList',
                 data: {
@@ -20,7 +19,6 @@ Responder Encuesta
                     var html = "";
                     var tipo= data[0]['pregunta']['tipo'];
                     if(tipo==1){
-                        console.log(data)
                         $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-la bel">'+data[0]['pregunta']['descripcion']+'</label></div> <textarea name="'+pr+'" id="rsp" cols="30" rows="10"></textarea></div>')
                     }
                     if(tipo==2){
@@ -29,6 +27,7 @@ Responder Encuesta
                             var text = data[i].opcion;
                             $('#add-radio').append(' <input value="'+text+'" name="'+pr+'"type="radio"/> ' + text +'</br>' )
                         }
+                        $("#add-radio").attr("id",pr);
                     }
                     if(tipo==3){
                         $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-label">'+data[0]['pregunta']['descripcion']+'</label></div> <div class="radio" id="add-check"></div></div>')

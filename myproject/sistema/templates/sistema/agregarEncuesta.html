@@ -1,4 +1,5 @@
 {% extends 'sistema/base_site.html' %}
+{% load static %}
 {% block titulo %}
 Agregar Encuesta
 {% endblock titulo %}
@@ -32,14 +33,6 @@ Agregar Encuesta
                         </select>
                     </div>
                     <br>   
-                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion (*)</label></div>
-                    <div class="col col-md-4"><select required id="select-reunion" class="js-example-basic-multiple  form-control" name="reunion" multiple="multiple">                
-                            {% for reunion in reuniones  %}
-                                <option value="{{reunion.id_reunion}}">{{reunion.nombre}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <br>                  
                 </div>
 
                 <div class="row form-group" id="cantidad">
@@ -112,7 +105,8 @@ Agregar Encuesta
     </div>
 </form>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="{% static 'assets/js/select2.min.js'%}"></script> 
+    
+    <script src="{% static 'assets/js/select2.min.js'%}"></script>
 
     <script>
         $(document).ready(function(){
@@ -122,7 +116,7 @@ Agregar Encuesta
                 console.log('oliii');
                 var tipo = $(this).val();
                 console.log(tipo);
-                if (tipo==2){
+                if (tipo==3){
                     $('#cantidad').show();
                     $('#envio').hide();
                     $("#cantidadd").prop('readonly', false);
@@ -143,4 +137,5 @@ Agregar Encuesta
             });
         });
     </script>
+
 {% endblock body %}
