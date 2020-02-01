@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from .forms import *
 from .models import *
+from mensajeria.models import *
 from datetime import date
 import datetime
 from usuario.models import *
@@ -767,6 +768,11 @@ def agregarRespuesta(request):
                 print("Bueno")
                 estado=Estado(usuario=request.user,estado="Bueno")
                 estado.save()
+                mensaje=Mensaje.objects.get(id=1)
+                mensaje=mensaje.id
+                return redirect('/mensajeria/enviarWhatsapp/'+str(mensaje))
+
+
             if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
                 print('Re bien!!')
                 estado=Estado(usuario=request.user,estado="Muy Bueno")
