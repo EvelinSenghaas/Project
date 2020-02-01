@@ -138,7 +138,7 @@ class Miembro(models.Model):
 class Telefono_Contacto(models.Model):
     id=models.AutoField(primary_key=True)
     miembro=models.ForeignKey(Miembro, on_delete=models.PROTECT)
-    
+
 class Grupo(models.Model):
     SEXO=[
         ('Masculino','Masculino'),

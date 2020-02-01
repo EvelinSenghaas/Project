@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from .forms import *
 from .models import *
 from mensajeria.models import *
+from mensajeria.views import *
 from datetime import date
 import datetime
 from usuario.models import *
@@ -41,7 +42,11 @@ def Home(request):
     else:
         sexo="Masculino"
     context ={'usuario':usuario,'sexo':sexo}
-
+    miembros=[]
+    miembros.append(str(miembro.dni))
+    # asunto="Wenas"
+    # mensaje=" Gracias lina! entra aca -> http://localhost:8000/Home"
+    # enviarMail(miembros,asunto,mensaje)
     #tengo que ver si el usr no tiene una falta que no ingreso para eso
     #obtengo todas sus reuniones
     tipo= Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
@@ -605,22 +610,28 @@ def agregarEncuesta(request):
         tipo.preguntas.set(request.POST.getlist('check[]'))
         tipo.changeReason="Creacion"
         tipo.save()
-        '''if tipo== 2:
-            reuniones=Reunion.objects.filter(borrado=False)
-            fecha=date.today()
+        if tipo== 2:
+            reuniones=request.POST.get('reunion[]')
             for reunion in reuniones:
-                usuario=reunion.grupo.encargado #el encargado es el lider, es un usuario
-                usuario=Usuario.objects.get(id=usuario) #obtengo el objeto usuario de la bd y el usuario tiene asosiado un miembro
-                miembro=usuario.miembro
-                Encuesta(borrado=False,fecha_envio=fecha,reunion=reunion,tipo=tipo,miembro=miembro,respondio=False)
-            Bueno la idea aca es obtener una opinion del encargado
-            mandarle por whatsapp a los otros miembros un link donde puedan responder, y eso no tengo todavia
-            tengo que ver el enviarle a las personas cada xx tiempo'''
+                miembross=reunion.grupo.miembros
+                miembros=[]
+                for miembro in miembross:
+                    miembros.append(miembro)
+                    encuesta=Encuesta(borrado=False,fecha_envio=date.today(),reunion=reunion,tipo=tipo,respondio=False) #creo la encuesta
+                    #a medida que voy creando le voy a ir enviando tmb
+                    encuesta.save()
+                    mensaje=Mensaje.objects.filter(tipo_id=2)
+                    asunto=mensaje.tipo
+                    mensaje=mensaje.mensaje+' ->  http://localhost:8000/agregarRespuesta'+str(encuesta.id)
+                    enviarMail(miembros,asunto,mensaje)
+                    miembros=[]#limpio porque voy a enviar 1 por uno
+
         return redirect('home')
     else:
         pregunta=Pregunta.objects.filter(borrado=False)
         tipo_encuesta=Tipo_Encuesta.objects.all()
-        return render(request,'sistema/agregarEncuesta.html',{'tipo_encuesta':tipo_encuesta,'pregunta':pregunta})
+        reuniones=Reunion.objects.filter(borrado=True)
+        return render(request,'sistema/agregarEncuesta.html',{'tipo_encuesta':tipo_encuesta,'pregunta':pregunta,'reuniones':reuniones})
 
 def agregarPregunta(request):
     if request.method =='POST':
@@ -770,7 +781,9 @@ def agregarRespuesta(request):
                 estado.save()
                 mensaje=Mensaje.objects.get(id=1)
                 mensaje=mensaje.id
-                return redirect('/mensajeria/enviarWhatsapp/'+str(mensaje))
+                miembros=[]
+                miembros.append(str(request.user.miembro.dni))
+                enviarWhatsapp(mensaje,miembros)
 
 
             if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
@@ -782,15 +795,9 @@ def agregarRespuesta(request):
 
     return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
 
-def agregarRespuestaReunion(request,id_reunion):
-    reunion=Reunion.objects.get(reunion=id_reunion)
-    encuesta= Encuesta()
-    encuesta.borrado=False #ver si realmente puedo borrar una encuesta xd creeria que no se debe
-    encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=2)
-    encuesta.fecha_envio=date.today()
-    encuesta.respondio=False
-    encuesta.reunion=reunion
-    encuesta.save()   
+def agregarRespuestaReunion(request,id_encuesta):  
+    encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
+    preguntas=encuesta.tipo.preguntas
     if request.method == 'POST':
         puntos=0
         for pregunta in preguntas: 
@@ -864,7 +871,9 @@ def agregarRespuestaReunion(request,id_reunion):
             #     print('Re bien!!')
             #     estado=Estado(usuario=request.user,estado="Muy Bueno")
             #     estado.save()
-    return redirect('home')    
+        return redirect('home')    
+
+    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
 # def verRespuesta(request):
 '''def reasignarMiembro(request):
     #la idea aca es ver si se puede reasignar miembros en primer lugar

@@ -15,6 +15,7 @@ urlpatterns = [
     path('agregarEncuesta/',agregarEncuesta,name ='agregarEncuesta'),
     path('agregarPregunta/',agregarPregunta,name='agregarPregunta'),
     path('agregarRespuesta/',agregarRespuesta,name='agregarRespuesta'),
+    path('agregarRespuesta/<int:id_encuesta>',agregarRespuesta,name='agregarRespuesta'),
     path('crearGrupo/',crearGrupo, name='crearGrupo'),
     path('listarGrupo/',listarGrupo,name='listarGrupo'),
     path('editarGrupo/<int:id_grupo>',editarGrupo,name='editarGrupo'),

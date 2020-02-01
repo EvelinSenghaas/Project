@@ -32,7 +32,14 @@ Agregar Encuesta
                             <option value='365'>Anualmente</option>
                         </select>
                     </div>
-                    <br>   
+                    <br>
+                    <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion(*)</label></div>
+                    <div class="col col-md-4"><select  id="select-reunion" class="js-example-basic-multiple  form-control" name="reunion[]" multiple="multiple">
+                            {% for reunion in reuniones %}
+                                <option value="{{reunion.id_reunion}}">reunion.nombre</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="row form-group" id="cantidad">
