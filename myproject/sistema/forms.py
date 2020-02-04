@@ -49,50 +49,51 @@ class ReunionForm(forms.ModelForm):
 class BarrioForm(forms.ModelForm):
     class Meta:
         model=Barrio
-        fields=['barrio']
+        fields=['barrio','localidad']
         widgets={
-            'barrio':forms.Select(attrs = {'class' : 'form-control' }),
+            'localidad':forms.Select(attrs = {'class' : 'form-control' }),
         } 
 
 class LocalidadForm(forms.ModelForm):
     class Meta:
         model=Localidad
-        fields=['localidad']
+        fields=['localidad','provincia']
         widgets={
-            'localidad':forms.Select(attrs = {'class' : 'form-control'}),
+            'provincia':forms.Select(attrs = {'class' : 'form-control'}),
         } 
     
 class ProvinciaForm(forms.ModelForm):
     class Meta:
         model=Provincia
         fields=['provincia']   
-        widgets={
-            'provincia':forms.Select(attrs = {'class' : 'form-control' }),
-        }   
+        # widgets={
+        #     'provincia':forms.Select(attrs = {'class' : 'form-control' }),
+        # }   
     
 class DomicilioForm(forms.ModelForm):
     class Meta:
         model=Domicilio
-        fields=['calle','nro','mz','departamento','piso']
+        fields=['calle','nro','mz','departamento','piso','barrio']
         widgets={
             'calle':forms.TextInput(attrs={'class':'form-control'}),
             'nro':forms.TextInput(attrs={'class':'form-control'}),
             'mz':forms.TextInput(attrs={'class':'form-control'}),
             'departamento':forms.TextInput(attrs={'class':'form-control'}),
-            'piso':forms.TextInput(attrs={'class':'form-control'})
+            'piso':forms.TextInput(attrs={'class':'form-control'}),
+            'barrio': forms.Select(attrs={'class':'form-control'}),
         }
 
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['nombre','apellido','dni','fecha_nacimiento' ,'cant_hijo','trabaja','sexo','correo']
+        fields = ['nombre','apellido','dni','fecha_nacimiento' ,'cant_hijo','trabaja','sexo','correo','estado_civil']
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'apellido':forms.TextInput(attrs={'class':'form-control'}),
-            'dni':forms.TextInput(attrs={'class':'form-control'}),
+            'dni':forms.TextInput(attrs={'class':'form-control','readonly':'readonly'}),
             'fecha_nacimiento':forms.DateInput(attrs={'class':'form-control f_nac'}),
-            'cant_hijo':forms.TextInput(attrs={'class':'form-control'}), #no es tan text....
-            #'trabaja': forms.BooleanField(required=True),
+            'cant_hijo':forms.TextInput(attrs={'class':'form-control'}),
+            'estado_civil': forms.Select(attrs={'class':'form-control'}),
             'correo':forms.EmailInput(attrs={'class':'form-control'}),
             #'horario_disponible': grrr
         }
@@ -117,7 +118,7 @@ class Telefono_ContactoForm(forms.ModelForm):
         model=Telefono_Contacto
         fields=['miembro']
         widgets={
-           'miembro':forms.Select(attrs={'class':'form-control '})
+            'miembro':forms.Select(attrs={'class':'form-control '})
         }
 
 class Horario_DisponibleForm(forms.ModelForm): 

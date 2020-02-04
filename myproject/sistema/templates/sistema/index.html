@@ -99,9 +99,7 @@
                                 <div class="col-lg-6 col-xl-12">
                                     <div class="card br-0">
                                         <div class="card-body">
-                                            <div class="chart-container ov-h">
-                                                <div id="flotPie1" class="float-chart"></div>
-                                            </div>
+                                            <canvas id="doughnut-chart" width="800" height="450"></canvas>
                                         </div>
                                     </div><!-- /.card -->
                                 </div>
@@ -187,4 +185,26 @@
             </div>
             <!-- .animated -->
         </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script>
+    var ctx = document.getElementById("doughnut-chart").getContext('2d');
+    var myChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: [ "Bien", "Muy Bien", "Maso", "Critico"],
+        datasets: [{
+            label: "Population (millions)",
+            backgroundColor: ["#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+            data: [5267,734,784,433]
+        }]
+    },
+    options: {
+        title: {
+            display: true,
+            text: 'Predicted world population (millions) in 2050'
+        }
+    }
+});
+</script>
 {% endblock body %}

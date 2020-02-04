@@ -50,7 +50,7 @@ class Domicilio(models.Model):
     borrado = models.BooleanField('borrado',default=False)
     
     def __str__(self):
-        return 'calle '+self.calle+'  nro '+self.nro
+        return 'calle '+self.calle+'  nro '
     
 class Horario_Disponible(models.Model):
     DIA=[
@@ -103,6 +103,8 @@ class Telefono(models.Model):
 class Estado_Civil(models.Model):
     id_estado = models.AutoField(primary_key=True)
     estado= models.CharField('soltero/a', max_length=20,blank=False, null=False)
+    def __str__(self):
+        return self.estado
     
 class Miembro(models.Model):
     SEXO=[
@@ -254,3 +256,9 @@ class Rol(models.Model):
     borrado=models.BooleanField(default=False)
     def __str__(self):
         return self.nombre
+
+class Estado_Reunion(models.Model):
+    id = models.AutoField(primary_key=True)
+    reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
+    estado=models.CharField(max_length=50)
+    fecha=models.DateField( auto_now_add=True)

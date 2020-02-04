@@ -57,3 +57,10 @@ class OpcionesSerializer(serializers.ModelSerializer):
     class Meta:
         model=Opciones
         fields=['opcion','puntaje','pregunta']
+
+class RespuestaSerializer(serializers.ModelSerializer):
+    pregunta=PreguntaSerializer()
+    opcion=OpcionesSerializer()
+    class Meta:
+        model=Respuesta
+        fields=['opcion','pregunta']

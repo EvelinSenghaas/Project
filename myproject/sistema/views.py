@@ -141,9 +141,8 @@ def crearGrupo(request):
         grupo.encargado=request.POST.get('encargado')
         grupo.changeReason ='Creacion'
         grupo.save()
-        for miembro in request.POST.getlist('miembro'):
-            grupo.miembro.add(miembro)
-            grupo.save()
+        grupo.miembro.set(request.POST.getlist('miembro'))
+        grupo.save()
         return redirect('/sistema/listarGrupo')
     else:
         usuarios=CustomUser.objects.all()
@@ -298,12 +297,10 @@ def crearMiembro(request):
 
 def editarMiembro(request,dni):
     miembro = Miembro.objects.get(dni= dni)
-    estado_civil_form = Estado_Civil.objects.all()
     id_domicilio=miembro.domicilio.id_domicilio
     domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
-    barrio = Barrio.objects.all()
-    localidad_form=Localidad.objects.all()
-    provincia_form=Provincia.objects.all()
+    barrio = Barrio.objects.get(id_barrio=domicilio.barrio.id_barrio)
+    localidad=Localidad.objects.get(id_localidad=barrio.localidad.id_localidad)
     if miembro.telefono != None:
         id_telefono=miembro.telefono.id_telefono
         telefono=Telefono.objects.get(id_telefono=id_telefono)
@@ -313,8 +310,8 @@ def editarMiembro(request,dni):
         telefono=None
         tipo_telefono=None
 
-    id_horario=miembro.horario_disponible.id_horario_disponible
-    horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=id_horario)
+    horario=miembro.horario_disponible.all()
+    horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=horario[0].id_horario_disponible)
 
     if request.method == 'GET':
         miembro_form=MiembroForm(instance = miembro)
@@ -327,7 +324,8 @@ def editarMiembro(request,dni):
             telefono_form=TelefonoForm()
         
         horario_form=Horario_DisponibleForm(instance=horario_disponible)
-        barrio_form=BarrioForm()
+        barrio_form=BarrioForm(instance=barrio)
+        localidad_form=LocalidadForm(instance=localidad)
     
     else:
         miembro_form=MiembroForm(request.POST,instance=miembro)
@@ -335,18 +333,9 @@ def editarMiembro(request,dni):
         horario_form=Horario_DisponibleForm(request.POST,instance=horario_disponible)
         telefono_form=TelefonoForm(request.POST,instance=telefono)
         tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
-        estado_civil_form=request.POST.get('estado_civil')
-        print(estado_civil_form)
-        estado=Estado_Civil.objects.get(id_estado=estado_civil_form)
-        barrio_form = request.POST.get('barrio')
-        barrio=Barrio.objects.get(barrio=barrio_form)
-        miembro=miembro_form.save(commit=False)
-        fecha = datetime.datetime.strptime(str(miembro.fecha_nacimiento), '%Y-%m-%d')
-        if fecha.date() > datetime.date.today():
-            print(fecha.date())
-            messages.error(request, 'fecha de nacimiento incorrecta')       
-        else: 
-            if tipo_telefono_form.is_valid() and telefono_form.is_valid() and horario_form.is_valid() and miembro_form.is_valid() and domicilio_form.is_valid() :
+        if miembro_form.is_valid():
+            miembro=miembro_form.save(commit=False)
+            if tipo_telefono_form.is_valid() and telefono_form.is_valid() and horario_form.is_valid() and miembro_form.is_valid() and domicilio_form.is_valid():
                 if request.POST.get('prefijo') and request.POST.get('numero') != None:
                     tipo=tipo_telefono_form.save()
                     telefono=telefono_form.save(commit=False)
@@ -354,14 +343,8 @@ def editarMiembro(request,dni):
                     telefono.save()
                     miembro.telefono=telefono
 
-                miembro.estado_civil=estado
-
-                domicilio=domicilio_form.save(commit=False)
-                domicilio.barrio = barrio
-                domicilio.save()
-
                 horario=horario_form.save()
-                
+                domicilio_form.save()
                 miembro.nombre=miembro.nombre.capitalize()
                 miembro.apellido=miembro.apellido.upper()
                 miembro.changeReason ='Modificacion'
@@ -370,7 +353,7 @@ def editarMiembro(request,dni):
                 return redirect('/sistema/listarMiembro')
         
 
-    return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+    return render(request,'sistema/editarMiembro.html',{'localidad_form':localidad_form,'barrio_form':barrio_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
 
 def eliminarMiembro(request,dni):
     miembroo = Miembro.objects.get(dni=dni)
@@ -596,41 +579,42 @@ def agregarHorario_Disponible(request):
 
 def agregarEncuesta(request):
     if request.method == 'POST':
-        
         tipo=request.POST.get('tipo')
         if request.POST.get('cantidad',None)=='None':
             cantidad=request.POST.get('cantidadd')
         else:
             cantidad=request.POST.get('cantidad')
-        
         tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=tipo)
         tipo.cantidad=cantidad
         pregunta=request.POST.get('pregunta')
         tipo.save()
         tipo.preguntas.set(request.POST.getlist('check[]'))
-        tipo.changeReason="Creacion"
+        #tipo.changeReason="Creacion"
         tipo.save()
-        if tipo== 2:
-            reuniones=request.POST.get('reunion[]')
-            for reunion in reuniones:
-                miembross=reunion.grupo.miembros
+        if tipo.id_tipo_encuesta== 2:
+            reuniones=request.POST.getlist('reunion[]')
+            for rn in reuniones:
+                reunion=Reunion.objects.get(id_reunion=int(rn))
+                grupo=reunion.grupo
+                miembross = grupo.miembro.all()
                 miembros=[]
                 for miembro in miembross:
                     miembros.append(miembro)
                     encuesta=Encuesta(borrado=False,fecha_envio=date.today(),reunion=reunion,tipo=tipo,respondio=False) #creo la encuesta
                     #a medida que voy creando le voy a ir enviando tmb
                     encuesta.save()
-                    mensaje=Mensaje.objects.filter(tipo_id=2)
+                    mensaje=Mensaje.objects.get(id=4)
                     asunto=mensaje.tipo
-                    mensaje=mensaje.mensaje+' ->  http://localhost:8000/agregarRespuesta'+str(encuesta.id)
+                    mensaje=mensaje.mensaje
+                    enviarWhatsapp(mensaje,miembros)
+                    mensaje=mensaje + ' ->  http://localhost:8000/sistema/agregarRespuestaReunion/'+str(encuesta.id_encuesta)
                     enviarMail(miembros,asunto,mensaje)
                     miembros=[]#limpio porque voy a enviar 1 por uno
-
         return redirect('home')
     else:
         pregunta=Pregunta.objects.filter(borrado=False)
         tipo_encuesta=Tipo_Encuesta.objects.all()
-        reuniones=Reunion.objects.filter(borrado=True)
+        reuniones=Reunion.objects.filter(borrado=False)
         return render(request,'sistema/agregarEncuesta.html',{'tipo_encuesta':tipo_encuesta,'pregunta':pregunta,'reuniones':reuniones})
 
 def agregarPregunta(request):
@@ -703,7 +687,9 @@ def agregarRespuesta(request):
         # encuesta=Encuesta.objects.get()
         preguntas=encuesta.tipo.preguntas.filter(borrado=False)
         print('tene si una pendiente ameo')
-
+        reunion = encuesta.reunion
+    else:
+        return redirect('home')
     if request.method == 'POST':
         if encuesta.tipo.id_tipo_encuesta==3:
             puntos=0
@@ -793,18 +779,19 @@ def agregarRespuesta(request):
             
             return redirect('home')
 
-    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
+    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas,'reunion':reunion})
 
 def agregarRespuestaReunion(request,id_encuesta):  
     encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
-    preguntas=encuesta.tipo.preguntas
+    preguntas=encuesta.tipo.preguntas.filter(borrado=False)
+    reunion = encuesta.reunion
     if request.method == 'POST':
         puntos=0
         for pregunta in preguntas: 
             opcion=request.POST.get(str(pregunta.id_pregunta))
             print('----------------------------')
             print(opcion)
-            print('---------------')
+            print('-----------------------------')
             if pregunta.tipo.id_tipo_pregunta==1: #es una pregunta abierta, no suma puntos, y por cada pregunta abierta creo una nueva respuesta
                 opcion=Opciones(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion,puntaje=0)
                 opcion.save()
@@ -822,7 +809,7 @@ def agregarRespuestaReunion(request,id_encuesta):
         encuesta.puntaje=puntos
         encuesta.save()
             #----Esto es el modulo inteligente para ver el estado de la Reunion
-            #Bueno la persona termino de responder y pum tengo que determinar su estado... para eso que hago? 
+            #Bueno la persona termino de responder y pum tengo que determinar su opinion... para eso que hago? 
             #bueno voy a ver las respuestas que esten dentro de esta encuesta, obtengo la pregunta y el tipo, si es abierta la ignoro, si es cerrada
             #agarro la que tenia maximo valor y sumo, una vez
             #si la pregunta es multiple sumo todos los valores, todo esto guardo en un puntos_total
@@ -832,129 +819,75 @@ def agregarRespuestaReunion(request,id_encuesta):
         for respuesta in respuestas:
             if respuesta.pregunta.tipo.id_tipo_pregunta==2: 
                 opt=Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Max('puntaje'))
-                print('--------------------////////------------------')
+                #print('--------------------////////------------------')
                 opt=opt['puntaje__max']
-                print(opt)
-                print('--------------------////////------------------')
+                # print(opt)
+                # print('--------------------////////------------------')
                 puntos_total+=opt
             if respuesta.pregunta.tipo.id_tipo_pregunta==3:
                 opt= Opciones.objects.filter(pregunta=respuesta.pregunta).aggregate(Sum('puntaje'))
-                print('--------------------////////------------------')
-                print(opt)
-                print('--------------------////////------------------')
+                # print('--------------------////////------------------')
+                # print(opt)
+                # print('--------------------////////------------------')
                 puntos_total += opt
-            #bien ahora tengo los puntos totales, lo que tengo que hacer es ver en que rango esa la persona y para ello facil
+            #bien ahora tengo los puntos totales, lo que tengo que hacer es ver en que rango esta la reunion y para ello facil
             #si obtuvo un puntaje mayor que la mitad de los puntos totales esta pasable
             #si obtuvo la mitad esta en control
             #si obtuvo cero deberia estar suspendido...
             #----------si obtuvo cero entra en juego mi modulo inteligente de reasignacion de miembros o lideres
-        usuario=request.user.id
-        print('puntos:',puntos_total)
+        print('puntos encuestas: ', puntos)
+        print('puntos totales:',puntos_total)
         print('-----hasta aca llego--------') #mi modulito xd
-            #a partir de aca tengo que empezar a ver depende de cuantos me respondieron
-            # if puntos <= puntos_total/4:
-            #     print('critico')
-            #     #tengo que crear ese estado critico y que quede en la espera de confirmacion
-            #     #para la baja
-            #     estado=Estado(usuario=request.user,estado="Pendiente",confirmado=False)
-            #     estado.save()
-            #     #aca pum ya notifico
-            # if puntos <= puntos_total/2 and puntos > puntos_total/4:
-            #     print("medio")
-            #     estado=Estado(usuario=request.user,estado="Medio")
-            #     estado.save()
-            # if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
-            #     print("Bueno")
-            #     estado=Estado(usuario=request.user,estado="Bueno")
-            #     estado.save()
-            # if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
-            #     print('Re bien!!')
-            #     estado=Estado(usuario=request.user,estado="Muy Bueno")
-            #     estado.save()
+        #a partir de aca tengo que crear un registro por persona que respondio
+        reunion=encuesta.reunion
+        if puntos <= puntos_total/4:
+            print('critico')
+            #tengo que crear ese estado critico y que quede en la espera de confirmacion
+            #para la baja
+            estado=Estado_Reunion(estado="Critico",reunion=reunion)
+            estado.save()
+            #aca pum ya notifico
+        if puntos <= puntos_total/2 and puntos > puntos_total/4:
+            print("medio")
+            estado=Estado_Reunion(estado="Medio",reunion=reunion)
+            estado.save()
+        if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
+            print("Bueno")
+            estado=Estado_Reunion(estado="Bueno",reunion=reunion)
+            estado.save()
+        if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
+            print('Re bien!!')
+            estado=Estado_Reunion(estado="Muy Bueno",reunion=reunion)
+            estado.save()
         return redirect('home')    
 
-    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas})
-# def verRespuesta(request):
-'''def reasignarMiembro(request):
-    #la idea aca es ver si se puede reasignar miembros en primer lugar
-    print('xd')
+    return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas,'reunion':reunion})
 
+def verRespuesta(request,id_encuesta):
+    encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
+    respuestas=Respuesta.objects.filter(encuesta=encuesta)
+    if request.method =='POST':
+        return redirect('home')
+    return render(request,'sistema/verRespuesta.html',{'respuestas':respuestas})
 
-def reasignarLider(request):
-    usr_recomendados=[]
-    mb_recomendados=[]
-    rn_recomendada=[]
-    # bueno la idea es ahora obtener todos los grupos donde esta esa persona
-            # para eso voy a obtener todos los grupos donde esta el encargado
-            # el encargado es el usuario que esta actualmente loggeado
-            grupos=Grupo.objects.filter(encargado=usuario)
-            for grupo in grupos:
-                #tengo que ver en que reunion esta este grupo
-                reuniones=Reunion.objects.filter(grupo_id=grupo.id_grupo)
-                for reunion in reuniones:
-                    #bueno la idea ahora es ver en que horario se da esta reunion y ver que usuario tiene libre ese horario
-                    #si ninguno tiene, entonces vemos el domicilio, a ver a quien le queda mas cerca
-                    #y ver a que grupo de personas atiende esa persona tmb, por ejemplo si el grupo es femenino vemos una chica
-                    hs_rn=reunion.horario
-                    if Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta).exists():
-                        horarios=Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta)
-                        for horario in horarios:
-                            if Miembro.objects.filter(horario_disponible=horario).exists():
-                                miembros=Miembro_Horario_Disponible.objects.filter(horario=horario)
-                                for miembro in miembros:
-                                    if Usuario.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro).exists():
-                                        usrs=Usuario.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro)
-                                        for usr in usrs: #por cada usuario que tenga asosiado un miembro con horario disponible
-                                            # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
-                                            if mb.sexo == grupo.sexo or grupo.sexo=="Ambos": #si los sexos coinciden entonces recomiendo
-                                                usr_recomendados.append(usr)
-                                                rn_recomendada.append(reunion) #el usr_recomendado[i] es para la rn_recoemndada[i]
-                                            
-                                    else: #aca no hay ningun user, entonces... vamos por miembros del mismo genero
-                                            if mb.sexo == grupo.sexo or grupo.sexo=="Ambos":
-                                                miembro_recomendados.append(miembro)
-                                                rn_recomendada.append(reunion)
-                            else: #osea si ningun MIEMBRO tiene hs disponibles
-                                #pregunto por el domicilio, por el barrio no mas
-                                dm_rn= reunion.domicilio
-                                domicilios=Domicilio.objects.filter(barrio=dm_rn.barrio) #obtengo todos los domicilios que tiene ese barrio
-                                for domicilio in domicilios: 
-                                    if Miembro.objects.filter(domicilio= domicilio).exclude(dni = request.user.miembro.dni).exists(): #veo si algun mb esta en el barrio
-                                        miembros=Miembro.objects.filter(domicilio= domicilio).exclude(dni = request.user.miembro.dni)
-                                        for miembro in miembros:
-                                            if CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro).exists(): #veo si alguno de esos miembros es un usr
-                                                usrs=CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro)
-                                                for usr in usrs: #por cada usuario que tenga asosiado un miembro con el domicilio en ese barrio
-                                                    mb = usr.miembro
-                                                    # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
-                                                    if mb.sexo == grupo.sexo or grupo.sexo=="Ambos": #si los sexos coinciden entonces recomiendo
-                                                        usr_recomendados.append(usr)
-                                                        rn_recomendada.append(reunion)
-                                            else: #aca hay cura, no tienen hs disponible, no hay usr, pero hay miembros
-                                                    if miembro.sexo == grupo.sexo or grupo.sexo=="Ambos":
-                                                        mb_recomendados.append(miembro)
-                                                        rn_recomendada.append(reunion)
-                                        
-                                    else: #aca no tienen ni hs ni domicilio nadie de nadie osea fritos #pero no es el ultimo ciclo lina
-                                        print('---en esta vuelta no hay nadie pero ntp, respira---')
-                                
-                    if not(usr_recomendados): 
-                        print('no hay nadie de nadie cabeza') #en este punto tengo todas las rn y grupos
-                        #puedo ver el rango etario xd
-                        if Grupo.objects.filter(desde__gte=grupo.desde,hasta__lte=grupo.hasta).exclude(id_grupo=grupo.id_grupo).exists():
-                            grupos_etarios= Grupo.objects.filter(sexo=grupo.sexo, desde__gte=grupo.desde,hasta__lte=grupo.hasta).exclude(id_grupo=grupo.id_grupo)#excluyo el grupo actual porque es el que necesita ser reubicado
-                            for grupito in grupos_etarios:
-                                    usr_recomendados.append(grupito.encargado)
-                        print('grupo.sexo: ', grupo.sexo)
-                        if not(usr_recomendados) and not(mb_recomendados): #aca si que no hay nada de nada, entonces vamos a darle usr del mismo genero
-                            if CustomUser.objects.filter(miembro__sexo=grupo.sexo).exclude(id=request.user.id).exists():
-                                usr_recomendados.append(CustomUser.objects.filter(miembro__sexo=grupo.sexo).exclude(id=request.user.id))
-                            else:
-                                print('weno esto si que ya es imposible china xd')     
-                        print('usr: ',usr_recomendados)
-                        print('mb: ',mb_recomendados)
-                        print('rn: ',rn_recomendada)        
-'''
+def reasignar(request,dni):
+    miembro=Miembro.objects.get(dni=dni)
+    reuniones=Reunion.objects.filter(grupo__miembro=miembro) 
+    if request.method=='POST':
+        print(request.POST)
+        for reunion in reuniones:
+            print('-------------------Espero que haya pls ', reunion.nombre + '-encargado')
+            if request.POST.get(reunion.nombre+'-encargado') != None :
+                encargado=request.POST.get(reunion.nombre+'-encargado')
+                if CustomUser.objects.get(miembro__dni=encargado).exists():
+                    enc=CustomUser.objects.get(miembro__dni=encargado)
+                    reunion.grupo.encargado=enc.id
+                    reunion.grupo.save()
+                else:
+                    print('hay un encargado pero no es un usr ', encargado)
+    
+    return render(request,'sistema/reasignar.html',{'miembro':miembro,'reuniones':reuniones})
+
 def crearRol(request):
     if request.method=='POST':
         nombre=request.POST.get('nombre')
@@ -1013,6 +946,60 @@ def validarRol(request):
             data['error_message']  = 'Este nombre de rol ya existe, por favor elige otro nombre'
     print(data)
     return JsonResponse(data)
+
+def auditoria_detalles_miembro(request,dni,id_auditoria):
+    print(dni, id_auditoria)
+    mb_historial = Miembro.history.filter(dni=dni)
+    historial = Miembro.history.filter(dni=dni)
+    print(historial)
+    if len(mb_historial) > 1: #weno si hay algo
+        for i in range(len(historial)): #recorro lo que hay
+            print(id_auditoria, " - ", historial[i].dni)
+            if historial[i].history_id == id_auditoria:  
+                print("entro al if")          
+                audit_regsolo = historial[i]    
+                delta = audit_regsolo.diff_against(mb_historial[i+1])
+                print(delta)
+                data = []            
+                for change in delta.changes:
+                    dic = {'change': change.field, 'old':change.old, 'new':change.new}
+                    data.append(dic)
+                    print("Entro en el for")
+                    print(data)
+                break
+            else:
+                data = []
+    else:
+        data=[{'change':False}]
+    print("DATA: ", data)
+    return JSONResponse(data)
+
+def auditoria_detalles_reunion(request,id,id_auditoria):
+    print(dni, id_auditoria)
+    rn_historial = Reunion.history.filter(dni=dni)
+    historial = Reunion.history.filter(dni=dni)
+    print(historial)
+    if len(rn_historial) > 1:
+        for i in range(len(historial)): 
+            print(id_auditoria, " - ", historial[i].history_id)
+            if historial[i].history_id == id_auditoria:  
+                print("entro al if")          
+                audit_regsolo = historial[i]    
+                delta = audit_regsolo.diff_against(rn_historial[i+1])
+                print(delta)
+                data = []            
+                for change in delta.changes:
+                    dic = {'change': change.field, 'old':change.old, 'new':change.new}
+                    data.append(dic)
+                    print("Entro en el for")
+                    print(data)
+                break
+            else:
+                data = []
+    else:
+        data=[{'change':False}]
+    print("DATA: ", data)
+    return JSONResponse(data)
 
 @csrf_exempt
 def provinciasList(request):
@@ -1144,3 +1131,179 @@ def opcionesList(request):
         result=dict()
         result = serializer.data
         return JSONResponse(result)
+
+@csrf_exempt
+def respuestaList(request):
+    rs=request.GET.get('rs')
+    if request.method=='GET':
+        print('------------//------------')
+        print('rs: ',rs)
+        respuesta= Respuesta.objects.get(id_respuesta=rs)
+        serializer=RespuestaSerializer(respuesta,many=False)
+        result=dict()
+        result = serializer.data
+        print(result)
+        return JSONResponse(result)
+
+@csrf_exempt
+def recomendacionTable(request):
+    rn=request.GET.get('rn')
+    if request.method =='GET':
+        reunion=Reunion.objects.get(nombre=rn)
+        best_usr_recomendados=[] #horario,domicilio,sexo == al actual
+        usr_recomendados=[]
+        mb_recomendados=[]
+        encargado=reunion.grupo.encargado
+        usr_encargado=CustomUser.objects.get(id=encargado)
+        mb_encargado=usr_encargado.miembro
+        #bueno la idea ahora es ver en que horario se da esta reunion y ver que usuario tiene libre ese horario
+        #si ninguno tiene, entonces vemos el domicilio, a ver a quien le queda mas cerca
+        #y ver a que grupo de personas atiende esa persona tmb, por ejemplo si el grupo es femenino vemos una chica
+        hs_rn=reunion.horario
+        if Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta).exists():
+            horarios=Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta)
+            for horario in horarios:
+                if Miembro.objects.filter(horario_disponible=horario).exclude(dni=mb_encargado.dni).exists():
+                    miembros=Miembro_Horario_Disponible.objects.filter(horario=horario).exclude(dni=mb_encargado.dni)
+                    #bien aca traje todos los miembros que tienen ese hs disponible a continuacion veo si hay un usr
+                    for miembro in miembros:
+                        if Usuario.objects.filter(miembro=miembro.dni).exists():
+                            usrs=Usuario.objects.filter(miembro=miembro.dni)
+                            for usr in usrs: #por cada usuario que tenga asosiado un miembro con horario disponible
+                                # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
+                                if usr.miembro.sexo == reunion.grupo.sexo or reunion.grupo.sexo=="Ambos": #si los sexos coinciden entonces recomiendo
+                                    if usr.miembro.domicilio.barrio == reunion.domicilio.barrio:
+                                        if not(mb in best_usr_recomendados):
+                                            best_usr_recomendados.append(miembro) #el mejor
+                                    else:
+                                        if not(miembro in usr_recomendados):
+                                            usr_recomendados.append(miembro) #no es tan weno
+                        else: #aca no hay ningun user, entonces... vamos por miembros del mismo genero
+                                if mb.sexo == reunion.grupo.sexo or reunion.grupo.sexo=="Ambos":
+                                    if not(miembro in usr_recomendados):
+                                        miembro_recomendados.append(miembro)
+                
+                else: #osea si ningun MIEMBRO tiene hs disponibles
+                    #pregunto por el domicilio, por el barrio no mas
+                    dm_rn= reunion.domicilio
+                    domicilios=Domicilio.objects.filter(barrio=dm_rn.barrio) #obtengo todos los domicilios que tiene ese barrio
+                    for domicilio in domicilios: 
+                        if Miembro.objects.filter(domicilio__barrio= domicilio.barrio).exclude(dni = request.user.miembro.dni).exists(): #veo si algun mb esta en el barrio
+                            miembros=Miembro.objects.filter(domicilio__barrio= domicilio.barrio).exclude(dni = request.user.miembro.dni)
+                            for miembro in miembros: #los miembros que tienen el mismo barrio y a hora veo si hay algun usr
+                                if CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro).exists(): #veo si alguno de esos miembros es un usr
+                                    usrs=CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro)
+                                    for usr in usrs: #por cada usuario que tenga asosiado un miembro con el domicilio en ese barrio
+                                        mb = usr.miembro
+                                        # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
+                                        if mb.sexo == reunion.grupo.sexo or reunion.grupo.sexo=="Ambos": #si los sexos coinciden entonces recomiendo
+                                            if not(mb in usr_recomendados):
+                                                usr_recomendados.append(mb)
+                                            #aca no pregunto por el domicilio porque ya tamos en el domicilio XD osea no es best porque no tiene hs disponible
+                                else: #aca hay cura, no tienen hs disponible, no hay usr, pero hay miembros en ese barrio
+                                    if miembro.sexo == reunion.grupo.sexo or reunion.grupo.sexo=="Ambos":
+                                        if not(miembro in mb_recomendados):
+                                            mb_recomendados.append(miembro) #esto ya es para la ultima opcion
+                                        
+                        else: #aca no tienen ni hs ni domicilio nadie de nadie osea fritos #pero no es el ultimo ciclo lina
+                            print('')
+        if not(best_usr_recomendados): 
+            if not(usr_recomendados):
+                #en este punto tengo todavia: reunion(que es la base siempre),usr_encargado,mb_encargado y las listas
+                #puedo ver el rango etario xd, pero tiene que ser del mismo sexo y tipo si o si
+                if Grupo.objects.filter(desde__gte=reunion.grupo.desde,hasta__lte=reunion.grupo.hasta,sexo=reunion.grupo.sexo).exclude(id_grupo=reunion.grupo.id_grupo).exists():
+                    grupos_etarios = Grupo.objects.filter(desde__gte=reunion.grupo.desde,hasta__lte=reunion.grupo.hasta,sexo=reunion.grupo.sexo).exclude(id_grupo=reunion.grupo.id_grupo) 
+                    #excluyo el grupo actual porque es el que necesita ser reubicado
+                    for grupito in grupos_etarios:
+                        en=Custom.objects.get(id=grupito.encargado) #en=encargado
+                        mb=en.miembro
+                        if not(mb in usr_recomendados):
+                            usr_recomendados.append(mb)
+                if not(usr_recomendados) and not(mb_recomendados): #aca si que no hay nada de nada, entonces vamos a darle usr del mismo genero
+                    if CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id).exists():
+                        usrs=CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id)
+                        for usr in usrs:
+                            mb=usr.miembro
+                            if not(mb in usr_recomendados):
+                                usr_recomendados.append(mb)
+                    else:
+                        print('weno esto si que ya es imposible china xd')   
+        if best_usr_recomendados:
+            serializer=MiembroSerializer(best_usr_recomendados,many=True)
+        elif usr_recomendados:
+            serializer=MiembroSerializer(usr_recomendados,many=True)
+        elif mb_recomendados:
+            serializer=MiembroSerializer(mb_recomendados,many=True)
+        result=dict()
+        result = serializer.data
+        return JSONResponse(result)
+
+@csrf_exempt
+def miembrosList(request):
+    rn=request.GET.get('rn')
+    print(rn)
+    if request.method =='GET':
+        reunion=Reunion.objects.get(nombre=rn)
+        miembros=reunion.grupo.miembro.all()
+        print(miembros)
+        serializer=MiembroSerializer(miembros,many=True)
+        result=dict()
+        result = serializer.data
+        return JSONResponse(result)
+
+@csrf_exempt
+def reunionList(request):
+    rn=request.GET.get('rn')
+    if request.method =='GET':
+        rn_base=Reunion.objects.get(nombre=rn) #no se si me va a dejar
+        #vemos si hay una reunion posible para recomendar, osea aca ya entran las del mismo tipo
+        encargado=rn_base.grupo.encargado
+        rn_recomendada=[]
+        if Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion).exclude(grupo__encargado=encargado).exists():
+            reuniones=Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion).exclude(grupo__encargado=encargado)
+            miembros=rn_base.grupo.miembro.all()
+            print("reuniones: ",reuniones)
+            for miembro in miembros:
+                best_rn=[]
+                rn=[]
+                for reunion in reuniones:
+                    if reunion.grupo.sexo=="Ambos" or reunion.grupo.sexo==rn_base.grupo.sexo:
+                        hs_rn=reunion.horario
+                        if Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta).exists():
+                            horarios=Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta)
+                            for horario in horarios:
+                                if Miembro.objects.filter(dni=miembro.dni,horario_disponible=horario).exists():
+                                    barrio=miembro.domicilio.barrio
+                                    if barrio == reunion.domicilio.barrio:
+                                        best_rn.append(reunion) #ESTA es la mejor reunion para recomendar
+                                    else:
+                                        rn.append(reunion) #Esta voy a ocupar si no es la mejor reunion
+                                        #esta reunion coincide con los horarios libres de las personas
+                                elif miembro.domicilio.barrio == reunion.domicilio.barrio:
+                                        rn.append(reunion) #No coincide con los horarios libres pero si con la ubicacion
+                                else: #bueno aca no hay en el mismo barrio ni en el mismo horario
+                                    #tonces le pongo la reunion del mismo tipo al menos y genero
+                                    rn.append(reunion)
+                        else: #aca no tienen el mismo hs disponible las reuniones pero pueden tener una ubicacion cerca
+                            if miembro.domicilio.barrio == reunion.domicilio.barrio:
+                                rn.append(reunion) #no es la mejor para ese miembro pero bueno
+                    else:
+                        print('ayayayay puede existir otras reuniones todavia tranqui')
+                
+                if best_rn:
+                    rn_recomendada.append(best_rn[0])#solo una xD
+                elif rn:
+                    rn_recomendada.append(rn[0])
+        if not(rn_recomendada):   
+            data = {
+                'is_taken': True
+            }
+            if data['is_taken']:
+                data['error_message']  = 'No hay Reunion Recomendada'
+            print(data)
+            return JsonResponse(data)
+        else:
+            serializer=ReunionSerializer(rn_recomendada,many=True)
+            result=dict()
+            result = serializer.data
+            return JSONResponse(result)

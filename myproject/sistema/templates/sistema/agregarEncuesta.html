@@ -25,7 +25,7 @@ Agregar Encuesta
 
                 <div class="row form-group" id="envio">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Envio(*)</label></div>
-                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control" required>
+                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control" >
                             <option selected value='None'> --------------</option>
                             <option value="7">Semanalmente</option>
                             <option value='30'>Mensualmente</option>
@@ -36,7 +36,7 @@ Agregar Encuesta
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion(*)</label></div>
                     <div class="col col-md-4"><select  id="select-reunion" class="js-example-basic-multiple  form-control" name="reunion[]" multiple="multiple">
                             {% for reunion in reuniones %}
-                                <option value="{{reunion.id_reunion}}">reunion.nombre</option>
+                                <option value="{{reunion.id_reunion}}">{{reunion.nombre}}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -52,7 +52,7 @@ Agregar Encuesta
                         <table id="tabla-pregunta" class="table table-striped table-bordered" name="pregunta">
                             <thead>
                                 <tr>
-                                    <th>Pregunta</th>
+                                    <th>Pregunta <a  href="/sistema/agregarPregunta/" class="btn btn-primary" > + </a></th>
                                     <th>Tipo</th>
                                     <th>Activa</th>
                                     <th></th>
@@ -111,14 +111,14 @@ Agregar Encuesta
         </div>
     </div>
 </form>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-    
-    <script src="{% static 'assets/js/select2.min.js'%}"></script>
 
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="{% static 'assets/js/select2.min.js'%}"></script>
     <script>
         $(document).ready(function(){
             $('#cantidad').hide();
             $('#envio').hide();
+            
             $('#tipo').change(function(){
                 console.log('oliii');
                 var tipo = $(this).val();
