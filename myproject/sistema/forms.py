@@ -44,6 +44,8 @@ class ReunionForm(forms.ModelForm):
         }
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control','onkeypress':'return Solo_Texto(event);'}),
+            'tipo_reunion':  forms.Select(attrs={'class':'form-control'}),
+            'grupo': forms.Select(attrs={'class':'form-control'}),
         }
 
 class BarrioForm(forms.ModelForm):

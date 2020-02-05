@@ -475,29 +475,26 @@ def editarReunion(request,id_reunion):
     domicilio=Domicilio.objects.get(id_domicilio = id)
     idd= reunion.horario.id_horario_disponible
     horario=Horario_Disponible.objects.get(id_horario_disponible=idd)
-    provincia_form=Provincia.objects.all().order_by('provincia')
-    localidad_form=Localidad.objects.all()
-    barrio_form=Barrio.objects.all()
+    barrio=Barrio.objects.get(id_barrio=domicilio.barrio.id_barrio)
+    localidad=Localidad.objects.get(id_localidad=barrio.localidad.id_localidad)
     if request.method == 'GET':
+
         reunion_form=ReunionForm(instance = reunion)
         domicilio_form=DomicilioForm(instance = domicilio)
         horario_form = Horario_DisponibleForm(instance=horario)
-        
+        barrio_form= BarrioForm(instance=barrio)
+        localidad_form=LocalidadForm(instance=localidad)        
     else:
-        nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST,instance=reunion)
         horario_form=Horario_DisponibleForm(request.POST,instance=horario)
         domicilio_form=DomicilioForm(instance = domicilio)
-        domicilio=domicilio_form.save(commit=False)
         print(reunion_form.errors.as_data())
         if reunion_form.is_valid():
-            reunion=reunion_form.save(commit=False)
-            reunion.domicilio=domicilio
             domicilio.save()
             reunion.changeReason ='Modificacion'
             reunion.save()
             return redirect('/sistema/listarReunion')
-    return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'provincia_form':provincia_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+    return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def listarReunion(request):
     reuniones = Reunion.objects.filter(borrado=False)
@@ -872,19 +869,71 @@ def verRespuesta(request,id_encuesta):
 
 def reasignar(request,dni):
     miembro=Miembro.objects.get(dni=dni)
-    reuniones=Reunion.objects.filter(grupo__miembro=miembro) 
+    usr=CustomUser.objects.get(miembro__dni=dni)
+    reuniones=Reunion.objects.filter(grupo__encargado=usr.id,borrado=False) 
+    
     if request.method=='POST':
         print(request.POST)
+        reuniones_encargado=request.POST.getlist('reunion-encargado')
+        print('reuniones:',reuniones_encargado) #esto devuelve toda una lista que la voy a ir corando
+        if reuniones_encargado:
+            for reunion_cambio in reuniones_encargado: 
+                rn,mb=reunion_cambio.split("-") #reunion uso para cortar no mas reunion tiene esto "id_r+id_m"
+                print("rn-mb",rn,mb)
+                #tengo que buscar esta reunion y ese miembro
+                rn=Reunion.objects.get(id_reunion=rn)
+                mb=Miembro.objects.get(dni=mb)
+                #Bien, aca empieza la reasignacion de miembros y el envio de correo para los encargados, vamos a empezar reasignando miembros
+                #Hay que ver si el miembro ya no es parte de esa reunion
+                #primero obtengo el grupo de la reunion
+                if mb in rn.grupo.miembro.all(): #si el miembro esta en la rn
+                    print('ya ta')
+                else:
+                    rn.grupo.miembro.add(mb)
+                    rn.grupo.changeReason='Modificacion' 
+                    rn.grupo.save()
+                    #es hora de avisar!
+                    msj=Mensaje.objects.get(id=5)
+                    mensaje=msj.mensaje
+                    miembros=[]
+                    usr=CustomUser.objects.get(id=reunion.grupo.encargado)
+                    mb_new=Miembros.objects.get(dni=usr.miembro_id)
+                    miembros.append(mb_new)
+                    asunto = msj.tipo
+                    enviarWhatsapp(mensaje,miembros)
+                    mensaje += 'El miembro ' + miembro.nombre + 'fue añadido a tu reunion ' + reunion.nombre 
+                    enviarMail(miembros,asunto,mensaje)
+                    #hasta aca avisamos al lider, ahora vamos al mb
+                    miembros.clear()
+                    miembros.append(mb)
+                    mensaje=msj.mensaje + 'Fuiste añadido a la reunion ' + reunion.nombre 
+                    enviarWhatsapp(miembros,mensaje) #le mandamos whatsapp
+                    mensaje = msj.mensaje + 'Fuiste añadido a la reunion ' + reunion.nombre + ' habla con ' + mb_new.nombre+' para mas informacion'
+                    enviarMail(miembros,asunto,mensaje)
+        
         for reunion in reuniones:
-            print('-------------------Espero que haya pls ', reunion.nombre + '-encargado')
             if request.POST.get(reunion.nombre+'-encargado') != None :
                 encargado=request.POST.get(reunion.nombre+'-encargado')
-                if CustomUser.objects.get(miembro__dni=encargado).exists():
+                print('encargado: ',encargado)
+                if CustomUser.objects.filter(miembro_id=encargado).exists():
+                    print('entre al if china')
                     enc=CustomUser.objects.get(miembro__dni=encargado)
                     reunion.grupo.encargado=enc.id
                     reunion.grupo.save()
                 else:
                     print('hay un encargado pero no es un usr ', encargado)
+                    #Weno aca no se que hacer
+            else: #si no tienen un nuevo encargado bye bye
+                reunion.borrado = True
+                reunion.changeReason='Eliminacion'
+                reunion.save()
+                reunion.grupo.borrado= True
+                #vacio tmb el grupo, porque si quiere reactivar la reunion tendra miembros nuevos
+                #dejo el encargado?
+                reunion.grupo.miembro.clear() #tengo miedo
+                reunion.grupo.changeReason='Elimincaion'
+                reunion.grupo.save()
+                
     
     return render(request,'sistema/reasignar.html',{'miembro':miembro,'reuniones':reuniones})
 
@@ -975,9 +1024,9 @@ def auditoria_detalles_miembro(request,dni,id_auditoria):
     return JSONResponse(data)
 
 def auditoria_detalles_reunion(request,id,id_auditoria):
-    print(dni, id_auditoria)
-    rn_historial = Reunion.history.filter(dni=dni)
-    historial = Reunion.history.filter(dni=dni)
+    print(id, id_auditoria)
+    rn_historial = Reunion.history.filter(id_reunion=id)
+    historial = Reunion.history.filter(id_reunion=id)
     print(historial)
     if len(rn_historial) > 1:
         for i in range(len(historial)): 
@@ -1259,10 +1308,11 @@ def reunionList(request):
         #vemos si hay una reunion posible para recomendar, osea aca ya entran las del mismo tipo
         encargado=rn_base.grupo.encargado
         rn_recomendada=[]
+        dic=[]
+        i=0
         if Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion).exclude(grupo__encargado=encargado).exists():
             reuniones=Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion).exclude(grupo__encargado=encargado)
             miembros=rn_base.grupo.miembro.all()
-            print("reuniones: ",reuniones)
             for miembro in miembros:
                 best_rn=[]
                 rn=[]
@@ -1294,6 +1344,20 @@ def reunionList(request):
                     rn_recomendada.append(best_rn[0])#solo una xD
                 elif rn:
                     rn_recomendada.append(rn[0])
+
+                print('------------------------------------///------------------------------')
+
+                dic.append({'reunion': rn_recomendada[i].nombre, 'nombre':miembro.apellido + ', ' + miembro.nombre , 'id_reunion':str(rn_recomendada[i].id_reunion),'id_miembro':str(miembro.dni)}) 
+                #aca confio con todo mi coracioncito que encontro una rn recomendada
+                i += 1
+
+            #aca estoy adentro del for de mb
+
+        #weno no tiene chiste que vuelva a recorrer todo de nuevo pero bueno no me manejo bien con arrays
+        #dic = {'reunion': change.field, 'nombre':change.old, 'id_reunion':change.new}
+
+
+
         if not(rn_recomendada):   
             data = {
                 'is_taken': True
@@ -1306,4 +1370,4 @@ def reunionList(request):
             serializer=ReunionSerializer(rn_recomendada,many=True)
             result=dict()
             result = serializer.data
-            return JSONResponse(result)
+            return JSONResponse(dic)

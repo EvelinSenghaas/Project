@@ -39,7 +39,7 @@ class AsistenciaSerializer(serializers.ModelSerializer):
 class ReunionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Reunion
-        fields=['nombre']
+        fields=['nombre','id_reunion']
 
 class PreguntaSerializer(serializers.ModelSerializer):
     class Meta:

@@ -53,5 +53,5 @@ urlpatterns = [
     path("miembrosList/", miembrosList, name="miembrosList"),
     path("reunionList/", reunionList, name="reunionList"),
     path("auditoria_detalles_miembro/<int:dni>/<int:id_auditoria>", auditoria_detalles_miembro, name="auditoria_detalles_miembro"),
-    path("auditoria_detalles_reunion/<int:id>/<int:id_auditoria>", auditoria_detalles_miembro, name="auditoria_detalles_miembro"),
+    path("auditoria_detalles_reunion/<int:id>/<int:id_auditoria>", auditoria_detalles_reunion, name="auditoria_detalles_reunion"),
 ]

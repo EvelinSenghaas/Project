@@ -17,7 +17,6 @@
                         {% comment %} <div class="row form-group">
                             <div "col col-md-3"><label for="text-input" class="form-control-label">Pruebita (*)</label></div>
                             <div "col col-md-4"><input type="text" onkeypress="return Solo_Texto(event);" class="form-control"></div>
-
                         </div>     {% endcomment %}
 
                         <div class="card-body card-block">
@@ -33,32 +32,18 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
-                                        <div class="col col-md-4"><select id="provincias" name='provincia' class="form-control" required>
-                                                <option selected> --------------</option>
-                                                {% for provincia in provincia_form %}
-                                                        <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
-                                                {% endfor %}
-                                            </select>
+                                        <div class="col col-md-4">{{localidad_form.provincia}}
                                             </div>
                                     </div>    
 
                                     <div class="row form-group">
                                         
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
-                                        <div class="col col-md-4"><select id="select-localidades" name='localidad' class="form-control" required>
-                                            {% for localidad in localidad_form %}
-                                                    <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
-                                            {% endfor %}
-                                            
-                                            </select>
+                                        <div class="col col-md-4">{{barrio_form.localidad}}
                                         </div>
 
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
-                                        <div class="col col-md-4"><select id="select-barrio" name='barrio' class="form-control" required>
-                                           {% for barrio in barrio_form %}
-                                                    <option value='{{barrio.barrio}}'>{{barrio.barrio}}</option>
-                                            {% endfor %}
-                                            </select>
+                                        <div class="col col-md-4">{{domicilio_form.barrio}}
                                         </div>
                                         
                                     </div>
@@ -77,7 +62,7 @@
                             <div class="col col-md-2">{{domicilio_form.piso}}</div>
                         </div>
 
-                         <br>
+                        <br>
                             <strong>HORARIO</strong>
                         <br><br>
                         {% if horario_form  %}
