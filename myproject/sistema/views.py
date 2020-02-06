@@ -112,6 +112,13 @@ def Home(request):
         print('weno alguien tiene que empezar no?')
     return render(request,'sistema/index.html',context)
 
+def estadistica_miembro(request):
+    if request.method=='POST':
+        print('y cuando va a hacer post linarda xD')
+    else:
+        #bueno para empezar podria mandarle los datos de todos los activos
+        return render(request,'sistema/estadistica_miembro.html')
+
 def auditoriaMiembro(request):
     auditoria_miembro = Miembro.history.all()
     context = {'auditoria_miembro': auditoria_miembro}
@@ -755,7 +762,7 @@ def agregarRespuesta(request):
                 estado.save()
                 #aca pum ya notifico
             if puntos <= puntos_total/2 and puntos > puntos_total/4:
-                print("medio")
+                print("Medio")
                 estado=Estado(usuario=request.user,estado="Medio")
                 estado.save()
             if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
@@ -1356,8 +1363,6 @@ def reunionList(request):
         #weno no tiene chiste que vuelva a recorrer todo de nuevo pero bueno no me manejo bien con arrays
         #dic = {'reunion': change.field, 'nombre':change.old, 'id_reunion':change.new}
 
-
-
         if not(rn_recomendada):   
             data = {
                 'is_taken': True
@@ -1371,3 +1376,77 @@ def reunionList(request):
             result=dict()
             result = serializer.data
             return JSONResponse(dic)
+
+
+def filtros_estado_miembro(request):
+    desde = request.GET['desde']
+    hasta = request.GET['hasta']
+    print(desde)
+    print(hasta)
+    cant_mb=0 #cantidad de estados muy buenos
+    cant_b=0  #cantidad de estados buenos
+    cant_m=0  #cantidad de estados medios
+    cant_c=0  #cantidad de estados criticos
+
+    #Me aseguro de tener los datos que eligió y aplico los filtros
+    if request.GET['desde'] == '' and request.GET['hasta'] =='': #si no eligio nada weno le muestro todos los actuales
+        usuarios= CustomUser.objects.filter(is_active=True)
+        cant_total=len(list(usuarios))
+        for usuario in usuarios:
+            estado = Estado.objects.filter(usuario_id=usuario.id).first()
+            print('estado: ',estado)
+            if estado != None:
+                if estado.estado == 'Muy Bueno':
+                    cant_mb += 1
+                if estado.estado == 'Bueno':
+                    cant_b += 1
+                if estado.estado == 'Medio':
+                    cant_m += 1
+                if estado.estado == 'Pendiente' or estado.estado == 'Critico' : #critico que falta confirmar
+                    cant_c += 1
+            else: #si nunca registro un estado es porque esta mb, nunca falto consecutivamente ni nada
+                cant_mb += 1 
+        #bien ahora porcentajes
+        if cant_total != 0:
+            cant_mb = (cant_mb * 100) / cant_total
+            cant_b = (cant_b * 100) / cant_total
+            cant_m = (cant_m * 100) / cant_total
+            cant_c = (cant_c * 100) / cant_total
+    else: #es porque hay un desde y/o un hasta
+        if request.GET['desde'] != '' and request.GET['hasta'] !='':
+            #castear hasta pa que sea un timedate
+            new_h = datetime.datetime.strptime(hasta, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
+            print('new_h: ', new_h)
+            usuarios= CustomUser.objects.filter(date_joined__lte=new_h) #traigo todos los usr que estaban creados antes de la fecha max (hasta)
+            cant_total=len(list(usuarios))
+            for usuario in usuarios:
+                estado= Estado.objects.filter(usuario_id=usuario.id,fecha__range=(desde,hasta)).first()
+                print('estado: ',estado)
+                if estado != None:
+                    if estado.estado == 'Muy Bueno':
+                        cant_mb += 1
+                    if estado.estado == 'Bueno':
+                        cant_b += 1
+                    if estado.estado == 'Medio':
+                        cant_m += 1
+                    if estado.estado == 'Pendiente' or estado.estado == 'Critico' : #critico que falta confirmar
+                        cant_c += 1
+                else: #si no registro un estado en ese rango voy a ver el ultimo estado que tenia
+                    estado = Estado.objects.filter(usuario_id=usuario.id,fecha__lte=desde).last()
+                    if estado != None:
+                        if estado.estado == 'Pendiente' or estado.estado == 'Critico' : #critico que falta confirmar
+                            cant_c += 1
+                        else:
+                            cant_mb+=1 #osea si no esta suspendido ni nada entonces ta mb
+                    else:
+                        cant_mb+=1 #osea si no esta suspendido ni nada entonces ta mb
+            if cant_total != 0:
+                cant_mb = (cant_mb * 100) / cant_total
+                cant_b = (cant_b * 100) / cant_total
+                cant_m = (cant_m * 100) / cant_total
+                cant_c = (cant_c * 100) / cant_total
+        
+    data = [cant_mb,cant_b,cant_m,cant_c]
+    print("-----------------------------//-----------------------")
+    print('data: ',data)
+    return JSONResponse(data)

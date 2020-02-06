@@ -54,4 +54,6 @@ urlpatterns = [
     path("reunionList/", reunionList, name="reunionList"),
     path("auditoria_detalles_miembro/<int:dni>/<int:id_auditoria>", auditoria_detalles_miembro, name="auditoria_detalles_miembro"),
     path("auditoria_detalles_reunion/<int:id>/<int:id_auditoria>", auditoria_detalles_reunion, name="auditoria_detalles_reunion"),
+    path("estadistica_miembro/",estadistica_miembro, name="estadistica_miembro"),
+    path("filtros_estado_miembro/", filtros_estado_miembro, name="filtros_estado_miembro"),
 ]
