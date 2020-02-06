@@ -432,28 +432,19 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
     return redirect('/sistema/listarTipo_Reunion/')
 
 def crearReunion(request):
-
     if request.method == 'POST':
-
-        nombrecito=request.POST.get('nombre')
         reunion_form=ReunionForm(request.POST)
-        barrio_form=request.POST.get('barrio')
-        barrio=Barrio.objects.get(barrio=barrio_form)
         domicilio_form=DomicilioForm(request.POST)
-
         horario_form= Horario_DisponibleForm(request.POST)
-        horario=horario_form.save()
-        print('-0-')
-        print(horario)
 
         if reunion_form.is_valid()and domicilio_form.is_valid():
             if Reunion.objects.filter(nombre=nombrecito).exists():
                 messages.error(request, 'Nombre no disponible')
             else:
+                horario=horario_form.save(commit=False)
+                horario.save()
                 reunion=reunion_form.save(commit=False)
                 domicilio=domicilio_form.save(commit=False)
-                domicilio.barrio=barrio
-                print(domicilio)
                 domicilio.save()
                 reunion.changeReason ='Creacion'
                 reunion.domicilio=domicilio
@@ -461,13 +452,12 @@ def crearReunion(request):
                 reunion.save()
                 return redirect('/sistema/listarReunion')
     else:
-        provincia_form=Provincia.objects.all().order_by('provincia')
-        localidad_form=Localidad.objects.all()
-        barrio_form=Barrio.objects.all()
+        localidad_form=LocalidadForm()
+        barrio_form=BarrioForm()
         reunion_form=ReunionForm()
         domicilio_form=DomicilioForm()
         horario_form=Horario_DisponibleForm()
-    return render(request,'sistema/crearReunion.html',{'horario_form':horario_form,'barrio_form':barrio_form,'localidad_form':localidad_form,'provincia_form':provincia_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+    return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
 
 def editarReunion(request,id_reunion):
     reunion = Reunion.objects.get(id_reunion=id_reunion)
@@ -514,11 +504,20 @@ def eliminarReunion(request,id_reunion):
 def agregarAsistencia(request):
     if request.method == 'POST':
         reunion_form = request.POST.get('reunion')
+        print("-----------------------------------")
+        # print('ast: ',request.POST.get('ast-encargado'))
         reunion=Reunion.objects.get(id_reunion=reunion_form)
         grupo= reunion.grupo
-        
         fecha = request.POST.get('fecha')
-        if request.POST.get('ast-encargado') == True:
+        hoy = date.today()
+        #Weno voy a ver si ya pusieron asistencias ese dia capa, le mando un error
+        print('fecharda: ',fecha)
+        if Asistencia.objects.filter(fecha=fecha,reunion=reunion).exists():
+            print('ni un cargo tu if')
+            messages.error(request, 'Esta Reunion ya registro sus asistencias el dia '+ fecha)
+            return redirect('/sistema/agregarAsistencia')
+
+        if request.POST.get('ast-encargado') == "True":
             miembros = Miembro.objects.filter(grupo=grupo)
             for miembro in miembros:
                 asistencia=Asistencia()
@@ -530,6 +529,7 @@ def agregarAsistencia(request):
                 asistencia.changeReason="Creacion"
                 asistencia.save()
             for check in request.POST.getlist('check[]'):
+                print('dni: ',check)
                 miembro=Miembro.objects.get(dni=check)
                 asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
                 asistencia.presente=True

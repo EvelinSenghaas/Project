@@ -13,10 +13,22 @@
             <form method="POST" class="form-horizontal">
             <div class="card-body card-block">
                 <div class="card-body">
-                    
+                    {% if messages %}
+                        <div class="col-md-12">
+                            <ul class="messages">
+                            {% for message in messages %}
+                                <div class="alert alert-danger">
+                                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                        <p {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                                </div>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
                     <div class="row form-group">
                         <div class="col col-md-2"><label for="text-input"  class=" form-control-label" > Fecha (*)</label></div>
-                        <div class="col col-md-4"><input required type="date" id="date-input" name="fecha" placeholder="dd/mm/aaaa" class="form-control"></div>
+                        <div class="col col-md-4"><input required  type="date" id="date-input" name="fecha" placeholder="dd/mm/aaaa" class="form-control"></div>
                     </div>
 
                     <div class="row form-group">
@@ -80,6 +92,13 @@
 
     </form>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>
+        $(function(){
+            $('[type="date"]').prop('max', function(){
+                return new Date().toJSON().split('T')[0];
+            });
+        });
+    </script>
     <script>
         $('#reunion').change(function(){
             console.log('oliii');
