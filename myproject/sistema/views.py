@@ -116,8 +116,18 @@ def estadistica_miembro(request):
     if request.method=='POST':
         print('y cuando va a hacer post linarda xD')
     else:
-        #bueno para empezar podria mandarle los datos de todos los activos
+        
         return render(request,'sistema/estadistica_miembro.html')
+
+def estadistica_reunion(request):
+    reuniones = Reunion.objects.all()
+    return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones})
+
+def estadistica_asistencias(request):
+    reuniones = Reunion.objects.all()
+    miembros = Miembros.objects.all()
+    roles = Rol.objects.all()
+    return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
 
 def auditoriaMiembro(request):
     auditoria_miembro = Miembro.history.all()
@@ -1377,7 +1387,6 @@ def reunionList(request):
             result = serializer.data
             return JSONResponse(dic)
 
-
 def filtros_estado_miembro(request):
     desde = request.GET['desde']
     hasta = request.GET['hasta']
@@ -1447,6 +1456,178 @@ def filtros_estado_miembro(request):
                 cant_c = (cant_c * 100) / cant_total
         
     data = [cant_mb,cant_b,cant_m,cant_c]
+    print("-----------------------------//-----------------------")
+    print('data: ',data)
+    return JSONResponse(data)
+
+def filtros_estado_reunion(request):
+    desde = request.GET['desde']
+    hasta = request.GET['hasta']
+    rn = request.GET['rn']
+    print(desde)
+    print(hasta)
+    cant_mb=0 #cantidad de estados muy buenos
+    cant_b=0  #cantidad de estados buenos
+    cant_m=0  #cantidad de estados medios
+    cant_c=0  #cantidad de estados criticos
+    cant_s=0  #cantidad de miembros que no respondieron
+    #lo primero y mas importante tiene que seleccionar una reunion
+    if rn != '':
+        if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
+            #bueno primero tengo que ver cual fue la ultima encuesta que le mande a esa reunion
+            enc = Encuesta.objects.filter(reunion_id = rn, tipo = 2).order_by('-fecha_envio').first()
+            #en teoria eso es orden descendente por eso obtengo el primero
+            if enc != None:
+                fecha=enc.fecha_envio
+                encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio=fecha).exclude(fecha_respuesta=None)#ahora obtengo todas las enviadas en esa fecha
+                cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha
+                cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None)
+                cant_s = len(list(cant_s))
+                cant_total += cant_s
+                print('------------------')
+                print('cantidad sin responder ', cant_s)
+                print('cantidad total ', cant_total)
+                print('------------------')
+                for encuesta in encuestas:
+                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+                    print('estado: ',estado)
+                    if estado.estado == 'Muy Bueno':
+                        cant_mb += 1
+                    if estado.estado == 'Bueno':
+                        cant_b += 1
+                    if estado.estado == 'Medio':
+                        cant_m += 1
+                    if estado.estado == 'Critico' :
+                        cant_c += 1
+                #bien ahora porcentajes
+                if cant_total != 0:
+                    cant_mb = (cant_mb * 100) / cant_total
+                    cant_b = (cant_b * 100) / cant_total
+                    cant_m = (cant_m * 100) / cant_total
+                    cant_c = (cant_c * 100) / cant_total
+                    cant_s = (cant_s * 100) / cant_total
+        else: #es porque hay un desde y/o un hasta
+            if request.GET['desde'] != '' and request.GET['hasta'] !='':
+                #traigo todas las encuestas que fueron enviadas entre esas fechas
+                encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__range=(desde,hasta)).exclude(fecha_respuesta=None)
+                cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas
+                cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None,fecha_envio__range=(desde,hasta))
+                cant_s = len(list(cant_s)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas y sin respuestas
+                cant_total += cant_s
+                print('------------------')
+                print('cantidad sin responder ', cant_s)
+                print('cantidad total ', cant_total)
+                print('------------------')
+                for encuesta in encuestas:
+                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+                    print('estado: ',estado)
+                    if estado.estado == 'Muy Bueno':
+                        cant_mb += 1
+                    if estado.estado == 'Bueno':
+                        cant_b += 1
+                    if estado.estado == 'Medio':
+                        cant_m += 1
+                    if estado.estado == 'Critico' :
+                        cant_c += 1
+                #bien ahora porcentajes
+                if cant_total != 0:
+                    cant_mb = (cant_mb * 100) / cant_total
+                    cant_b = (cant_b * 100) / cant_total
+                    cant_m = (cant_m * 100) / cant_total
+                    cant_c = (cant_c * 100) / cant_total
+                    cant_s = (cant_s * 100) / cant_total
+            
+        
+        data = [cant_mb,cant_b,cant_m,cant_c,cant_s]
+        if cant_mb ==0 and cant_b==0 and cant_m == 0 and cant_s==0 :
+            data = []
+            #ver de poner un mensajito
+    print("-----------------------------//-----------------------")
+    print('data: ',data)
+    return JSONResponse(data)
+
+def filtros_asistencias(request):
+    desde = request.GET['desde']
+    hasta = request.GET['hasta']
+    rn = request.GET['rn']
+    print(desde)
+    print(hasta)
+    cant_mb=0 #cantidad de estados muy buenos
+    cant_b=0  #cantidad de estados buenos
+    cant_m=0  #cantidad de estados medios
+    cant_c=0  #cantidad de estados criticos
+    cant_s=0  #cantidad de miembros que no respondieron
+    #lo primero y mas importante tiene que seleccionar una reunion
+    if rn != '':
+        if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
+            #bueno primero tengo que ver cual fue la ultima encuesta que le mande a esa reunion
+            enc = Encuesta.objects.filter(reunion_id = rn, tipo = 2).order_by('-fecha_envio').first()
+            #en teoria eso es orden descendente por eso obtengo el primero
+            if enc != None:
+                fecha=enc.fecha_envio
+                encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio=fecha).exclude(fecha_respuesta=None)#ahora obtengo todas las enviadas en esa fecha
+                cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha
+                cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None)
+                cant_s = len(list(cant_s))
+                cant_total += cant_s
+                print('------------------')
+                print('cantidad sin responder ', cant_s)
+                print('cantidad total ', cant_total)
+                print('------------------')
+                for encuesta in encuestas:
+                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+                    print('estado: ',estado)
+                    if estado.estado == 'Muy Bueno':
+                        cant_mb += 1
+                    if estado.estado == 'Bueno':
+                        cant_b += 1
+                    if estado.estado == 'Medio':
+                        cant_m += 1
+                    if estado.estado == 'Critico' :
+                        cant_c += 1
+                #bien ahora porcentajes
+                if cant_total != 0:
+                    cant_mb = (cant_mb * 100) / cant_total
+                    cant_b = (cant_b * 100) / cant_total
+                    cant_m = (cant_m * 100) / cant_total
+                    cant_c = (cant_c * 100) / cant_total
+                    cant_s = (cant_s * 100) / cant_total
+        else: #es porque hay un desde y/o un hasta
+            if request.GET['desde'] != '' and request.GET['hasta'] !='':
+                #traigo todas las encuestas que fueron enviadas entre esas fechas
+                encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__range=(desde,hasta)).exclude(fecha_respuesta=None)
+                cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas
+                cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None,fecha_envio__range=(desde,hasta))
+                cant_s = len(list(cant_s)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas y sin respuestas
+                cant_total += cant_s
+                print('------------------')
+                print('cantidad sin responder ', cant_s)
+                print('cantidad total ', cant_total)
+                print('------------------')
+                for encuesta in encuestas:
+                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+                    print('estado: ',estado)
+                    if estado.estado == 'Muy Bueno':
+                        cant_mb += 1
+                    if estado.estado == 'Bueno':
+                        cant_b += 1
+                    if estado.estado == 'Medio':
+                        cant_m += 1
+                    if estado.estado == 'Critico' :
+                        cant_c += 1
+                #bien ahora porcentajes
+                if cant_total != 0:
+                    cant_mb = (cant_mb * 100) / cant_total
+                    cant_b = (cant_b * 100) / cant_total
+                    cant_m = (cant_m * 100) / cant_total
+                    cant_c = (cant_c * 100) / cant_total
+                    cant_s = (cant_s * 100) / cant_total
+            
+        
+        data = [cant_mb,cant_b,cant_m,cant_c,cant_s]
+        if cant_mb ==0 and cant_b==0 and cant_m == 0 and cant_s==0 :
+            data = []
+            #ver de poner un mensajito
     print("-----------------------------//-----------------------")
     print('data: ',data)
     return JSONResponse(data)

@@ -107,6 +107,8 @@ class Estado_Civil(models.Model):
         return self.estado
     
 class Miembro(models.Model):
+    class Meta:
+        unique_together = (('dni', 'sexo'),)
     SEXO=[
         ('Masculino','Masculino'),
         ('Femenino','Femenino')
@@ -262,3 +264,4 @@ class Estado_Reunion(models.Model):
     reunion=models.ForeignKey(Reunion, on_delete=models.PROTECT)
     estado=models.CharField(max_length=50)
     fecha=models.DateField( auto_now_add=True)
+    encuesta=models.OneToOneField(Encuesta, on_delete=models.PROTECT)
