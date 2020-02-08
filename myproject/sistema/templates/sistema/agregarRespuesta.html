@@ -19,13 +19,13 @@ Responder Encuesta
                     var html = "";
                     var tipo= data[0]['pregunta']['tipo'];
                     if(tipo==1){
-                        $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-la bel">'+data[0]['pregunta']['descripcion']+'</label></div> <textarea name="'+pr+'" id="rsp" cols="30" rows="10"></textarea></div>')
+                        $('#add').append('<div required class="row form-group"> <div class="col col-md-4"><label class=" form-control-la bel">'+data[0]['pregunta']['descripcion']+'</label></div> <textarea name="'+pr+'" id="rsp" cols="30" rows="10"></textarea></div>')
                     }
                     if(tipo==2){
                         $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-label">'+data[0]['pregunta']['descripcion']+'</label></div> <div class="radio" id="add-radio"></div></div>')
                         for (var i = 0; i < data.length; i++) {
                             var text = data[i].opcion;
-                            $('#add-radio').append(' <input value="'+text+'" name="'+pr+'"type="radio"/> ' + text +'</br>' )
+                            $('#add-radio').append(' <input required  value="'+text+'" name="'+pr+'"type="radio"/> ' + text +'</br>' )
                         }
                         $("#add-radio").attr("id",pr);
                     }
@@ -33,7 +33,7 @@ Responder Encuesta
                         $('#add').append('<div class="row form-group"> <div class="col col-md-4"><label class=" form-control-label">'+data[0]['pregunta']['descripcion']+'</label></div> <div class="radio" id="add-check"></div></div>')
                         for (var i = 0; i < data.length; i++) {
                         var text = data[i].opcion;
-                        $('#add-check').append('<input value="'+text+'" name="check[]" type="checkbox" /> ' + text + '<br />');
+                        $('#add-check').append('<input required  value="'+text+'" name="check[]" type="checkbox" /> ' + text + '<br />');
                         }
                     }
                 }

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import *
+from usuario.models import CustomUser
+
 
 class ProvinciaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,6 +25,12 @@ class MiembroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Miembro
         fields=['dni','nombre','apellido']
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    miembro = MiembroSerializer()
+    class Meta:
+        model = CustomUser
+        fields=['id','miembro']
 
 class GrupoSerializer(serializers.ModelSerializer):
     miembro = MiembroSerializer(many=True)

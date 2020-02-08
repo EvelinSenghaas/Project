@@ -125,9 +125,9 @@ def estadistica_reunion(request):
 
 def estadistica_asistencias(request):
     reuniones = Reunion.objects.all()
-    miembros = Miembros.objects.all()
+    miembros = Miembro.objects.all()
     roles = Rol.objects.all()
-    return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
+    return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
 
 def auditoriaMiembro(request):
     auditoria_miembro = Miembro.history.all()
@@ -1318,6 +1318,19 @@ def miembrosList(request):
         return JSONResponse(result)
 
 @csrf_exempt
+def rolList(request):
+    rol=request.GET.get('rol')
+    print(rol)
+    if request.method =='GET':
+        rol=Rol.objects.get(id_rol=rol)
+        miembros=CustomUser.objects.filter(rol_id=rol)
+        print(miembros)
+        serializer=UsuarioSerializer(miembros,many=True)
+        result=dict()
+        result = serializer.data
+        return JSONResponse(result)
+
+@csrf_exempt
 def reunionList(request):
     rn=request.GET.get('rn')
     if request.method =='GET':
@@ -1464,6 +1477,7 @@ def filtros_estado_reunion(request):
     desde = request.GET['desde']
     hasta = request.GET['hasta']
     rn = request.GET['rn']
+
     print(desde)
     print(hasta)
     cant_mb=0 #cantidad de estados muy buenos
@@ -1549,84 +1563,126 @@ def filtros_estado_reunion(request):
 def filtros_asistencias(request):
     desde = request.GET['desde']
     hasta = request.GET['hasta']
+    mb = request.GET['mb']
     rn = request.GET['rn']
-    print(desde)
-    print(hasta)
-    cant_mb=0 #cantidad de estados muy buenos
-    cant_b=0  #cantidad de estados buenos
-    cant_m=0  #cantidad de estados medios
-    cant_c=0  #cantidad de estados criticos
-    cant_s=0  #cantidad de miembros que no respondieron
+    rol = request.GET['rol']
+    if Reunion.objects.filter(nombre=rn).exists():
+        reunion= Reunion.objects.filter(nombre=rn).last()
+        rn = reunion.id_reunion
+    else:
+        rn=''
+    print('REUNION ', rn)
+    print('MIEMBRO ',mb)
+    print('ROL: ',rol)
+    cant_ast=0 #cantidad de estados muy buenos
+    cant_fal=0   #cantidad de miembros que no respondieron
     #lo primero y mas importante tiene que seleccionar una reunion
-    if rn != '':
-        if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
-            #bueno primero tengo que ver cual fue la ultima encuesta que le mande a esa reunion
-            enc = Encuesta.objects.filter(reunion_id = rn, tipo = 2).order_by('-fecha_envio').first()
-            #en teoria eso es orden descendente por eso obtengo el primero
-            if enc != None:
-                fecha=enc.fecha_envio
-                encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio=fecha).exclude(fecha_respuesta=None)#ahora obtengo todas las enviadas en esa fecha
-                cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha
-                cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None)
-                cant_s = len(list(cant_s))
-                cant_total += cant_s
-                print('------------------')
-                print('cantidad sin responder ', cant_s)
-                print('cantidad total ', cant_total)
-                print('------------------')
-                for encuesta in encuestas:
-                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
-                    print('estado: ',estado)
-                    if estado.estado == 'Muy Bueno':
-                        cant_mb += 1
-                    if estado.estado == 'Bueno':
-                        cant_b += 1
-                    if estado.estado == 'Medio':
-                        cant_m += 1
-                    if estado.estado == 'Critico' :
-                        cant_c += 1
-                #bien ahora porcentajes
-                if cant_total != 0:
-                    cant_mb = (cant_mb * 100) / cant_total
-                    cant_b = (cant_b * 100) / cant_total
-                    cant_m = (cant_m * 100) / cant_total
-                    cant_c = (cant_c * 100) / cant_total
-                    cant_s = (cant_s * 100) / cant_total
-        else: #es porque hay un desde y/o un hasta
-            if request.GET['desde'] != '' and request.GET['hasta'] !='':
-                #traigo todas las encuestas que fueron enviadas entre esas fechas
-                encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__range=(desde,hasta)).exclude(fecha_respuesta=None)
-                cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas
-                cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None,fecha_envio__range=(desde,hasta))
-                cant_s = len(list(cant_s)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas y sin respuestas
-                cant_total += cant_s
-                print('------------------')
-                print('cantidad sin responder ', cant_s)
-                print('cantidad total ', cant_total)
-                print('------------------')
-                for encuesta in encuestas:
-                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
-                    print('estado: ',estado)
-                    if estado.estado == 'Muy Bueno':
-                        cant_mb += 1
-                    if estado.estado == 'Bueno':
-                        cant_b += 1
-                    if estado.estado == 'Medio':
-                        cant_m += 1
-                    if estado.estado == 'Critico' :
-                        cant_c += 1
-                #bien ahora porcentajes
-                if cant_total != 0:
-                    cant_mb = (cant_mb * 100) / cant_total
-                    cant_b = (cant_b * 100) / cant_total
-                    cant_m = (cant_m * 100) / cant_total
-                    cant_c = (cant_c * 100) / cant_total
-                    cant_s = (cant_s * 100) / cant_total
-            
+    if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
+        if rn != '': #weno si no hay limite de fecha y rn esta seleccionado
+            #bueno voy a traer todos los registros de asistencias de esa rn
+            cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True)
+            cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False)
+            cant_ast= len(list(cant_ast))
+            cant_fal= len(list(cant_fal))
+            cant_total = cant_ast + cant_fal
+        elif mb != 'null':
+            cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True)
+            cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False)
+            cant_ast= len(list(cant_ast))
+            cant_fal= len(list(cant_fal))
+            cant_total = cant_ast + cant_fal
+        elif rol != '': 
+            usuarios = CustomUser.objects.filter(rol_id=rol)
+            for usuario in usuarios:
+                miembro = usuario.miembro
+                cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True)
+                cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False)
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+    else: #weno si puso horarios tengo que ver cual
+        if request.GET['desde'] != '' and request.GET['hasta'] !='':
+            if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn entre esas fechas entonces
+                #bueno voy a traer todos los registros de asistencias de esa rn
+                cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__range=(desde,hasta))
+                cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__range=(desde,hasta))
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+
+            elif mb != 'null':
+                cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__range=(desde,hasta))
+                cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__range=(desde,hasta))
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+            elif rol != '': 
+                usuarios = CustomUser.objects.filter(rol_id=rol)
+                for usuario in usuarios:
+                    miembro = usuario.miembro
+                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__range=(desde,hasta))
+                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__range=(desde,hasta))
+                    cant_ast= len(list(cant_ast))
+                    cant_fal= len(list(cant_fal))
+                    cant_total = cant_ast + cant_fal
+        elif request.GET['desde'] != '': #si entra aca es porque uno de los dos esta vacio, hay que ver cual
+            #en este caso cargo solo el desde
+            if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha en adelante
+                #bueno voy a traer todos los registros de asistencias de esa rn
+                cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__gte=desde)
+                cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__gte=desde)
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+
+            elif mb != 'null':
+                cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__gte=desde)
+                cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__gte=desde)
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+            elif rol != '': 
+                usuarios = CustomUser.objects.filter(rol_id=rol)
+                for usuario in usuarios:
+                    miembro = usuario.miembro
+                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__gte=desde)
+                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__gte=desde)
+                    cant_ast= len(list(cant_ast))
+                    cant_fal= len(list(cant_fal))
+                    cant_total = cant_ast + cant_fal
+        elif  request.GET['hasta'] != '': #en realidad con un else ya anda pero por la dudas
+            if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha limita hacia atras
+                #bueno voy a traer todos los registros de asistencias de esa rn
+                cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__lte=hasta)
+                cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__lte=hasta)
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+
+            elif mb != 'null':
+                cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__lte=hasta)
+                cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__lte=hasta)
+                cant_ast= len(list(cant_ast))
+                cant_fal= len(list(cant_fal))
+                cant_total = cant_ast + cant_fal
+            elif rol != '': 
+                usuarios = CustomUser.objects.filter(rol_id=rol)
+                for usuario in usuarios:
+                    miembro = usuario.miembro
+                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__lte=hasta)
+                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__lte=hasta)
+                    cant_ast= len(list(cant_ast))
+                    cant_fal= len(list(cant_fal))
+                    cant_total = cant_ast + cant_fal
         
-        data = [cant_mb,cant_b,cant_m,cant_c,cant_s]
-        if cant_mb ==0 and cant_b==0 and cant_m == 0 and cant_s==0 :
-            data = []
+        
+    data = []
+    if cant_total != 0: #no tenian ninguna asitencia
+        cant_ast = (cant_ast * 100) / cant_total
+        cant_fal = (cant_fal * 100) / cant_total
+        data = [cant_ast,cant_fal]
+        
+            
             #ver de poner un mensajito
     print("-----------------------------//-----------------------")
     print('data: ',data)
