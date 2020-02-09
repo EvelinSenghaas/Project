@@ -1,0 +1,101 @@
+{% extends 'sistema/base_site.html' %}
+{% load static %}
+{% block titulo %}
+Miembro en Estado Critico
+{% endblock titulo %}
+{% block body %}
+
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+<form method="POST">
+        
+    <div class="col-lg-11">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header">
+                <strong>Planilla de Miembro en Estado Critico </strong> {{miembro.nombre}}
+            </div>
+
+            <form method="POST" class="form-horizontal">
+
+                <div  class="col-xl-11">
+                    <div class="row">
+                        <div class="col-lg-10 col-xl-12">
+                            <div class="card br-0">
+                                <div align="center" class="card-body">
+                                <div class="row row-form-group">
+                                    <div class="col col-md-1"><label for="text-label">Desde</label></div>
+                                    <div class="col col-md-3"><input type="date" id="desde" class="form form-control"></div>
+                                    <div class="col col-md-1"><label for="text-label">Hasta</label></div>
+                                    <div class="col col-md-3"><input type="date" id="hasta" class="form form-control"></div>
+                                    <button type="button" class="btn btn-primary" id="filtrar">Filtrar</button>
+                                </div>    
+                                    <br>
+                                    <canvas id="doughnut-chart" width="800" height="450"></canvas>
+                                </div>
+                            </div><!-- /.card -->
+                        </div>
+                    </div>
+                </div> <!-- /.col-md-4 -->
+            </form>
+        </div>
+    </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+<script>
+    $(function(){
+        $('[type="date"]').prop('max', function(){
+            return new Date().toJSON().split('T')[0];
+        });
+        $('#filtrar').click();
+    });
+</script>
+
+<script>
+    $("#desde" ).change(function(){
+        $('#hasta').prop('min', $('#desde').val());
+    });
+</script>
+
+<script>
+    $('#filtrar').click(function() {
+        var desde = $('#desde').val();
+        var hasta = $('#hasta').val();
+        $.ajax({
+            url: '/sistema/filtros_estado_miembro/',
+            data: {
+                'desde': desde,
+                'hasta':hasta,
+            },
+            dataType: 'json',
+            success: function(data) {
+                var ctx = document.getElementById("doughnut-chart").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [ "Muy Bien", "Bien", "Maso", "Critico"],
+                        datasets: [{
+                            label: "Estado de Miembros",
+                            backgroundColor: ["#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                            data: data,
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Estado de Miembros'
+                        }
+                    }
+                });
+            }
+        });
+    });    
+</script>
+
+<script>
+    
+</script>
+{% endblock body %}

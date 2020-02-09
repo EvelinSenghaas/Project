@@ -1,0 +1,229 @@
+{% extends 'sistema/base_site.html' %}
+{% load static %}
+{% block titulo %}
+Miembro en Estado Critico
+{% endblock titulo %}
+{% block body %}
+
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+<script>
+    function Usuario(){
+        var rn = $('#rn-enc').html();
+        $.ajax({
+            url: '/sistema/recomendacionTable',
+            data: {
+                'rn': rn,
+            },
+            dataType: 'json',
+            success: function(data) {
+                var html = "";
+                for (var i = 0; i < data.length; i++) {
+                    html += "<tr>";
+                    html += "<td>" + data[i].nombre + "</td>";
+                    html += "<td>" + "<input type='radio' name='"+ rn + "-encargado' value="+data[i].dni+ ">"+"</td>";
+                    html += "</tr>";
+                } 
+                $('#mi-reunion ').html(html);
+                $("#mi-reunion").attr("id","tabla -"+rn);
+                
+            }
+        });
+        $("#rn-enc").attr("id",rn);
+    };
+</script>
+
+<script>
+    function Reunion(){
+        var rn = $('#rn').html();
+        $.ajax({
+            url: '/sistema/reunionList',
+            data: {
+                'rn': rn,
+            },
+            dataType: 'json',
+            success: function(data) {
+                var html = "";
+                console.log(data[0]['nombre'])
+                if (data['error_message']){
+                    console.log('vacio china')
+                    html='<input hidden="True" type="text" id="msg" value="'+data['error_message']+'">'
+                    $('#add').append(html);
+                    //$('#rn-'rn)/show();
+                    //weno la idea aca es poner algun botoncito de reasignar lider
+                }
+                else{
+                    for (var i = 0; i < data.length; i++) {
+                        html += "<tr>";
+                        html += "<td>"+data[i]['nombre']+"</td>";
+                        html += "<td>" + data[i]['reunion'] + "</td>";
+                        html += "<td>" + "<input type='checkbox' name='reunion-encargado' value="+data[i]['id_reunion']+"-"+data[i]['id_miembro']+ ">"+"</td>";
+                        html += "</tr>";
+                    } 
+                    $('#rn-rn').html(html);
+                    $('#rn-rn').attr("id","rn-"+rn);
+                }
+            }
+        });
+        $("#rn").attr("id","id-rn"+     rn);
+    };
+</script>
+<form method="POST">
+        
+    <div class="col-lg-11">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header">
+                <strong>Planilla de Miembro en Estado Critico </strong> {{miembro.nombre}}
+            </div>
+
+            <form method="POST" class="form-horizontal">
+                <div class="col col-md-12" id="add"> 
+                    <br>
+                    <div class="" id="oculto1">
+                        <span> Se ah registrado que el miembro {{miembro.aspanlido}}, {{miembro.nombre}} presenta un estado critrico
+                        , dicho miembro cuenta con las siguientes reuniones: </span>
+                        <div align="center">
+                            {% for reunion in reuniones %}
+                                    <div class="col col-md-4"><label for="text-input">- {{reunion.nombre}}</label></div>
+                                <hr class="line-separate">
+                            {% endfor %}
+                        </div>
+                        <br>
+                        <br>
+                        <div class="row form-group">
+                            <span> Se le solicita confirmacion para suspender sus actividades</span>
+                        </div>
+                    </div>
+
+                    <div class="" id="oculto2">
+                        <span>Los siguientes miembros seran reasignados a las siguientes reuniones, por favor confirme presionando
+                        la casilla de confirmacion</span>
+                        
+                        {% for reunion in reuniones %}
+                            <div class="card-header ">
+                                <strong>Reunion</strong><span id="rn">{{reunion.nombre}}</span>
+                            </div>
+
+                            <div  id="tbl">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Miembro</th>
+                                            <th>Reunion</th>
+                                            <th>Confirmar<input type="checkbox" name="all" id="select-all" /></label></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rn-rn">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <script>Reunion()</script>
+                        {% endfor %}
+                    
+                        <p>Los miembros que no fueron confirmados no seran reasignados a ninguna reunion</p>
+                    </div>
+
+                    <div class="" id="oculto3">
+                        <span>Los siguientes miembros seran reasignados a las siguientes reuniones, por favor confirme presionando
+                        la casilla de confirmacion</span>
+                        <br>
+                            {% for reunion in reuniones %}
+                            
+                                <div class="card-header ">
+                                    <strong>Reunion </strong><span id="rn-enc">{{reunion.nombre}}</span>
+                                </div>
+
+                                <div>
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Miembro</th>
+                                                <th>Confirmar<input type="checkbox" name="all" id="select-all" /></label></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mi-reunion">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <script>Usuario()</script>
+                                <hr class="line-separate">
+                                
+
+                            {% endfor %}
+                        <div>
+                            <p>Los miembros que no fueron confirmados no seran reasignados a ninguna reunion</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-success btn-sm">Cancelar</button>
+                            <button id="confirmar" type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#ConfirmarModal">Confirmar</button>
+                            <button id="fin" type="submit" class="btn btn-success btn-sm" >Confirmar</button>
+                        </div>
+                    </div>
+                    <!-- Button trigger modal -->
+                                        <!-- inicio del modal-->
+                                        <div class="modal fade" id="ConfirmarModal" tabindex="-1" role="dialog" aria-labelledby="ConfirmarModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="ConfirmarModalLabel">Suspender Miembro</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <h4>Que desea hacer?</h4>
+                                                <br>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button id="cerrar" type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                <a id="miembro" class="btn btn-primary">Reasignar miembros</a>
+                                                <a id="lider"class="btn btn-primary">Reasignar Lider</a>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <!--Fin del modal-->
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</form>
+<script>
+    $(document).ready(function(){
+        $('#oculto2').hide();
+        $('#oculto3').hide();
+        $('#fin').hide();
+    });    
+</script>
+
+<script>
+    $("#miembro" ).click(function() {
+        var val = $('#msg').val()
+        if(val){
+            alert(val);
+        }else{
+            $('#oculto1').hide();
+            $('#oculto3').hide();
+            $('#cerrar').click();
+            $('#oculto2').show();
+            $("#confirmar").hide();
+            $("#fin").show();
+        }
+    });
+    $("#lider" ).click(function() {
+        $('#oculto1').hide();
+        $('#cerrar').click();
+        $('#oculto2').hide();
+        $('#oculto3').show();
+        $("#confirmar").hide();
+        $("#fin").show();
+    });
+</script>
+
+{% endblock body %}

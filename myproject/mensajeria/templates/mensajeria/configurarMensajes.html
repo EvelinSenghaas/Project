@@ -1,0 +1,28 @@
+{% extends 'sistema/base_site.html'%}
+{% load static %}
+{% block titulo %}
+    Configurar Mensajes
+{% endblock titulo %}
+{% block body %}
+    <form method="POST">
+        {% csrf_token %} 
+        <div class="col-lg-11">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Planilla de Configuracion de </strong> Mensajes
+                </div>
+                <div class="card-body">
+                    {% for mensaje in mensajes %}
+                        <div class="row form-group">
+                            <div class="col col-md-3"><label for="text-input" class=" form-control-label">{{mensaje.tipo}}</label></div>
+                            <div class="col-12 col-md-9"><input type="text" id="tp" name="{{mensaje.tipo}}" value="{{mensaje}}" class="form-control"></div>
+                        </div>
+                    {% endfor %}
+                    
+                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                </div>
+                
+            </div>
+        </div>
+    </form>
+{% endblock body %}

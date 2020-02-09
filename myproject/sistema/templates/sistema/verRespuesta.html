@@ -1,0 +1,74 @@
+{% extends 'sistema/base_site.html' %}
+{% block titulo %}
+Responder Encuesta
+{% endblock titulo %}
+{% block body %}
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+<form method="POST">
+    <script>
+        function myFunction(){
+            var rs = $('#oculto').val();
+            $.ajax({
+                url: '/sistema/respuestaList',
+                data: {
+                    'rs': rs,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var html = "";
+                  //la idea no es complicarme sino hacer algo asi 
+                  //pregunta : respuesta 
+                    $('#add').append('<div class="row form-group"> <div class="col col-md-5"><label class=" form-control-label">'+data['pregunta']['descripcion']+'</label></div> <div class="col col-md-4"><p>'+data['opcion']['opcion']+'</p> </div> </div> <hr class="line-separate">')
+
+                }
+            });
+        };
+    </script>
+    <div class="col-lg-11">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header">
+                <strong>Planilla para Ver </strong> Respuestas
+            </div>
+
+            <form method="POST" class="form-horizontal">
+                <div class="col col-md-12" id="add"> 
+                    <br>
+                    
+                    <select id="oculto" class="form-control" name='tipo' required>
+                        {% for respuesta in respuestas %}
+                            <option selected value="{{respuesta.id_respuesta}}">{{respuesta.id_respuesta}}</option>
+                            <script>myFunction()</script>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-success btn-sm">Volver</button>
+                        </div>
+                    </div>
+                
+            </form>
+        </div>
+    </div>
+</form>
+    <script>
+        $('#rango').change(function(){
+            console.log($(this).val());
+            //$('#rango').tooltip({'trigger':'focus', 'title': 'Password tooltip'});
+        });
+    </script>
+    <script>
+        $(document).ready(function(){
+            $('#oculto').hide();
+            $('#main-menu').remove(); 
+            $('#left-panel').remove();
+            $('#body').prop('class', "open");
+        });
+    </script> 
+    
+
+    
+{% endblock body %}

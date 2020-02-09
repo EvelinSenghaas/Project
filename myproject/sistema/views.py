@@ -36,12 +36,13 @@ def Home(request):
     #Tengo que ver de recuperar el ultimo registro de asistencia por reunion, si pasaron mas de 7 dias 
     #y no hubo un registro, ponerle falta al encargado
     usuario = request.user
+    usuarios = CustomUser.objects.all()
     miembro = Miembro.objects.get(dni=usuario.miembro_id)
     if miembro.sexo=="Femenino":
         sexo="Femenino"
     else:
         sexo="Masculino"
-    context ={'usuario':usuario,'sexo':sexo}
+    context ={'usuario':usuario,'sexo':sexo,'usuarios':usuarios}
     miembros=[]
     miembros.append(str(miembro.dni))
     # asunto="Wenas"

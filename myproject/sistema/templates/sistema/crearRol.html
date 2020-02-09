@@ -1,0 +1,127 @@
+{% extends 'sistema/base_site.html' %}
+{% load static %}
+
+{% block titulo %}Crear Rol{% endblock titulo %}
+
+{% block body %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <form method="POST">
+        {% csrf_token %} 
+        <div class="col-lg-11">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Planilla de Registro de </strong> Roles
+                </div>
+                
+                <div class="card-body">
+                        
+                            <div class="row form-group">
+                                    <div class="col-md-3"><label for="text-input">Nombre del Rol (*)</label></div>
+                                    <div class="col-md-5"><input type="text" name="nombre" id="nombre" class="form-control"</div>
+                                </div>
+                            <div class="wrapper">
+                                <div class="list">
+                                    <h3>Permisos:</h3>
+                                    <ul class="todo" id="todo">
+                                        {% for permiso in permisos %}
+                                            <li value="{{permiso.id_permiso}}">{{permiso.nombre}}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                <div class="list">
+                                    <h3>Permisos Otorgados:</h3>
+                                    <ul class="done">
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+
+                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                </div>
+                <div id="oculto" >
+                <select name="permisos" id="otorgados" multiple="multiple">
+                
+                </select>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<script>
+    $(document).ready(function(){   
+        $('#oculto').hide();
+        $('.todo').on('click', 'li', function(){ 
+            $(this).appendTo('.done');
+            var value=$(this)['0'].value;
+            var data = $(this).html();
+            var html = "";
+            html += "<option selected name='permisos[]' value=" + value + ">" + data + "</option>";
+            $('#otorgados').append(html);
+        });
+
+        $('.done').on('click', 'li', function(){    
+            $(this).appendTo('.todo');
+            var value = $(this)['0'].value;
+            $('#otorgados').find('option[value="'+ value +'"]').remove();
+        });
+    });
+</script>
+
+<script>
+    $("#nombre").change(function () {
+        var nombre = $(this).val();
+        console.log("oli");
+        $.ajax({
+            url: '{% url "sistema:validarRol" %}',
+            data: {
+                'nombre': nombre
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.is_taken) {
+                    $("#nombre").val('')
+                    alert(data['error_message'] );
+                }
+            }
+        });
+    });
+</script>
+
+<style>
+    body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    .list {
+    display: inline-block;
+    width: 330px;
+    vertical-align: top;
+    margin: 0 50px;
+    }
+
+    ul {
+    font-size: 18px;
+    background-color: #f5f5f2;
+    padding: 0;
+    min-height: 50px;
+    border: 1px solid #DBDBD3;
+    }
+
+    ul li {
+    color: #66665D;
+    list-style-type: none;
+    padding: 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #DBDBD3;
+    }
+
+    ul li:last-child {
+    border-bottom: none;
+    }
+
+    ul.done li {
+    color: #ABABA4;
+    }
+</style>
+{% endblock body %}

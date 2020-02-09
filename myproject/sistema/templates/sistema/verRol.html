@@ -1,0 +1,117 @@
+{% extends 'sistema/base_site.html' %}
+{% load static %}
+{% block body %}
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-inner">
+                <div class="row m-0">
+                    <div class="col-sm-4">
+                        <div class="page-header float-left">
+                            <div class="page-title">
+                                <h1>ROL</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="page-header float-right">
+                            <div class="page-title">
+                                <ol class="breadcrumb text-right">
+                                    <li><a href="/home">Home</a></li>
+                                    <li><a href="#">Rol</a></li>
+                                    <li class="active">Listado de Roles</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if messages %}
+        <div class="col-md-11">
+                <ul class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-danger">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                    </div>
+                {% endfor %}
+                </ul>
+        </div>
+        {% endif %}    
+
+        <div class="content">
+            <div class="animated fadeIn">
+                <div class="row">
+
+                    <div class="col-md-11">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong class="card-title">Listado de Roles</strong>
+                            </div>
+                            <div class="card-body">
+                                <table id="bootstrap-data-table" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nombre</th>
+                                            <th>Permisos</th>
+                                            <th>Estado</th>
+                                            <th> </th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if roles %}
+                                            {% for rol in roles %}
+                                                <tr>
+                                                    <td>{{forloop.counter}}</td>
+                                                    <td>{{rol.nombre}}</td>
+                                                    <td>
+                                                    {% for permiso in rol.permisos.all  %}
+                                                        {{permiso.nombre}}<br>
+                                                    {% endfor %}</td>
+                                                    {% if rol.borrado %}
+                                                        <td>Borrado</td>
+                                                    {% else %}
+                                                        <td>Activo</td>
+                                                    {% endif %}
+                                                    
+                                                    <td> 
+                                                        <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        
+                                                        <a href="/sistema/editarRol/{{rol.id_rol}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
+                                                        <a href="#myModal2"class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{rol.id_rol}}"><i class="fa fa-trash-o"></i></a>
+                                                        <!-- inicio del modal-->
+                                                            <div class="btn-group">
+                                                                <div class="modal fade bs-example-modal-lg2{{rol.id_rol}}" id="myModal2{{rol.id_rol}}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h4 class="modal-title" id="myModalLabel{{rol.id_rol}}">Confirmacion de Eliminacion</h4>
+                                                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <h4>Esta seguro de Eliminar la rol {{rol.nombre}} ?</h4>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                                <a href=" {% url 'sistema:eliminarRol' rol.id_rol%}" class="btn btn-primary" >Confirmar Eliminacion</a>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                        <!--Fin del modal-->
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- .animated -->
+        </div><!-- .content -->
+
+{% endblock body %}
