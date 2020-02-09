@@ -1,0 +1,44 @@
+{% extends 'sistema/base_site.html'%}
+{% load static %}
+{% block titulo %}
+    Enviar Mensajes
+{% endblock titulo %}
+{% block body %}
+    <form method="POST">
+        {% csrf_token %} 
+        <div class="col-lg-11">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Planilla Para Enviar</strong> Mensajes
+                </div>
+                <div class="card-body">
+                    <div class="row row-form-group">
+                        <div class="col col-md-3"><label for="text">Reunion</label></div>
+                        <div class="col col-md-4"><select name="rn" id="rn" class="js-example-basic-multiple  form-control" multiple="multiple">
+                            <option  value="Todos">Todos</option>
+                            {% for reunion in reuniones %}
+                                <option value="{{reunion.id_reunion}}">{{reunion.nombre}}</option>
+                            {% endfor %}
+                        </select></div>
+                    </div>
+                    <br>
+                    <div class="row row-form-group">
+                        <div class="col col-md-3"><label for="text">Mensaje</label></div>
+                        <div class="col col-md-4"><input type="text" class="form-control" name="mensaje"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                </div>
+                
+            </div>
+        </div>
+    </form>
+    
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="{% static 'assets/js/select2.min.js'%}"></script> 
+<script>
+    $(document).ready(function(){
+        $('#rn').select2();
+    });
+</script>
+{% endblock body %}

@@ -222,6 +222,9 @@ class Encuesta(models.Model):
     puntaje=models.IntegerField(null=True)
     respondio=models.BooleanField(null=True)
     history = HistoricalRecords()
+    def __str__(self):
+        return str(self.id_encuesta)
+    
 
 class Opciones(models.Model):
     id=models.AutoField(primary_key=True)

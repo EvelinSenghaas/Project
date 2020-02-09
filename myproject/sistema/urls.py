@@ -61,4 +61,6 @@ urlpatterns = [
     path("filtros_estado_reunion/", filtros_estado_reunion, name="filtros_estado_reunion"),
     path("filtros_asistencias/", filtros_asistencias, name="filtros_asistencias"),
     path("rolList/", rolList, name="rolList"),
+    path("estadoList/", estadoList, name="estadoList"),
+    path("enviarMensaje/", enviarMensaje, name="enviarMensaje"),
 ]

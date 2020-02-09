@@ -51,19 +51,28 @@ def enviarWhatsapp(mensaje,miembros):
     # to_whatsapp_number='whatsapp:+5493764706442'
     #5493764675702 hernan
     for miembro in miembros:
+        print('tiene whatsapp si ', miembro.telefono.whatsapp)
         if miembro.telefono.whatsapp == True:
+            if not(Mensaje.objects.filter(mensaje=mensaje).exists()):
+                mensaje=mensaje
+            else:
+                mensaje=mensaje + ' revisa tu correo para mas informacion'
             to_whatsapp_number = 'whatsapp:+549'+ str(miembro.telefono.prefijo)+str(miembro.telefono.numero)
-            mensaje=mensaje + ' revisa tu correo para mas informacion'
             message = client.messages.create(body=mensaje,from_= from_whatsapp_number,to=to_whatsapp_number)
+            
         else:
             #deberia ver el tema de telefono de contactos, pero veo si tiene mail
             if miembro.correo != None:
-                mensaje=Mensaje.objects.filter(mensaje=mensaje)[:1]
-                mensaje=Mensaje.objects.get(id=mensaje[0].id)
+                if not(Mensaje.objects.filter(mensaje=mensaje).exists()):
+                    tipo = Tipo_Mensaje.objects.get(id=1)
+                    mensaje = Mensaje(mensaje=mensaje,tipo=tipo)
+                else:
+                    mensaje=Mensaje.objects.filter(mensaje=mensaje)[:1]
+                    mensaje=Mensaje.objects.get(id=mensaje[0].id)
                 asunto=mensaje.tipo
                 mensaje=mensaje.mensaje
                 miembros=[]
                 miembros.append(miembro)
                 enviarMail(miembros,asunto,mensaje)
-                print("mira tu correo capa")
+            print("mira tu correo capa")
     

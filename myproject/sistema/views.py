@@ -38,11 +38,12 @@ def Home(request):
     usuario = request.user
     usuarios = CustomUser.objects.all()
     miembro = Miembro.objects.get(dni=usuario.miembro_id)
+    configuracion_form = Configuracion.objects.all().last()
     if miembro.sexo=="Femenino":
         sexo="Femenino"
     else:
         sexo="Masculino"
-    context ={'usuario':usuario,'sexo':sexo,'usuarios':usuarios}
+    context ={'usuario':usuario,'sexo':sexo,'usuarios':usuarios,'configuracion_form':configuracion_form}
     miembros=[]
     miembros.append(str(miembro.dni))
     # asunto="Wenas"
@@ -1068,6 +1069,24 @@ def auditoria_detalles_reunion(request,id,id_auditoria):
     print("DATA: ", data)
     return JSONResponse(data)
 
+def enviarMensaje(request):
+    reuniones=Reunion.objects.filter(borrado=False)
+    if request.method == 'POST':
+        rns=request.POST.getlist('rn')
+        print(rns)
+        if 'Todos' in rns:
+            miembros = Miembro.objects.filter(borrado=False)
+            mensaje=request.POST.get('mensaje')
+            enviarWhatsapp(mensaje,miembros)
+        else:
+            for reunion in rns:
+                reunion=Reunion.objects.get(id_reunion=reunion)
+                miembros = reunion.grupo.miembro.all()
+                mensaje=request.POST.get('mensaje')
+                enviarWhatsapp(mensaje,miembros)
+        print('en teoria envio')
+    return render(request,'sistema/enviarMensaje.html',{'reuniones':reuniones})
+
 @csrf_exempt
 def provinciasList(request):
     """
@@ -1330,6 +1349,37 @@ def rolList(request):
         result=dict()
         result = serializer.data
         return JSONResponse(result)
+    
+@csrf_exempt
+def estadoList(request):
+    usr= request.GET.get('usr')
+    print('usr ', usr)
+    usuario = CustomUser.objects.get(id=usr)
+    estado = Estado.objects.filter(usuario_id=usuario.id).order_by('-fecha').first()
+    data=[]
+    if estado != None:
+        print('estado ',estado)
+        encuesta = Encuesta.objects.filter(tipo_id=3,fecha_respuesta = estado.fecha,miembro_id=usuario.miembro.dni)
+        # encuesta = Encuesta.objects.get(id_encuesta=encuesta[0]['id_encuesta'])4
+        print('---------------------------')
+        print('encuesta ',encuesta[0])
+        link = '/sistema/verRespuesta/'+str(encuesta[0])
+        #bueno ya tengo el link y el estado ahora tengo que contar cuantas reuniones tiene
+        cant_r = Reunion.objects.filter(grupo__encargado=usuario.id,borrado=False)
+        cant_r = len(list(cant_r))
+        if estado.estado == 'Critico' and estado.confirmado == None:
+            estado.estado='Suspendido'
+        dic = {'link':link,'estado':estado.estado,'rn':cant_r}
+    else:
+        link=''
+        estado='Muy Bueno'
+        cant_r = Reunion.objects.filter(grupo__encargado=usuario.id,borrado=False)
+        cant_r = len(list(cant_r))
+        dic = {'link':link,'estado':estado,'rn':cant_r}
+    data.append(dic)
+    print("-----------------------------//-----------------------")
+    print('data: ',data)
+    return JSONResponse(data)
 
 @csrf_exempt
 def reunionList(request):
