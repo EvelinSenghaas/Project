@@ -253,7 +253,9 @@ class Configuracion(models.Model):
 class Permisos(models.Model):
     id_permiso=models.AutoField(primary_key=True)
     nombre=models.CharField('Permiso', max_length=100)
-
+    def __str__(self):
+        return self.nombre
+    
 class Rol(models.Model):
     id_rol=models.AutoField(primary_key=True)
     nombre=models.CharField("Nombre", max_length=50)

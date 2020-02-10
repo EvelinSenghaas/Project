@@ -5,8 +5,9 @@
         {% csrf_token %}
         <div class="col-lg-11">
                         <div class="card">
-                            <div class="card-header">
-                                <strong>Planilla de Registro de </strong> Miembros
+                            <div class="card-header" data-step="0" data-intro="Paso 0: Bienvenidos al tutorial para agregar miembros">
+                                <strong>Planilla de Registro de </strong> Miembros 
+                                <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                             </div>
                             {% if messages %}
                                         <div class="col-md-12">
@@ -24,26 +25,26 @@
                             
                                 <div class="card-body card-block">
 
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="1" data-intro="Paso 1: Debe ingresar su DNI sin puntos ni espacios">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Documento (*)</label></div>
                                         <div class="col col-md-3"><input type="number" id="dni" name="dni"  min ="1" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nombre (*)</label></div>
-                                        <div class="col-md-4"><input type="text" id="text-input" style="uppercase" name="nombre" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
+                                        <div class="col-md-4" data-step="2" data-intro="Paso 2: Aqui debe ingresar sus nombres"><input type="text" id="text-input" style="uppercase" name="nombre" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Apellido (*)</label></div>
-                                        <div class="col col-md-3"><input type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-3" data-step="3 " data-intro="Paso 3: Aqui debe ingresar sus apellidos"><input type="text" id="text-input" style="uppercase" name="apellido" placeholder="" class="form-control" onkeypress="return Solo_Texto(event);"><small class="form-text text-muted"></small></div>
                                         
                                         
                                     </div>
                             
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="4 " data-intro="Paso 4: Aqui debe ingresar la fecha de nacimientos, con el formato dd/mm/aaaa">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Fecha de Nacimiento (*)</label></div>
                                         <div class="col-12 col-md-4"><input type="date" id="fecha"  name="fecha_nacimiento" placeholder="dd/mm/aaaa" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
                                     
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="4 " data-intro="Paso 4: Aqui debes seleccionar su estado civil">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Estado_Civil (*)</label></div>
                                         <div class="col col-md-4"><select name="estado_civil" id="estado_civil" class="form-control">
                                             {% for estado in estado_civil_form %}
@@ -55,17 +56,17 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="email-input" class=" form-control-label">Email</label></div>
-                                        <div class="col-12 col-md-9"><input  type="email" id="email-input" name="correo" placeholder="" class="form-control"><small class="form-text text-muted">Example@example.com</small></div>
+                                        <div class="col-12 col-md-9" data-step="5 " data-intro="Paso 5: Aqui debe ingresar su correo, si no posee uno ponga el de algun contacto"><input  type="email" id="email-input" name="correo" placeholder="" class="form-control"><small class="form-text text-muted">Example@example.com</small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos (*)</label></div>
-                                        <div class="col-12 col-md-4"><input type="number" min="0" pattern="^[0-9]+" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-4" data-step="6" data-intro="Paso 6: Aqui debe ingresar la cantidad de hijos que posee, en caso de no tener hijos ingrese '0' "><input type="number" min="0" pattern="^[0-9]+" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label class="form-control-label">Trabaja (*)</label></div>
-                                            <div class="col col-md">
+                                            <div class="col col-md" data-step="7" data-intro="Paso 7: Aqui debe ingresar su situacion laboral, en caso trabaje debe presionar el si, notara que el radio quedara en negrita, esto significa que esa opcion esta seleccionada">
                                                 <div class="form-check">
                                                     <div class="radio">
                                                         <label for="radio1" class="form-check-label ">
@@ -82,7 +83,7 @@
                                             
                                             <div><label class="form-control-label">Sexo (*)</label></div>
                                             <div class="col col-md">
-                                                <div class="form-check">
+                                                <div class="form-check" data-step="8" data-intro="Paso 8: Aqui debe seleccionar su sexo biologico, si es Femenino debe seleccionar esa opcion, notara que la opcion esta seleccionada cuando queda en negrita">
                                                     <div class="radio">
                                                         <label for="radio1" class="form-check-label ">
                                                             <input type="radio" id="F" name="sexo" value="Femenino" class="form-check-input">Femenino
@@ -98,18 +99,18 @@
                                     </div>
                                     
                                     <br>
-                                    <strong>TELEFONO</strong>
+                                    <strong data-step="9" data-intro="Paso 9: Los Campos no son obligatorios, pero es recomendable que lo complete, en caso de no tener telefono, por favor ingrese el de algun contacto, si ese contacto es un miembro indiquelo abajo en la seccion 'Telefono de Contacto'">TELEFONO</strong>
                                     <br><br>
-                                    <div class="row form-group">   
+                                    <div class="row form-group" >   
                                         <div class ="col col-md-3"><label for="select" class="form-control-label">Tipo de Telefono</label></div>
-                                            <div class="col-12 col-md-4">
+                                            <div class="col-12 col-md-4" data-step="10" data-intro="Paso 10: Debe seleccionar el tipo de telefono que tiene, en caso de ser un celular seleccione 'Movil'" >
                                                 <select id="select" name='tipo' class="form-control">
                                                     <option value="Movil">Movil</option>
                                                     <option value="Fijo">Fijo</option>
                                                 </select>
                                             </div>
                                         <div class ="col col-md-1"><label for="select" class="form-control-label">Empresa</label></div>
-                                            <div class="col-12 col-md-4">
+                                            <div class="col-12 col-md-4" data-step="11" data-intro="Paso 11: Aqui debe ingresar la empresa a la que pertenece el telefono, en caso ser fijo seleccione 'Otro'" >
                                                 <select id="select" name='empresa' class="form-control">
                                                     <option value="Claro">Claro</option>
                                                     <option value="Personal">Personal</option>
@@ -121,16 +122,16 @@
                                     </div>
 
                                     <div class="row form-group">
-                                        <div class="col-12 col-md-3"><label for="text-input" class=" form-control-label">Prefijo</label></div>
-                                        <div class="col col-md-4"><input type="number" id="prefijo" min="0" name="prefijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
-                                        <div class="col col-md-1"><label for="text-input" class=" form-control-label">Nº Telefono</label></div>
-                                        <div class="col col-md-4"><input type="number" id="numero" min="0" name="numero" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col-12 col-md-3"><label for="text-input" class=" form-control-label">Codigo de Area</label></div>
+                                        <div class="col col-md-4" data-step="12" data-intro="Paso 12: Aqui debe ingresar el Codigo de Area, sin '0', '+' ni prefijos, por ejemplo si su localidad es Posadas: ingresar '3764' "><input type="number" id="prefijo" min="0" name="prefijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-1" ><label for="text-input" class=" form-control-label">Nº Telefono</label></div>
+                                        <div class="col col-md-4" data-step="13" data-intro="Paso 13: Ingrese solo su numero telefonico, el numero tiene 6 digitos"><input type="number" id="numero" min="0" name="numero" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                     </div>
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label class="form-control-label">Whatsapp</label></div>
                                             <div class="col col-md">
-                                                <div class="form-check">
+                                                <div class="form-check" data-step="14" data-intro="Paso 14: Debe indicar si posee whatsapp" >
                                                     <div class="radio">
                                                         <label for="radio1" class="form-check-label ">
                                                             <input type="radio" id="Si" name="whatsapp" value="True" class="form-check-input">Si
@@ -145,7 +146,7 @@
                                             </div>
                                     </div>
 
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="15" data-intro="Paso 15: Si desea puede indicar un telefono de contacto ">
                                         <div class="col col-md-3"><label class="form-control-label">Telefono De concatco</label></div>
                                         <div class="col col-md-4"><select id="select-miembro"  class="form-control">
                                             <option selected value=None> --------------</option>
@@ -160,7 +161,7 @@
                                     <strong>DOMICILIO</strong>
                                     <br><br>
 
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="16" data-intro="Paso 16: Seleccione la provincia y se cargaran las localidades que pertenecen a esa provincia">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
                                         <div class="col col-md-4"><select id="select-provincia" name='provincia' class="form-control">
                                             <option selected> --------------</option>
@@ -170,7 +171,7 @@
                                         </select>
                                         </div>
                                         <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                                        <button data-step="17" data-intro="Paso 17: Si la provincai no se encuentra en la lista puede agregarla presionando aqui " type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                                         +
                                         </button>
                                         <!-- inicio del modal-->
@@ -199,7 +200,7 @@
                                         <!--Fin del modal-->
                                     </div> 
                                     
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="18" data-intro="Paso 18: Seleccione la localidad a la que pertenece y se cargaran lo barrios que pertenecen a dicha localidad">
                                         
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
                                         <div class="col col-md-4"><select id="select-localidad" name='localidad' class="form-control">
@@ -210,7 +211,7 @@
                                             </select>
                                         </div>
                                         <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#localidadModal">
+                                        <button data-step="19" data-intro="Paso 19: Si no se encuentra la localidad a la que pertenece, la puede agregar aqui" type="button" class="btn btn-primary" data-toggle="modal" data-target="#localidadModal">
                                         +
                                         </button>
                                         <!-- inicio del modal-->
@@ -248,7 +249,7 @@
                                         <!--Fin del modal-->
                                     </div>
 
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="20" data-intro="Paso 20: Seleccione el barrio al que pertenece">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Barrio (*)</label></div>
                                         <div class="col col-md-4"><select id="select-barrios" name='barrio' class="form-control">
                                             <!--{% for barrio in barrio_form %}
@@ -257,7 +258,7 @@
                                             </select>
                                         </div>
                                         <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#barrioModal">
+                                        <button data-step="21" data-intro="Paso 21: Si no encuentra el barrio, puede agregarlo aqui" type="button" class="btn btn-primary" data-toggle="modal" data-target="#barrioModal">
                                         +
                                         </button>
                                         <!-- inicio del modal-->
@@ -298,21 +299,21 @@
 
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle (*)</label></div>
-                                        <div class="col col-md-5"><input type="text" id="text-input" min="0" name="calle" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-5" data-step="22" data-intro="Paso 22: Debe ingresar su calle "><input type="text" id="text-input" min="0" name="calle" placeholder="" class="form-control"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Nº (*)</label></div>
-                                        <div class="col col-md-2"><input type="text" id="text-input" name="nro" min="0" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-2"><input data-step="23" data-intro="Paso 23: Debe ingresar su numero de casa" type="text" id="text-input" name="nro" min="0" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
                                         <div><label for="text-input" class=" form-control-label">Mz</label></div>
                                         <div class="col col-md-2"><input type="text" id="text-input" name="mz" placeholder="" min="0" class="form-control"></small></div>
                                     </div>
                                     <div class="row form-group">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
-                                        <div class="col col-md-2"><input type="text" id="text-input" name="departamento" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-2"><input data-step="24" data-intro="Paso 24: En caso que viva en departamento indique en que numero" type="text" id="text-input" name="departamento" placeholder="" class="form-control"></small></div>
                                         <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
-                                        <div class="col col-md-2"><input type="text" id="text-input" name="piso" placeholder="" class="form-control"></small></div>
+                                        <div class="col col-md-2"><input data-step="25" data-intro="Paso 25: En caso que viva en departamento, indique en que piso" type="text" id="text-input" name="piso" placeholder="" class="form-control"></small></div>
                                     </div>
                                     
                                     <br>
-                                    <strong>HORARIO DISPONIBLE</strong>
+                                    <strong data-step="26" data-intro="Paso 26: A continuacion debe indicar el dia que la persona tiene libre, para poder organizar reuniones en base a esos horarios "> HORARIO DISPONIBLE</strong>
                                     <br><br>
                                     {% if horario_form  %}
                                         {% for field in horario_form %}
@@ -330,10 +331,10 @@
 
                             <div class="card">
                                 <div class="card-body">
-                                    <button type="submit" class="btn btn-success btn-sm" name= "btn-crear-miembro">Confirmar</button>
+                                    <button data-step="27" data-intro="Paso 27: Una vez que haya cargado todos los datos puede presionar 'Confirmar' " type="submit" class="btn btn-success btn-sm" name= "btn-crear-miembro">Confirmar</button>
                                 </div>
                             </div>
-                            <div class="card-footer">
+                            <div class="card-footer" data-step="28" data-intro="Paso 28: En caso quiera limpiar todos los campos puede presionar 'limpiar' ">
                                 <button type="reset" class="btn btn-danger btn-sm">
                                     <i class="fa fa-ban"></i> Limpiar
                                 </button>

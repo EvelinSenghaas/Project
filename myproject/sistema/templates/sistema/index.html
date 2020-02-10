@@ -14,7 +14,6 @@
             },
             dataType: 'json',
             success: function(data) {
-                console.log(data);
                 $('#cant-'+usr).html(data[0]['rn']);
                 if(data[0]['estado']=='Muy Bueno' || data[0]['estado']=='Bueno' || data[0]['estado']=='Medio'){
                     $('#estado-'+usr).attr("class","badge badge-complete");
@@ -44,7 +43,8 @@
     };
 </script>
         <!-- Content -->
-        <div class="content">
+        <div class="content" >
+            <div class="row">
             <center>
             {% if sexo == "Femenino" %}
                 <h2><strong>Bienvenida {{usuario}}</strong> que tengas un lindo dia!</h2>
@@ -54,7 +54,8 @@
             {% endif %}
             <br>
             </center>
-
+            </div>
+            
             <!-- Animated -->
             <div class="animated fadeIn">
                 
@@ -199,6 +200,7 @@
             </div>
             <!-- .animated -->
         </div>
+        
         <input type="hidden" id="titulo" value= "{{configuracion_form.titulo}}" class="titulo_reporte">
         <input type="hidden" id="telefono" value = "{{configuracion_form.telefono}}" class="telefono_reporte">
         <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
