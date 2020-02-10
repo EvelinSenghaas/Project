@@ -141,6 +141,11 @@ def auditoriaReunion(request):
     context = {'auditoria_reunion': auditoria_reunion}
     return render(request, 'sistema/auditoriaReunion.html', context)
 
+def auditoriaAsistencia(request):
+    auditoria_asistencia = Asistencia.history.all()
+    context = {'auditoria_asistencia': auditoria_asistencia}
+    return render(request, 'sistema/auditoriaAsistencia.html', context)
+
 def configuracion(request):
     if request.method == 'POST':
         configuracion_form = ConfiguracionForm(request.POST)
@@ -589,6 +594,7 @@ def editarAsistencia(request,id_asistencia):
             ast.presente = asistio
             edito = True
         if edito == True:
+            ast.changeReason="Modificacion"
             ast.save()
         return redirect('/sistema/verAsistencia')
     
@@ -1087,6 +1093,25 @@ def auditoria_detalles_reunion(request,id,id_auditoria):
         data=[{'change':False}]
     print("DATA: ", data)
     return JSONResponse(data)
+
+def auditoria_detalles_asistencia(request,id_asistencia,id_auditoria):
+    auditoria_historial = Asistencia.history.filter(id_asistencia=id_asistencia)
+    historial = Asistencia.history.filter(id_asistencia=id_asistencia)
+    if len(auditoria_historial) > 1:
+        for i in range(len(historial)): 
+            if historial[i].history_id == id_auditoria:  
+                audit_regsolo = historial[i]    
+                delta = audit_regsolo.diff_against(auditoria_historial[i+1])
+                data = []            
+                for change in delta.changes:
+                    dic = {'change': change.field, 'old':change.old, 'new':change.new}
+                    data.append(dic)
+                break
+            else:
+                data = []
+    else:
+        data=[{'change':False}]
+    return JSONResponse(data)    
 
 def enviarMensaje(request):
     reuniones=Reunion.objects.filter(borrado=False)
