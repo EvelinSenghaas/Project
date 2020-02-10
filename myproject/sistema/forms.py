@@ -25,6 +25,7 @@ class Tipo_ReunionForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'descripcion': forms.TextInput(attrs={'class':' form-control'}),
         }
+
 class Estado_CivilForm(forms.ModelForm):
     class Meta:
         model=Estado_Civil

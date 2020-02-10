@@ -8,13 +8,14 @@
         {% csrf_token %} 
         <div class="col-lg-11">
             <div class="card">
-                <div class="card-header">
-                    <strong>Planilla Para Enviar</strong> Mensajes
+                <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para emitir comunicados">
+                    <strong>Planilla Para Emitir</strong> Comunicados
+                    <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                 </div>
-                <div class="card-body">
+                <div class="card-body" data-step="2" data-intro="Paso 2: Usted podra enviar mensajes a su reunion, por ejemplo para avisar su inasistencia o a todaas las personas para realizar una invitacion o aviso">
                     <div class="row row-form-group">
                         <div class="col col-md-3"><label for="text">Reunion</label></div>
-                        <div class="col col-md-4"><select name="rn" id="rn" class="js-example-basic-multiple  form-control" multiple="multiple">
+                        <div class="col col-md-11" data-step="3" data-intro="Paso 3: Aqui debe indicar para quienes sera enviado el mensaje, pueden ser muchas reuniones! tenga en cuenta que si selecciona la opcion 'Todos' sera enviado a todos los miembros, incluso lo que no estan en ninguna reunion"><select required name="rn" id="rn" class="js-example-basic-multiple  form-control" multiple="multiple">
                             <option  value="Todos">Todos</option>
                             {% for reunion in reuniones %}
                                 <option value="{{reunion.id_reunion}}">{{reunion.nombre}}</option>
@@ -22,12 +23,17 @@
                         </select></div>
                     </div>
                     <br>
-                    <div class="row row-form-group">
-                        <div class="col col-md-3"><label for="text">Mensaje</label></div>
-                        <div class="col col-md-4"><input type="text" class="form-control" name="mensaje"></div>
+                    <div class="row row-form-group" data-step="4" data-intro="Paso 4: Aqui debes escribir tu mensaje">
+                        <div class="col col-md-3"><label for="text" required> Mensaje</label></div>
+                        <br>
+                        <div class="col col-md-11"><input type="text" class="form-control" name="mensaje"></div>
                     </div>
-
-                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    
+                    <br>
+                    <br>
+                    <div align="right">
+                    <button data-step="5" data-intro="Paso 5: Cuando haya seleccionado el destino y el mensaje presione 'Confirmar'"  type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    </div>
                 </div>
                 
             </div>
