@@ -5,12 +5,14 @@
 {% endblock titulo %}
 {% block body %}
         <form method="POST" class="form-horizontal">
+            <script src="http://code.jquery.com/jquery-latest.js"></script>
             <div class="col-lg-11">
                 {% csrf_token %}
                 <div class="card">
-                    <form method="POST" class="form-horizontal">
-                        <div class="card-header">
+                    <form method="POST" class="form-horizontal" >
+                        <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para crear Reuniones, los campos con '(*)' son obligatorios">
                                 <strong>Planilla de Registro de </strong> Reuniones
+                                <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                         </div>
                         
                         
@@ -19,24 +21,25 @@
                             <div "col col-md-4"><input type="text" onkeypress="return Solo_Texto(event);" class="form-control"></div>
                         </div>     {% endcomment %}
 
-                        <div class="card-body card-block">
-                        {% for field in reunion_form %}
-                        <div class="row form-group">
-                            <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
-                            <div class = "col col-md-4">{{field}}</div>
+                        <div class="card-body card-block" >
+                        <div data-step="2" data-intro="Paso 2: Escriba el nombre de la reunion, seleccione el tipo de reunion y el grupo que pertenecera a la reunion">
+                            {% for field in reunion_form %}
+                                <div class="row form-group">
+                                    <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}} (*)</label></div>
+                                    <div class = "col col-md-4">{{field}}</div>
+                                </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                         <br>
                         <strong>Lugar de la Reunion</strong>
                         <br><br>
 
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="3" data-intro="Paso 3: seleccione la provincia en donde se hara la reunion">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
-                                        <div class="col col-md-4">{{localidad_form.provincia}}
-                                            </div>
+                                        <div class="col col-md-4">{{localidad_form.provincia}}</div>
                                     </div>    
 
-                                    <div class="row form-group">
+                                    <div class="row form-group" data-step="4" data-intro="Paso 4: Seleccione la localidad y el barrio donde se dara la reunion">
                                         
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
                                         <div class="col col-md-4">{{barrio_form.localidad}}
@@ -47,7 +50,7 @@
                                         </div>
                                         
                                     </div>
-                        <div class="row form-group">
+                        <div class="row form-group" data-step="5" data-intro="Paso 5: Escriba la o las calles, el numero de casa y la manzana del lugar donde se dara la reunion">
                             <div class="col col-md-2"><label for="text-input" class=" form-control-label">Calle</label></div>
                             <div class="col col-md-5">{{domicilio_form.calle}}</div>
                             <div><label for="text-input" class=" form-control-label">Nº</label></div>
@@ -55,7 +58,7 @@
                             <div><label for="text-input" class=" form-control-label">Mz</label></div>
                             <div class="col col-md-2">{{domicilio_form.mz}}</div>
                         </div>
-                        <div class="row form-group">
+                        <div class="row form-group" data-step="6" data-intro="Paso 6: Si la reunion se da en un departamento escriba el numero y el piso ">
                             <div class="col col-md-2"><label for="text-input" class=" form-control-label">Departamento</label></div>
                             <div class="col col-md-2">{{domicilio_form.departamento}}</div>
                             <div class="col col-md-1"><label for="text-input" class=" form-control-label">Piso</label></div>
@@ -63,7 +66,7 @@
                         </div>
 
                         <br>
-                            <strong>HORARIO</strong>
+                            <strong data-step="7" data-intro="Paso 7:  escriba el horario de la reunion">HORARIO</strong>
                         <br><br>
                         {% if horario_form  %}
                             {% for field in horario_form %}
@@ -75,7 +78,7 @@
                         {% endif %}
                                                 
                         <div class="card-body">
-                            <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                            <button data-step="8" data-intro="Paso 8: Una vez cargados todos los datos obligatorios, presione confirmar" type="submit" class="btn btn-success btn-sm">Confirmar</button>
                         </div>
                         </div>
                     </form>
