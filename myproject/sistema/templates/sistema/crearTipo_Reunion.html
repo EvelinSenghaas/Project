@@ -8,10 +8,11 @@
         {% csrf_token %} 
         <div class="col-lg-11">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenido al tutorial para crear tipo de reuniones" >
                     <strong>Planilla de Registro de </strong> Tipo de Reuniones
+                    <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                 </div>
-                <div class="card-body">
+                <div class="card-body" data-step="2" data-intro="Paso 2: A continuacion ingrese el nombre del tipo de reunion y una breve descripcion si lo deseea" >
                         {% if messages %}
                             <div class="col-md-12">
                                 <ul class="messages">
@@ -27,7 +28,7 @@
                             </div>
                         {% endif %}
                     {{tipo_reunion_form.as_p}}
-                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    <button data-step="3" data-intro="Paso 3: Una vez completados los campos presione 'Confirmar' " type="submit" class="btn btn-success btn-sm">Confirmar</button>
                 </div>
                 
             </div>

@@ -21,7 +21,10 @@ class Tipo_ReunionForm(forms.ModelForm):
     class Meta:
         model=Tipo_Reunion
         fields=['nombre','descripcion']
-
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class':'form-control'}),
+            'descripcion': forms.TextInput(attrs={'class':' form-control'}),
+        }
 class Estado_CivilForm(forms.ModelForm):
     class Meta:
         model=Estado_Civil
@@ -107,6 +110,7 @@ class AsistenciaForm(forms.ModelForm):
         widgets = {
             'fecha':forms.DateInput(attrs={'id':'id-ast','class':'form-control','type':'date'}),
         }
+
 class Tipo_TelefonoForm(forms.ModelForm): 
     class Meta:
         model = Tipo_Telefono
