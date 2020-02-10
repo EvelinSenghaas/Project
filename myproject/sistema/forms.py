@@ -104,7 +104,9 @@ class AsistenciaForm(forms.ModelForm):
     class Meta:
         model=Asistencia
         fields=['miembro','reunion','fecha']
-
+        widgets = {
+            'fecha':forms.DateInput(attrs={'id':'id-ast','class':'form-control','type':'date'}),
+        }
 class Tipo_TelefonoForm(forms.ModelForm): 
     class Meta:
         model = Tipo_Telefono

@@ -575,6 +575,25 @@ def agregarAsistencia(request):
         miembro_form=Miembro.objects.all()
     return render(request,'sistema/agregarAsistencia.html',{'miembro_form':miembro_form,'asistencia_form':asistencia_form,'reunion_form':reunion_form})
 
+def editarAsistencia(request,id_asistencia):
+    ast = Asistencia.objects.get(id_asistencia=id_asistencia)
+    asistencia = AsistenciaForm(instance=ast)
+    if request.method == 'POST':
+        edito = False
+        fecha=request.POST.get('fecha')
+        if ast.fecha != fecha:
+            ast.fecha = fecha
+            edito = True
+        asistio = request.POST.get('asistio')
+        if ast.presente != asistio:
+            ast.presente = asistio
+            edito = True
+        if edito == True:
+            ast.save()
+        return redirect('/sistema/verAsistencia')
+    
+    return render(request,'sistema/editarAsistencia.html',{'ast':ast,'asistencia':asistencia})
+
 def verAsistencia(request):
     if request.method == 'POST':
         print('wenas')

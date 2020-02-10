@@ -32,6 +32,7 @@
                                                         <th>Fecha</th>
                                                         <th>Reunion</th>
                                                         <th>Presente</th>
+                                                        <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="my-tabla"> 
@@ -47,7 +48,7 @@
                                                             {%else%}
                                                                 <td class="cosito cosito-falto">Faltó</td>
                                                             {%endif%}
-                                                            
+                                                            <td><a href="/sistema/editarAsistencia/{{ast.id_asistencia}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a></td>
                                                         </tr>
                                                     {% endfor %} 
                                                 </tbody>
@@ -87,10 +88,29 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
     
                         
-
+    {% comment %} <script>
+    $(document).ready(function() {
+    $('#tablitax').DataTable( {
+        "language": {
+            "lengthMenu": "Mostrando _MENU_ registros",
+            "zeroRecords": "No hay registros encontrados - lo sentimos",
+            "info": "Mostrando pagina _PAGE_ de _PAGES_",
+            "infoEmpty": "No hay registros disponibles",
+        }
+    } );
+} );
+    </script> {% endcomment %}
     <script type="text/javascript">
         $(document).ready(function() {
             $('#tablitax').DataTable({
+                "language": {
+                    "lengthMenu": "Mostrando _MENU_ registros",
+                    "zeroRecords": "No hay registros encontrados - Lo Sentimos =( ",
+                    "info": "Mostrando pagina _PAGE_ de _PAGES_",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(Filtrado de _MAX_ registros en Total)",
+                    "search":"Buscar",
+                },
                 initComplete: function() {
                 this.api().columns().every(function() {
                     var column = this;
@@ -111,7 +131,7 @@
                 });
                 }
             });
-    } );
+        } );
     </script>
     
 {% endblock body %}

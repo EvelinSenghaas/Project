@@ -2,7 +2,7 @@
 {% extends 'sistema/base_site.html' %}
 {% load static %}
 {% block titulo %}
-    Agregar Asistencia
+    Editar Asistencia
 {% endblock titulo %}
 {% block body %}
     <form method="POST">
@@ -13,75 +13,39 @@
             <form method="POST" class="form-horizontal">
             <div class="card-body card-block">
                 <div class="card-body">
-                    {% if messages %}
-                        <div class="col-md-12">
-                            <ul class="messages">
-                            {% for message in messages %}
-                                <div class="alert alert-danger">
-                                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                                        <p {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-                                </div>
-                            {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
 
                     <div class="row form-group">
                         <div class="col col-md-2"><label for="text-input"  class=" form-control-label" > Fecha (*)</label></div>
-                        <div class="col col-md-4"><input required  type="date" id="date-input" name="fecha" placeholder="dd/mm/aaaa" class="form-control"></div>
+                        <div class="col col-md-4"><input id="fecha" type="date" name="fecha" class ="form-control" value="{{asistencia.fecha.value|date:"Y-m-d"}}"></div>
+                        
+
                     </div>
 
                     <div class="row form-group">
                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion (*)</label></div>
-                        <div class="col col-md-4"><select id="reunion" name='reunion' class="form-control" required>
-                            <option selected value=None> --------------</option>
-                            {% for reunion in reunion_form %}
-                                <option value='{{reunion.id_reunion}}'>{{reunion.nombre}}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="col col-md-4"><input type="text" readonly="readonly" class="form-control" value="{{ast.reunion}}">
                         </div>
                     </div>
-
+                    <br>
                     <div class="row form-group">
-                        <div class="col col-md-2"><label for="text-input" class=" form-control-label">Hubo Reunion? (*)</label></div>
+                        <div class="col col-md-5"><label for="text-input" class=" form-control-label">El Miembro {{ast.miembro}} asistió ? (*)</label></div>
                         <div class="col col-md">
                             <div class="form-check">
                                 <div class="radio">
-                                    <label for="radio1" class="form-check-label ">
-                                        <input type="radio" id="ast-e1" name="ast-encargado" value="True" class="ast-eorm-check-input">Si
+                                    <label for="radio1" class="form-check-label">
+                                        <input required type="radio" id="ast-e1" name="asistio" value="True" class="form-check-input"> Si
                                     </label>
                                         </div>
                                 <div class="radio">
                                     <label for="radio2" class="form-check-label ">
-                                        <input type="radio" id="ast-e2" name="ast-encargado" value="False" class="form-check-input">No
+                                        <input type="radio" id="ast-e2" name="asistio" value="False" class="form-check-input"> No
                                     </label>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row form-group" id="tbl">
-                        <table id="tabla-miembros" class="table table-striped table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Apellido</th>
-                                    <th>Presente <input type="checkbox" name="all" id="select-all" /></label></th>
-                                </tr>
-                            </thead>
-                            <tbody id="mi-tabla"> 
-                                {% comment %} {% for miembro in miembro_form %}
-                                    <tr>
-                                        <td></td>
-                                        <td>{{miembro.nombre}}</td>
-                                        <td>{{miembro.apellido}}</td>
-                                        <td><input type="checkbox" name="check[]" value="{{miembro.dni}}" /></td>
-                                    </tr>
-                                {% endfor %} {% endcomment %}
-                                
-                            </tbody>
-                        </table>
-                    </div>
+                    
                     <button type = "submit">Crear</button>
                 </div>
                 </div>
@@ -97,6 +61,11 @@
             $('[type="date"]').prop('max', function(){
                 return new Date().toJSON().split('T')[0];
             });
+            //var fecha =$('#fecha').val()
+            //console.log(fecha);
+            /*var f = new Date("02/02/2018").toJSON().split('T')[0];
+            console.log(f);
+            $('[type="date"]').prop("value",f);*/
         });
     </script>
     <script>
