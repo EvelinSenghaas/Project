@@ -9,17 +9,18 @@
         <div class="col-lg-11">
         
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para crear grupos, los campos con '(*)' son obligatorios" >
                                 <strong>Planilla de Registro de </strong> Grupos
+                                <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                             </div>
                             <form method="POST" class="form-horizontal">
                                     
-                                <div class="row form-group">
+                                <div class="row form-group" data-step="2" data-intro="Paso 2: Debe ingresar el nombre del grupo, este nombre no debe ser repetido, en caso exista otro grupo con el mismo nombre se le notificara">
                                     <div class="col-md-3"><label for="text-input">Nombre del Grupo (*)</label></div>
                                     <div class="col-md-5"><input type="text" id="nombre" class="form-control" name="nombre"></div>
                                 </div>
 
-                                <div class="row form-group">
+                                <div class="row form-group" data-step="3" data-intro="Paso 3: Debe seleccionar que usuario es el encargado del grupo">
                                     <div class="col-md-3"><label for="text-input">Encargado(*)</label></div>
                                     <div class="col-md-5">
                                         <select required id="encargado" class="form-control" name="encargado">
@@ -32,7 +33,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="row form-group">
+                                <div class="row form-group" data-step="4" data-intro="Paso 4: Debe seleccionar para que personas es el grupo, por ejemplo: si es un grupo de mujeres seleccione 'Femenino'">
                                     <div class="col-md-3"><label for="text-input">Sexo(*)</label></div>
                                     <div class="col-md-5">
                                         <select id="sexo" class="form-control" name="sexo">
@@ -47,7 +48,7 @@
                                 <br>
                                     <div class="col-md-4"><strong>EDAD</strong></div>
                                 <br>
-                                <div class="row form-group">
+                                <div class="row form-group" data-step="5" data-intro="Paso 5: Debe indicar el rango etario del grupo">
                                     <div class="col-md-3"><label id="edad-desde" for="text-input">Desde (*)</label></div>
                                     <div class="col-md-3">{{grupo_form.desde}}</div>
                                     <div class="col-md-1"><label id="edad-hasta" for="text-input">Hasta(*)</label></div>
@@ -58,7 +59,7 @@
                                     <div class="col-md-5"><strong>MIEMBROS</strong></div>
                                 <br>
 
-                                <div class="row form-group">
+                                <div class="row form-group" data-step="6" data-intro="Paso 6: Una vez seleccionado el sexo y el rango etario puede seleccionar los miembros, lo puede buscar si conoce su nombre escribiedo">
                                     <div class="col-md-3"><label for="text-input"></label></div>
                                     <div class="col-md-7">
                                     <select required id="select-miembro" class="js-example-basic-multiple  form-control" name="miembro" multiple="multiple">
@@ -68,7 +69,7 @@
                                     
                                 </div>
                                 <div class="card">
-                                    <div class="card-body">
+                                    <div class="card-body" data-step="7" data-intro="Paso 7: Una vez cargados todos los datos obligatorios puede presionar Confirmar ">
                                         <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
                                     </div>
                                 </div>
