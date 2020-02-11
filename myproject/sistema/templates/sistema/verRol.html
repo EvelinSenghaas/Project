@@ -7,7 +7,7 @@
                     <div class="col-sm-4">
                         <div class="page-header float-left">
                             <div class="page-title">
-                                <h1>ROL</h1>
+                                <h1>Rol</h1>
                             </div>
                         </div>
                     </div>
@@ -44,18 +44,19 @@
 
                     <div class="col-md-11">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para ver Roles" >
                                 <strong class="card-title">Listado de Roles</strong>
+                                <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                             </div>
                             <div class="card-body">
-                                <table id="bootstrap-data-table" class="table table-striped table-bordered">
-                                    <thead>
+                                <table id="tablita" class="table table-striped table-bordered">
+                                    <thead data-step="2" data-intro="Paso 2: Aqui puedes ver los roles y los permisos que actualmente existen, si quieres uno en especifo puedes buscarlo en 'Buscar'">
                                         <tr>
                                             <th>#</th>
-                                            <th>Nombre</th>
+                                            <th data-step="3" data-intro="Paso 3: Puedes usar las flechitas de la derecha  para ordenar los registros">Nombre</th>
                                             <th>Permisos</th>
                                             <th>Estado</th>
-                                            <th> </th>
+                                            <th data-step="4" data-intro="Paso 4: Puedes Editar y desactivar Roles"> </th>
                                             
                                         </tr>
                                     </thead>
@@ -76,7 +77,7 @@
                                                     {% endif %}
                                                     
                                                     <td> 
-                                                        <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                        
+                                                        {% comment %} <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                         {% endcomment %}
                                                         <a href="/sistema/editarRol/{{rol.id_rol}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
                                                         <a href="#myModal2"class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{rol.id_rol}}"><i class="fa fa-trash-o"></i></a>
                                                         <!-- inicio del modal-->
@@ -114,4 +115,10 @@
             </div><!-- .animated -->
         </div><!-- .content -->
 
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
+    
 {% endblock body %}
