@@ -9,19 +9,20 @@
                 {% csrf_token %}
                 <div class="card">
                     <form method="POST" class="form-horizontal">
-                        <div class="card-header">
-                                <strong> Planilla de Auditorias de </strong> Miembros
+                        <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para ver Auditorias de Miembros, usted utilizando 'Buscar' podra buscar a un miembro, o a miembros con determinados movimientos y podra imprimirlos presionando 'PDF' ">
+                            <strong> Planilla de Auditorias de </strong> Miembros
+                            <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                         </div>
                         
                         <div class="card-body card-block">
-                        <table id="midatatable" class="table table-striped table-bordered">
+                        <table id="tablita" class="table table-striped table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Usuario</th>  
+                                    <th data-step="2" data-intro="Puedes Ordenar los registros utilizando las flechitas de la derecha ">Usuario</th>  
                                     <th>Miembro</th>
                                     <th>Movimiento</th>
-                                    <th>Fecha</th>
-                                    <th>Hora</th>                             
+                                    <th>Fecha | Hora</th>
+                                    <th data-step="3" data-intro="Paso 3: Podras Ver detalles apretando el ojito azul"></th>                             
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,7 +77,14 @@
     
     
     <script src="http://code.jquery.com/jquery-latest.js"></script> 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>      
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>    
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
+    
     <script>
         function modal_detalle_miembro(dni,id_history) {
             console.log(dni);
