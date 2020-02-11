@@ -21,13 +21,13 @@
                     <li class="active">
                         <a href="/Home"><i class="menu-icon fa fa-laptop"></i>Home </a>
                     </li>
-                    <script>inicial()</script>
+                    
 
                     <li id="miembros-titulo" class="menu-title">Miembros</li><!-- /.menu-title -->
                     <li class="menu-item-has-children dropdown">
                         <a id="miembros" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-user"></i>Miembros</a>
-                        <ul class="sub-menu children dropdown-menu">
-                            <li id = "1"><i class="fa fa-plus-square"></i><a href="/sistema/crearMiembro">Agregar Miembro</a></li>
+                        <ul id="1.5" class="sub-menu children dropdown-menu">
+                            <div id="oli"><li id ="1" ><i class="fa fa-plus-square"></i><a href="/sistema/crearMiembro">Agregar Miembro</a></li></div>
                             <li id ="4" ><i class="fa fa-bars"></i><a href="/sistema/listarMiembro">Ver Miembros</a></li> <!--aca esta el editar y eliminar-->
                             <!--<li><i class="fa fa-id-card-o"></i><a href="ui-cards.html">Cards</a></li>-->
                         </ul>
@@ -117,6 +117,7 @@
                             <li id="35"><i class="menu-icon fa fa-sign-in"></i><a href="/accounts/signup">Registrar Usuario</a></li>
                         </ul>
                     </li>
+                    <script>inicial()</script>
                     {% for pr in user.rol.permisos.all %}
                         <script> myFunction("{{pr.id_permiso}}") </script>
                     {% endfor %}
