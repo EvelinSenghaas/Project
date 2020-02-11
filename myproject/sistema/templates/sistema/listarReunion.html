@@ -1,6 +1,44 @@
 {% extends 'sistema/base_site.html' %}
 {% load static %}
 {% block body %}
+    <script src="http://code.jquery.com/jquery-latest.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>    
+    <script>
+        function modal_estado_reunion(id_reunion){
+            console.log(id_reunion);
+            var rn = id_reunion;
+            console.log('rn '+rn);
+            $.ajax({
+                url: '/sistema/recomendacion/',
+                data: {
+                    'rn':id_reunion,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var html = "";
+                    if (data=='') {
+                        html+= "<h4> Aun no hay datos sobre el estado de la reunion </h4>";
+                        $('.detalle').html(html);
+                    }else{
+                        html += "<strong> A continuacion te mostraremos cosas que observamos en la Reunion</strong> <br>";
+                        if (data[0]['mejora']==true){
+                            html+= "<br><h4> - Se observan mejoras en la reunion </h4>";
+                        }else{
+                            html+= "<br><h4> - No se observan mejoras en la reunion </h4>";
+                        }
+                        html += "<br><h5><strong> Las siguientes preguntas obtuvieron una respuesta no esperada <strong> </h5> <br>";
+                        for (var i = 0; i < data.length; i++) {
+                            console.log(data[i]);
+                            html += "<h4>"+ data[i]['pregunta']+"</h4>";
+                            html += "<h4> Respuesta: "+ data[i]['opcion']+"</h4>";
+                            html += '<hr class="line-separate">' ;
+                        }
+                        $('.detalle').html(html);
+                    }
+                }
+            });
+        };
+    </script>
         <div class="breadcrumbs">
             <div class="breadcrumbs-inner">
                 <div class="row m-0">
@@ -63,9 +101,30 @@
                                                     <!--<td>{{reunion.domicilio}}</td>-->
                                                     <td>{{reunion.grupo}}</td>
                                                     <td> 
-                                                        {% comment %} <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                         {% endcomment %}
+                                                        <a href="#myModal1" class="btn btn-outline-primary btn-sm" onclick="modal_estado_reunion({{reunion.id_reunion}});" data-toggle="modal" data-target=".bs-example-modal-lg1{{reunion.id_reunion}}"><i class="fa fa-eye"></i></a>
+                                                        <!-- inicio del modal-->
+                                                            <div class="btn-group">
+                                                                <div class="modal fade bs-example-modal-lg1{{reunion.id_reunion}}" id="myModal1{{reunion.id_reunion}}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h4 class="modal-title" id="myModalLabel{{reunion.id_reunion}}"> <strong> Ver Estado de Reunion </strong></h4>
+                                                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                                                            </div>
+                                                                            <div  id="modal-estado"class="modal-body detalle">
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                        <!--Fin del modal-->
+
                                                         <a href="/sistema/editarReunion/{{reunion.id_reunion}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
-                                                        <a href="#myModal2"class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{reunion.id_reunion}}"><i class="fa fa-trash-o"></i></a>
+                                                        
+                                                        <a href="#myModal2" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{reunion.id_reunion}}"><i class="fa fa-trash-o"></i></a>
                                                         <!-- inicio del modal-->
                                                             <div class="btn-group">
                                                                 <div class="modal fade bs-example-modal-lg2{{reunion.id_reunion}}" id="myModal2{{reunion.id_reunion}}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -79,7 +138,7 @@
                                                                                 <h4>Esta seguro de Eliminar la Reunion {{reunion.nombre}} ?</h4>
                                                                             </div>
                                                                             <div class="modal-footer">
-                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                                                                                 <a href=" {% url 'sistema:eliminarReunion' reunion.id_reunion%}" class="btn btn-primary" >Confirmar Eliminacion</a>
                                                                             </div>
                                                                             
@@ -119,6 +178,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
+    
     
     
 {% endblock body %}

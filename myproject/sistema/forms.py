@@ -47,7 +47,7 @@ class ReunionForm(forms.ModelForm):
             'nombre':'Nombre'
         }
         widgets = {
-            'nombre': forms.TextInput(attrs={'class':'form-control','onkeypress':'return Solo_Texto(event);'}),
+            'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'tipo_reunion':  forms.Select(attrs={'class':'form-control'}),
             'grupo': forms.Select(attrs={'class':'form-control'}),
         }

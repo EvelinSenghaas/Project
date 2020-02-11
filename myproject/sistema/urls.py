@@ -66,4 +66,5 @@ urlpatterns = [
     path("estadoList/", estadoList, name="estadoList"),
     path("enviarMensaje/", enviarMensaje, name="enviarMensaje"),
     path("editarAsistencia/<int:id_asistencia>", editarAsistencia, name="editarAsistencia"),
+    path("recomendacion/", recomendacion, name="recomendacion"),
 ]

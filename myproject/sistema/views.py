@@ -458,16 +458,16 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
 def crearReunion(request):
     if request.method == 'POST':
         reunion_form=ReunionForm(request.POST)
+        reunion=reunion_form.save(commit=False)
         domicilio_form=DomicilioForm(request.POST)
         horario_form= Horario_DisponibleForm(request.POST)
 
         if reunion_form.is_valid()and domicilio_form.is_valid():
-            if Reunion.objects.filter(nombre=nombrecito).exists():
+            if Reunion.objects.filter(nombre=reunion.nombre).exists():
                 messages.error(request, 'Nombre no disponible')
             else:
                 horario=horario_form.save(commit=False)
                 horario.save()
-                reunion=reunion_form.save(commit=False)
                 domicilio=domicilio_form.save(commit=False)
                 domicilio.save()
                 reunion.changeReason ='Creacion'
@@ -573,7 +573,7 @@ def agregarAsistencia(request):
             asistencia.presente=False
             asistencia.justificado=False
             asistencia.save()
-        return redirect('home')
+        return redirect('/sistema/verAsistencia')
     else:
         asistencia_form=AsistenciaForm()
         reunion_form=Reunion.objects.all()
@@ -694,7 +694,7 @@ def agregarPregunta(request):
                 i+=1
                 opcion=Opciones(pregunta=pregunta, opcion=check, puntaje=punto)
                 opcion.save()
-        return redirect('home')
+        return redirect('/sistema/agregarEncuesta')
     else:
         pregunta_form=PreguntaForm()
         tipos=Tipo_Pregunta.objects.all()
@@ -703,7 +703,7 @@ def agregarPregunta(request):
 def validarPregunta(request):
     nombre = request.GET.get('nombre')
     data = {
-        'is_taken': Pregunta.objects.filter(descripcion=nombre).exists()
+        'is_taken': Pregunta.objects.filter(descripcion=nombre,borrado=False).exists()
     }
     if data['is_taken']:
         data['error_message']  = 'Esta Pregunta ya existe, por favor haz otra pregunta'
@@ -731,7 +731,37 @@ def agregarRespuesta(request):
         reunion = encuesta.reunion
     else:
         return redirect('home')
+
     if request.method == 'POST':
+        if encuesta.tipo.id_tipo_encuesta ==1:
+            puntos=0
+            for pregunta in preguntas: 
+                opcion=request.POST.get(str(pregunta.id_pregunta))
+                print('----------------------------')
+                print(opcion)
+                print('---------------')
+                if pregunta.tipo.id_tipo_pregunta==1: #es una pregunta abierta, no suma puntos, y por cada pregunta abierta creo una nueva respuesta
+                    opcion=Opciones(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion,puntaje=0)
+                    opcion.save()
+                    respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
+                    respuesta.save()        
+                else:
+                    opcion=Opciones.objects.filter(borrado=False,pregunta_id=pregunta.id_pregunta,opcion=opcion).first()
+                    #busco la opcion que coincida con la opcion que me mandaron por el request.POST
+                    respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
+                    puntos+=opcion.puntaje
+                    respuesta.save()
+            fecha=date.today()
+            encuesta.fecha_respuesta=fecha
+            encuesta.respondio=True
+            encuesta.puntaje=puntos
+            encuesta.save()
+            reunion=encuesta.reunion.id_reunion
+            cant=encuesta.tipo.cantidad
+            asistencias=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion_id=reunion).order_by('fecha')[:cant]
+            for ast in asistencias:    
+                ast.justificado=True
+                ast.save()
         if encuesta.tipo.id_tipo_encuesta==3:
             puntos=0
             for pregunta in preguntas: 
@@ -797,6 +827,15 @@ def agregarRespuesta(request):
                 #para la baja
                 estado=Estado(usuario=request.user,estado="Pendiente",confirmado=False)
                 estado.save()
+                mensaje=Mensaje.objects.get(id=3)
+                asunto = mensaje.tipo.tipo
+                mensaje = mensaje.mensaje + "por favor ingrese en el siguiente enlace http://localhost:8000/sistema/reasignar/"+str(encuesta.miembro)
+                miembros=[]
+                miembros.append(request.user.miembro)
+                enviarMail(miembros, asunto, mensaje)
+                mensaje=Mensaje.objects.get(id=3)
+                mensaje=mensaje.mensaje
+                enviarWhatsapp(mensaje,miembros)
                 #aca pum ya notifico
             if puntos <= puntos_total/2 and puntos > puntos_total/4:
                 print("Medio")
@@ -806,26 +845,22 @@ def agregarRespuesta(request):
                 print("Bueno")
                 estado=Estado(usuario=request.user,estado="Bueno")
                 estado.save()
-                mensaje=Mensaje.objects.get(id=1)
-                mensaje=mensaje.id
-                miembros=[]
-                miembros.append(str(request.user.miembro.dni))
-                enviarWhatsapp(mensaje,miembros)
-
-
+                
             if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
                 print('Re bien!!')
                 estado=Estado(usuario=request.user,estado="Muy Bueno")
                 estado.save()
             
-            return redirect('home')
+        return redirect('home')
 
     return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas,'reunion':reunion})
 
 def agregarRespuestaReunion(request,id_encuesta):  
     encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
-    preguntas=encuesta.tipo.preguntas.filter(borrado=False)
+    print('-------encuesta: ',encuesta.tipo.preguntas.all())
+    preguntas=encuesta.tipo.preguntas.all()
     reunion = encuesta.reunion
+    
     if request.method == 'POST':
         puntos=0
         for pregunta in preguntas: 
@@ -843,6 +878,7 @@ def agregarRespuestaReunion(request,id_encuesta):
                 #busco la opcion que coincida con la opcion que me mandaron por el request.POST
                 respuesta=Respuesta(pregunta=pregunta,borrado=False,encuesta=encuesta,opcion=opcion)
                 puntos+=opcion.puntaje
+                
                 respuesta.save()
         fecha=date.today()
         encuesta.fecha_respuesta=fecha
@@ -888,21 +924,109 @@ def agregarRespuestaReunion(request,id_encuesta):
             estado=Estado_Reunion(estado="Critico",reunion=reunion)
             estado.save()
             #aca pum ya notifico
+            #para las mejoras le podria mandar un mensaje: 'En estas areas obtuviste un puntaje bajo'
         if puntos <= puntos_total/2 and puntos > puntos_total/4:
             print("medio")
-            estado=Estado_Reunion(estado="Medio",reunion=reunion)
+            estado=Estado_Reunion(estado="Medio",reunion=reunion,encuesta = encuesta)
             estado.save()
         if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
             print("Bueno")
-            estado=Estado_Reunion(estado="Bueno",reunion=reunion)
+            estado=Estado_Reunion(estado="Bueno",reunion=reunion,encuesta = encuesta)
             estado.save()
         if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
             print('Re bien!!')
-            estado=Estado_Reunion(estado="Muy Bueno",reunion=reunion)
+            estado=Estado_Reunion(estado="Muy Bueno",reunion=reunion,encuesta = encuesta)
             estado.save()
         return redirect('home')    
 
+    print('Preguntas: ', preguntas)
+    print('reunion: ', reunion)
     return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas,'reunion':reunion})
+
+def recomendacion(request):
+    #Bien ahora si la idea es obtener todas las encuestas enviadas a esa reunion en esa fecha
+    #ver cuantos respondieron y que respondieron si respondio
+    rn = request.GET.get('rn')
+    print('-----------------')
+    print('rn: ',rn)
+    reunion = Reunion.objects.get(id_reunion=rn)
+    cant_m=0  #cantidad de estados medios
+    cant_c=0  #cantidad de estados criticos
+    cant_total=0
+    data= []
+    preguntas=[]
+    opciones=[]
+    mejora = None
+    encuesta = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2).exclude(fecha_respuesta=None).order_by('-fecha_envio').first()#ahora obtengo todas la ultima que envie
+    if encuesta !=None:
+        fecha_envio = encuesta.fecha_envio
+        encuestas = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2,fecha_envio=fecha_envio).exclude(fecha_respuesta=None) #con respuestas
+        cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha con respuestas
+    
+    if cant_total == 0: #si nadie respondio todavia
+        data=[]
+    else:
+        for encuesta in encuestas: #por cada encuesta que respondio
+            estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+            print('estado: ',estado)
+            if estado.estado == 'Medio':
+                cant_m += 1
+                #aca tengo que ver que le hizo estar en este estado
+                #para eso voy a obtener las respuestas de esta encuesta
+                respuestas = Respuesta.objects.filter(encuesta_id=encuesta.id_encuesta)
+                for respuesta in respuestas:
+                    #por cada respuesta voy a ver sus opciones
+                    if respuesta.opcion.puntaje==0 and respuesta.pregunta.tipo.id_tipo_pregunta!=1:
+                        if not(respuesta.pregunta in preguntas): #si la pregunta no esta aca la agrego
+                            preguntas.append(respuesta.pregunta)
+                            opciones.append(respuesta.opcion)
+            if estado.estado == 'Critico' :
+                cant_c += 1
+                #aca tengo que ver que le hizo estar en este estado
+                #para eso voy a obtener las respuestas de esta encuesta
+                respuestas = Respuesta.objects.filter(encuesta_id=encuesta.id_encuesta)
+                for respuesta in respuestas:
+                    #por cada respuesta voy a ver sus opciones
+                    if respuesta.opcion.puntaje==0 and respuesta.pregunta.tipo.id_tipo_pregunta!=1:
+                        if not(respuesta.pregunta in preguntas): #si la pregunta no esta aca la agrego
+                            preguntas.append(respuesta.pregunta)
+                            opciones.append(respuesta.opcion)
+        
+
+
+        #-------Bien ahora tendria que ver su estado anterior( :c ) ----- para ver si presenta mejoras
+
+        puntos_negativos = 0
+        encuesta = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2).exclude(fecha_respuesta=None,fecha_envio=fecha_envio).order_by('-fecha_envio').first()#ahora obtengo la ante ultima que envie
+        cant_total =0
+        if encuesta != None:
+            print('hay una para comparar')
+            fecha_envio = encuesta.fecha_envio
+            encuestas = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2,fecha_envio=fecha_envio).exclude(fecha_respuesta=None) #con respuestas
+            cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha con respuestas
+        if cant_total != 0: #si alguien respondio 
+            for encuesta in encuestas: #por cada encuesta que respondio
+                estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+                print('estado: ',estado)
+                if estado.estado == 'Medio':
+                    puntos_negativos +=1
+                if estado.estado == 'Critico' :
+                    puntos_negativos +=1
+            if (puntos_negativos > (cant_m + cant_c)): # si los pontajes negativos de la ante ultima son mayores que los de la ultima entonces mejoro
+                mejora = True
+            else:
+                mejora = False
+
+        if cant_m or cant_c: #si alguno de estos no esta vacio tiene que haber recomendaciones
+            i=0
+            for reco in preguntas:
+                dic={'mejora':mejora, 'pregunta':reco.descripcion,'opcion':opciones[i].opcion} #si hubo True, sino False,  y si no hay estado para comparar None
+                i+=1
+                data.append(dic)
+
+    print("-----------------------------//-----------------------")
+    print('data: ',data)
+    return JSONResponse(data)
 
 def verRespuesta(request,id_encuesta):
     encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
@@ -914,8 +1038,18 @@ def verRespuesta(request,id_encuesta):
 def reasignar(request,dni):
     miembro=Miembro.objects.get(dni=dni)
     usr=CustomUser.objects.get(miembro__dni=dni)
-    reuniones=Reunion.objects.filter(grupo__encargado=usr.id,borrado=False) 
-    
+    print('Encargado: ', usr)
+    reuniones=[]
+    grupos = Grupo.objects.filter(encargado = usr.id).exclude(borrado=True)
+    print('Grupos: ', grupos)
+    for grupo in grupos:
+        rns = Reunion.objects.filter(grupo_id=grupo.id_grupo)
+        print('rns: ', rns)
+        for rn in rns:
+            if not(rn in reuniones):
+                reuniones.append(rn) 
+    print('------------------//-----------------------------')
+    print('Reuniones: ',reuniones)
     if request.method=='POST':
         print(request.POST)
         reuniones_encargado=request.POST.getlist('reunion-encargado')
@@ -1027,7 +1161,7 @@ def eliminarRol(request,id_rol):
 def validarRol(request):
     nombre = request.GET.get('nombre')
     data = {
-        'is_taken': Rol.objects.filter(nombre=nombre).exists()
+        'is_taken': Rol.objects.filter(nombre=nombre,borrado=False).exists()
     }
     if data['is_taken']:
         rol=Rol.objects.filter(nombre=nombre).last()
@@ -1247,6 +1381,7 @@ def EncuestaTable(request):
 @csrf_exempt
 def opcionesList(request):
     pr=request.GET.get('pr')
+    print('pr:  ',pr)
     if request.method == 'GET':
         pregunta=Pregunta.objects.get(id_pregunta=pr)
         if pregunta.tipo_id==1:
