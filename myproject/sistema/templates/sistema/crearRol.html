@@ -9,18 +9,19 @@
         {% csrf_token %} 
         <div class="col-lg-11">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para crear Roles">
                     <strong>Planilla de Registro de </strong> Roles
+                    <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                 </div>
                 
                 <div class="card-body">
                         
                             <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input">Nombre del Rol (*)</label></div>
-                                    <div class="col-md-5"><input type="text" name="nombre" id="nombre" class="form-control"</div>
+                                    <div class="col-md-5" data-step="2" data-intro="Paso 2: Debe poner el nombre del rol. Por Ejemplo: 'Maestro' "><input type="text" name="nombre" id="nombre" class="form-control"</div>
                                 </div>
                             <div class="wrapper">
-                                <div class="list">
+                                <div class="list" data-step="3" data-intro="Paso 3: Debe seleccionar los permisos que otorgara, haciendo un click sobre el permiso" >
                                     <h3>Permisos:</h3>
                                     <ul class="todo" id="todo">
                                         {% for permiso in permisos %}
@@ -29,15 +30,17 @@
                                     </ul>
                                 </div>
 
-                                <div class="list">
+                                <div class="list" data-step="4" data-intro="Paso 4: Los permisos otorgados estaran en esta lista, los puede quitar haciendo un click sobre ellos" >
                                     <h3>Permisos Otorgados:</h3>
                                     <ul class="done">
                                         
                                     </ul>
                                 </div>
                             </div>
+                    <div align="right" class="card-body">
+                    <button data-step="5" data-intro="Paso 5: Una vez que haya completado todo presiona 'Confirmar'" type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    </div>
 
-                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
                 </div>
                 <div id="oculto" >
                 <select name="permisos" id="otorgados" multiple="multiple">
