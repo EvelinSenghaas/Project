@@ -8,18 +8,22 @@
         {% csrf_token %} 
         <div class="col-lg-11">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para configurar Mensajes">
                     <strong>Planilla de Configuracion de </strong> Mensajes
+                    <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                 </div>
-                <div class="card-body">
+                <div class="card-body" data-step="2" data-intro="Paso 2: A continuacion puedes ver los tipos de mensajes y el texto actual que se envia, puedes cambiarlo si deseas " >
                     {% for mensaje in mensajes %}
                         <div class="row form-group">
                             <div class="col col-md-3"><label for="text-input" class=" form-control-label">{{mensaje.tipo}}</label></div>
                             <div class="col-12 col-md-9"><input type="text" id="tp" name="{{mensaje.tipo}}" value="{{mensaje}}" class="form-control"></div>
                         </div>
                     {% endfor %}
-                    
-                    <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    <div class="card">
+                    <div align="right" class="card-body">
+                        <button data-step="3" data-intro="Paso 3: Una vez que hayas terminado presiona 'Confirmar'" type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                    </div>
+                </div>
                 </div>
                 
             </div>
