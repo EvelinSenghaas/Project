@@ -12,28 +12,29 @@ Estadistica del Estado de Reuniones
     <div class="col-lg-12">
         {% csrf_token %}
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenido al tutorial de ver las Estadisticas de los Estados de las Reuniones">
                 <strong>Estadistica de Estado de Reuniones</strong>
+                <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
             </div>
 
             <form method="POST" class="form-horizontal">
 
-                <div  class="col-xl-12">
+                <div  class="col-xl-12" data-step="2" data-intro="Paso 2: Actualmente se muestra el porcentaje de como se encuentran actualmente las reuniones ">
                     <div class="row">
-                        <div class="col-lg-10 col-xl-12">
-                            <div class="card br-0">
+                        <div class="col-lg-10 col-xl-12" >
+                            <div class="card br-0" >
                                 <div align="center" class="card-body">
-                                <div class="row">
+                                <div class="row" data-step="3" data-intro="Paso 3: Puedes Filtrar como quieras!">
                                     
-                                    <div class="col-3">
+                                    <div class="col-3" data-step="4" data-intro="Paso 4: Colocar a partir de que fecha">
                                     <p style="margin-bottom:0;text-align: left;">Desde</p>
                                     <input type="date" id="desde" class="form form-control"></div>
                                     
-                                    <div class="col-3">
+                                    <div class="col-3" data-step="5" data-intro="Paso 5: Colocar la fecha limite">
                                     <p style="margin-bottom:0;text-align: left;">Hasta</p>
                                     <input type="date" id="hasta" class="form form-control"></div>
                                     
-                                    <div class="col-3">
+                                    <div class="col-3" data-step="6" data-intro="Paso 6: Puedes especificar la reunion y te mostrata segun las encuestas el porcentaje de lo que voto cada miembro">
                                     <p style="margin-bottom:0;text-align: left;">Reunion</p>
                                     <select class="form form-control" name="reunion" id="rn">
                                         {% for reunion in reuniones %}
@@ -42,12 +43,12 @@ Estadistica del Estado de Reuniones
                                     </select></div>
                                     <div class="col-2"> 
                                     <br>
-                                    <button  id="filtrar" type="button" class="btn btn-primary">filtrar</button>
+                                    <button  data-step="7" data-intro="Paso 7: Finalmente presiona 'Filtrar' y observa" id="filtrar" type="button" class="btn btn-primary">filtrar</button>
                                     </div> 
                                 </div>  
                                 
                                     <br>
-                                    <canvas id="doughnut-chart" width="800" height="450"></canvas>
+                                    <canvas data-step="8" data-intro="Paso 8: aqui se mostraran los resultados, pasa el cursor sobre el grafico para ver los porcentajes" id="doughnut-chart" width="800" height="450"></canvas>
                                 </div>
                             </div><!-- /.card -->
                         </div>
