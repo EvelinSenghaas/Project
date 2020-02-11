@@ -11,7 +11,6 @@ urlpatterns = [
     path('editarReunion/<int:id_reunion>',editarReunion,name='editarReunion'),
     path('eliminarReunion/<int:id_reunion>',eliminarReunion,name='eliminarReunion'),
     path('agregarAsistencia/',agregarAsistencia,name='agregarAsistencia'),
-    path('agregarHorario_Disponible/',agregarHorario_Disponible,name='agregarHorario_Disponible'),
     path('agregarEncuesta/',agregarEncuesta,name ='agregarEncuesta'),
     path('agregarPregunta/',agregarPregunta,name='agregarPregunta'),
     path('agregarRespuesta/',agregarRespuesta,name='agregarRespuesta'),

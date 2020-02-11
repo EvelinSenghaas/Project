@@ -28,6 +28,12 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
+def permiso(request, p):
+    permisos = request.user.rol.permisos.all()
+    for permiso in permisos:
+        if p == permiso.id_permiso:
+            return True
+
 def days_between(d1, d2):
     return abs(d2 - d1).days
     
@@ -114,592 +120,736 @@ def Home(request):
         print('weno alguien tiene que empezar no?')
     return render(request,'sistema/index.html',context)
 
+@login_required
 def estadistica_miembro(request):
-    if request.method=='POST':
-        print('y cuando va a hacer post linarda xD')
-    else:
-        
+    if permiso(request, 43):
         return render(request,'sistema/estadistica_miembro.html')
+    else:
+        return redirect('home')
 
+@login_required
 def estadistica_reunion(request):
-    reuniones = Reunion.objects.all()
-    return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones})
+    if permiso(request, 43):
+        reuniones = Reunion.objects.all()
+        return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones})
+    else:
+        return redirect('home')
 
+@login_required
 def estadistica_asistencias(request):
-    reuniones = Reunion.objects.all()
-    miembros = Miembro.objects.all()
-    roles = Rol.objects.all()
-    return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
+    if permiso(request, 43):
+        reuniones = Reunion.objects.all()
+        miembros = Miembro.objects.all()
+        roles = Rol.objects.all()
+        return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
+    else:
+        return redirect('home')
 
+@login_required
 def auditoriaMiembro(request):
-    auditoria_miembro = Miembro.history.all()
-    context = {'auditoria_miembro': auditoria_miembro}
-    return render(request, 'sistema/auditoriaMiembro.html', context)
+    if permiso(request, 42):
+        auditoria_miembro = Miembro.history.all()
+        configuracion_form = Configuracion.objects.all().last()
+        context = {'auditoria_miembro': auditoria_miembro,'configuracion_form':configuracion_form}
+        return render(request, 'sistema/auditoriaMiembro.html', context)
+    else:
+        return redirect('home')
 
+@login_required
 def auditoriaReunion(request):
-    auditoria_reunion = Reunion.history.all()
-    context = {'auditoria_reunion': auditoria_reunion}
-    return render(request, 'sistema/auditoriaReunion.html', context)
+    if permiso(request, 42):
+        auditoria_reunion = Reunion.history.all()
+        configuracion_form = Configuracion.objects.all().last()
+        context = {'auditoria_reunion': auditoria_reunion,'configuracion_form':configuracion_form}
+        return render(request, 'sistema/auditoriaReunion.html', context)
+    else:
+        return redirect('home')
 
+@login_required
 def auditoriaAsistencia(request):
-    auditoria_asistencia = Asistencia.history.all()
-    context = {'auditoria_asistencia': auditoria_asistencia}
-    return render(request, 'sistema/auditoriaAsistencia.html', context)
+    if permiso(request, 42):
+        auditoria_asistencia = Asistencia.history.all()
+        configuracion_form = Configuracion.objects.all().last()
+        context = {'auditoria_asistencia': auditoria_asistencia,'configuracion_form':configuracion_form}
+        return render(request, 'sistema/auditoriaAsistencia.html', context)
+    else:
+        return redirect('home')
 
+@login_required
 def configuracion(request):
-    if request.method == 'POST':
-        configuracion_form = ConfiguracionForm(request.POST)
-        print(configuracion_form)
-        if configuracion_form.is_valid():
-            configuracion_form.save()
-            return redirect('home')
+    if permiso(request, 24):
+        if request.method == 'POST':
+            configuracion_form = ConfiguracionForm(request.POST)
+            print(configuracion_form)
+            if configuracion_form.is_valid():
+                configuracion_form.save()
+                return redirect('home')
+        else:
+            configuracion_form = ConfiguracionForm()
+        return render(request,'sistema/configuracion.html',{'configuracion_form':configuracion_form})
     else:
-        configuracion_form = ConfiguracionForm()
-    return render(request,'sistema/configuracion.html',{'configuracion_form':configuracion_form})
+        return redirect('home')
 
+@login_required
 def crearGrupo(request):
-    miembros=Miembro.objects.all()
-    if request.method == 'POST':
-        grupo_form = GrupoForm(request.POST)
-        grupo=grupo_form.save(commit=False)
-        grupo.encargado=request.POST.get('encargado')
-        grupo.changeReason ='Creacion'
-        grupo.save()
-        grupo.miembro.set(request.POST.getlist('miembro'))
-        grupo.save()
-        return redirect('/sistema/listarGrupo')
+    if permiso(request, 14):
+        miembros=Miembro.objects.all()
+        if request.method == 'POST':
+            grupo_form = GrupoForm(request.POST)
+            grupo=grupo_form.save(commit=False)
+            grupo.encargado=request.POST.get('encargado')
+            grupo.changeReason ='Creacion'
+            grupo.save()
+            grupo.miembro.set(request.POST.getlist('miembro'))
+            grupo.save()
+            if permiso(request, 17) or permiso(request, 18):
+                return redirect('/sistema/listarGrupo')
+            else:
+                return redirect('home')
+        else:
+            usuarios=CustomUser.objects.all()
+            grupo_form=GrupoForm()
+        return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'miembros':miembros,'usuarios':usuarios})
     else:
-        usuarios=CustomUser.objects.all()
-        grupo_form=GrupoForm()
-    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'miembros':miembros,'usuarios':usuarios})
+        return redirect('home')
 
+@login_required
 def listarGrupo(request):
-    grupos = Grupo.objects.filter(borrado=False)
-    return render(request,'sistema/listarGrupo.html',{'grupos':grupos})
+    if permiso(request, 17):
+        grupos = Grupo.objects.filter(borrado=False, encargado= request.user.id)
+    if permiso(request, 18):
+        grupos = Grupo.objects.filter(borrado=False)
+    if not(permiso(request, 18) or permiso(request, 17)):
+        return redirect('home')
+    configuracion_form = Configuracion.objects.all().last()
+    return render(request,'sistema/listarGrupo.html',{'grupos':grupos,'configuracion_form':configuracion_form})
 
+@login_required
 def validarGrupo(request):
     nombre = request.GET.get('nombre')
     data = {
-        'is_taken': Grupo.objects.filter(nombre=nombre).exists()
+        'is_taken': Grupo.objects.filter(nombre=nombre,borrado = False).exists()
     }
     if data['is_taken']:
         data['error_message'] = 'Este nombre de grupo ya existe, por favor elige otro nombre'
     print(data)
     return JsonResponse(data)
 
+@login_required
 def editarGrupo(request,id_grupo):
-    grupo = Grupo.objects.get(id_grupo=id_grupo)
-    if request.method =='GET':
-        grupo_form=GrupoForm(instance=grupo)
+    if permiso(request, 16):
+        grupo = Grupo.objects.get(id_grupo=id_grupo)
+        if request.method =='GET':
+            grupo_form=GrupoForm(instance=grupo)
+        else:
+            grupo_form=GrupoForm(request.POST,instance=grupo)
+            if grupo_form.is_valid():
+                grupo=grupo_form.save(commit=False)
+                grupo.changeReason='Modificacion'
+                grupo.save()
+            if permiso(request, 17) or permiso(request, 18):
+                return redirect('/sistema/listarGrupo')
+            else:
+                return redirect('home')
+        return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
     else:
-        grupo_form=GrupoForm(request.POST,instance=grupo)
-        if grupo_form.is_valid():
-            grupo=grupo_form.save(commit=False)
-            grupo.changeReason='Modificacion'
-            grupo.save()
-        return redirect('/sistema/listarGrupo')
-    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
+        return redirect('home')
 
+@login_required
 def eliminarGrupo(request,id_grupo):
-    grupo = Grupo.objects.get(id_grupo=id_grupo)
-    grupo.borrado=True
-    grupo.changeReason='Eliminacion'
-    grupo.save()
-    return redirect('/sistema/listarGrupo')
+    if permiso(request, 15):
+        grupo = Grupo.objects.get(id_grupo=id_grupo)
+        grupo.borrado=True
+        grupo.changeReason='Eliminacion'
+        grupo.save()
+        if permiso(request, 17) or permiso(request, 18):
+            return redirect('/sistema/listarGrupo')
+        else:
+            return redirect('home')
+    else:
+        return redirect('home')
 
+@login_required
 def listarMiembro(request):
-    miembros = Miembro.objects.filter(borrado=False)
+    if permiso(request, 4): #tiene permiso para ver sus miembros
+        miembros=[]
+        grupos = Grupo.objects.filter(encargado = request.user.id)
+        for grupo in grupos:
+            mbs = grupo.miembro.all()
+            for mb in mbs:
+                if not(mb in miembros):
+                    miembros.append(mb)
+
+    if permiso(request, 5): #tiene permiso para ver todos los miembros
+        miembros = Miembro.objects.filter(borrado=False)
+    
+    if not(permiso(request, 5) or permiso(request, 4)):
+        return redirect('home')
     for miembro in miembros:        
         miembro.fecha_nacimiento = miembro.edad(miembro.fecha_nacimiento)
     configuracion_form = Configuracion.objects.all().last()
     return render(request,'sistema/listarMiembro.html',{'miembros':miembros,'configuracion_form':configuracion_form})
 
+@login_required
 def crearMiembro(request):
-    provincia_form=Provincia.objects.all()
-    if request.method == 'POST':
-        if 'btn-add-provincia' in request.POST:
-            provincia=request.POST.get('prov',None)
-            provincia=provincia.capitalize()
-            if Provincia.objects.filter(provincia=provincia).exists():
-                print('nombre repetido china')#vo tenes que cambiar esto michinita
-            else:
-                prv=Provincia.objects.create(provincia=provincia,borrado=False)
-                prv.save()
-            return redirect('/sistema/crearMiembro')
+    if permiso(request, 1):
+        provincia_form=Provincia.objects.all()
+        if request.method == 'POST':
+            if 'btn-add-provincia' in request.POST:
+                provincia=request.POST.get('prov',None)
+                provincia=provincia.capitalize()
+                if Provincia.objects.filter(provincia=provincia).exists():
+                    print('')#vo tenes que cambiar esto michinita
+                else:
+                    prv=Provincia.objects.create(provincia=provincia,borrado=False)
+                    prv.save()
+                return redirect('/sistema/crearMiembro')
 
-        if 'btn-add-localidad' in request.POST:
-            localidad=request.POST.get('localidad',None)
-            provincia=request.POST.get('prv',None)
-            prv1=Provincia.objects.filter(provincia=provincia)
-            prv=Provincia.objects.get(id_provincia=prv1[0].id_provincia)
-            print(prv)
-            localidad=localidad.capitalize()
-            if Localidad.objects.filter(localidad=localidad).exists():
-                print('nombre repetido china')
-            else:
-                lcl=Localidad.objects.create(localidad=localidad,provincia=prv,borrado=False)
-                lcl.save()
-            return redirect('/sistema/crearMiembro')
-        
-        if 'btn-add-barrio'in request.POST:
-            barrio=request.POST.get('barrioo',None)
-            localidad=request.POST.get('lcl',None)
-            lcl1=Localidad.objects.filter(localidad=localidad)
-            lcl=Localidad.objects.get(id_localidad=lcl1[0].id_localidad)
-            barrio=barrio.capitalize()
-            if Barrio.objects.filter(barrio=barrio).exists():
-                print('nombre repetido china')
-            else:
-                br=Barrio.objects.create(barrio=barrio,localidad=lcl,borrado=False)
-                br.save()
-            return redirect('/sistema/crearMiembro')
-        
-        if 'btn-crear-miembro' in request.POST:
-            miembro_form=MiembroForm(request.POST)
-            barrio_form=request.POST.get('barrio')
-            estado_civil_form=request.POST.get('estado_civil')
-            domicilio_form=DomicilioForm(request.POST)
-            horario_form=Horario_DisponibleForm(request.POST)
-            if not(miembro_form.is_valid() and horario_form.is_valid() and barrio_form!=None and domicilio_form.is_valid()):
-                messages.error(request, 'Debe completar todos los campos obligatorios')
+            if 'btn-add-localidad' in request.POST:
+                localidad=request.POST.get('localidad',None)
+                provincia=request.POST.get('prv',None)
+                prv1=Provincia.objects.filter(provincia=provincia)
+                prv=Provincia.objects.get(id_provincia=prv1[0].id_provincia)
+                print(prv)
+                localidad=localidad.capitalize()
+                if Localidad.objects.filter(localidad=localidad).exists():
+                    print('nombre repetido china')
+                else:
+                    lcl=Localidad.objects.create(localidad=localidad,provincia=prv,borrado=False)
+                    lcl.save()
                 return redirect('/sistema/crearMiembro')
             
-            miembro=miembro_form.save(commit=False)
-            miembro.changeReason ='Creacion'
+            if 'btn-add-barrio'in request.POST:
+                barrio=request.POST.get('barrioo',None)
+                localidad=request.POST.get('lcl',None)
+                lcl1=Localidad.objects.filter(localidad=localidad)
+                lcl=Localidad.objects.get(id_localidad=lcl1[0].id_localidad)
+                barrio=barrio.capitalize()
+                if Barrio.objects.filter(barrio=barrio).exists():
+                    print('nombre repetido china')
+                else:
+                    br=Barrio.objects.create(barrio=barrio,localidad=lcl,borrado=False)
+                    br.save()
+                return redirect('/sistema/crearMiembro')
+            
+            if 'btn-crear-miembro' in request.POST:
+                miembro_form=MiembroForm(request.POST)
+                barrio_form=request.POST.get('barrio')
+                estado_civil_form=request.POST.get('estado_civil')
+                domicilio_form=DomicilioForm(request.POST)
+                horario_form=Horario_DisponibleForm(request.POST)
+                if not(miembro_form.is_valid() and horario_form.is_valid() and barrio_form!=None and domicilio_form.is_valid()):
+                    messages.error(request, 'Debe completar todos los campos obligatorios')
+                    return redirect('/sistema/crearMiembro')
+                
+                miembro=miembro_form.save(commit=False)
+                miembro.changeReason ='Creacion'
 
-            barrio=Barrio.objects.get(id_barrio=barrio_form)
-            
-            estado_civil=Estado_Civil.objects.get(id_estado=estado_civil_form)
+                barrio=Barrio.objects.get(id_barrio=barrio_form)
+                
+                estado_civil=Estado_Civil.objects.get(id_estado=estado_civil_form)
 
-            domicilio=domicilio_form.save(commit=False)
-            domicilio.barrio=barrio
-            domicilio.save()
+                domicilio=domicilio_form.save(commit=False)
+                domicilio.barrio=barrio
+                domicilio.save()
 
-            horario=horario_form.save()
-            
-            if Tipo_TelefonoForm(request.POST)!= None:
-                tipo_telefono_form=Tipo_TelefonoForm(request.POST)
-                tipo_telefono=tipo_telefono_form.save()
-                telefono_form=TelefonoForm(request.POST)
-                telefono=telefono_form.save(commit=False)
-                telefono.tipo_telefono=tipo_telefono
-                telefono.save()
-            
-            
-            #return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
-            miembro.domicilio=domicilio
-            miembro.estado_civil=estado_civil
-            if  telefono != None:
-                miembro.telefono=telefono
-            miembro.nombre=miembro.nombre.capitalize()
-            miembro.apellido=miembro.apellido.upper()
-            miembro.borrado=False
-            miembro_contacto=request.POST.get('miembro')
-            if miembro_contacto != None:
-                print(miembro_contacto)
-                miembro_cont=Miembro.objects.get(dni=miembro_contacto)
-                tel_contacto=Telefono_Contacto()
-                tel_contacto.miembro=miembro_cont
-                tel_contacto.save()
-            miembro.save()
-            miembro.horario_disponible.add(horario)
-            miembro.save()
-        return redirect('/sistema/listarMiembro')
-        
+                horario=horario_form.save()
+                
+                if Tipo_TelefonoForm(request.POST)!= None:
+                    tipo_telefono_form=Tipo_TelefonoForm(request.POST)
+                    tipo_telefono=tipo_telefono_form.save()
+                    telefono_form=TelefonoForm(request.POST)
+                    telefono=telefono_form.save(commit=False)
+                    telefono.tipo_telefono=tipo_telefono
+                    telefono.save()
+                
+                
+                #return render(request,'sistema/editarMiembro.html',{'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio':barrio,'estado_civil_form':estado_civil_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+                miembro.domicilio=domicilio
+                miembro.estado_civil=estado_civil
+                if  telefono != None:
+                    miembro.telefono=telefono
+                miembro.nombre=miembro.nombre.capitalize()
+                miembro.apellido=miembro.apellido.upper()
+                miembro.borrado=False
+                miembro_contacto=request.POST.get('miembro')
+                if miembro_contacto != None:
+                    print(miembro_contacto)
+                    miembro_cont=Miembro.objects.get(dni=miembro_contacto)
+                    tel_contacto=Telefono_Contacto()
+                    tel_contacto.miembro=miembro_cont
+                    tel_contacto.save()
+                miembro.save()
+                miembro.horario_disponible.add(horario)
+                miembro.save()
+            if permiso(request, 4) or permiso(request, 5):
+                return redirect('/sistema/listarMiembro')
+            else:
+                return redirect('home')
+        else:
+            provincia_form=Provincia.objects.all()
+            localidad_form=Localidad.objects.all()
+            barrio_form=Barrio.objects.all()
+            domicilio_form=DomicilioForm()
+            estado_civil_form=Estado_Civil.objects.all()
+            miembro_form=MiembroForm()
+            tipo_telefono_form=Tipo_TelefonoForm()
+            telefono_form=TelefonoForm()
+            horario_form=Horario_DisponibleForm()
+            telefono_contacto_form=Miembro.objects.all()
+            return render(request,'sistema/crearMiembro.html',{'telefono_contacto_form':telefono_contacto_form,'estado_civil_form':estado_civil_form,'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio_form':barrio_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
     else:
-        provincia_form=Provincia.objects.all()
-        localidad_form=Localidad.objects.all()
-        barrio_form=Barrio.objects.all()
-        domicilio_form=DomicilioForm()
-        estado_civil_form=Estado_Civil.objects.all()
-        miembro_form=MiembroForm()
-        tipo_telefono_form=Tipo_TelefonoForm()
-        telefono_form=TelefonoForm()
-        horario_form=Horario_DisponibleForm()
-        telefono_contacto_form=Miembro.objects.all()
-        return render(request,'sistema/crearMiembro.html',{'telefono_contacto_form':telefono_contacto_form,'estado_civil_form':estado_civil_form,'provincia_form':provincia_form,'localidad_form':localidad_form,'barrio_form':barrio_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+        return redirect('home')
 
+@login_required
 def editarMiembro(request,dni):
-    miembro = Miembro.objects.get(dni= dni)
-    id_domicilio=miembro.domicilio.id_domicilio
-    domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
-    barrio = Barrio.objects.get(id_barrio=domicilio.barrio.id_barrio)
-    localidad=Localidad.objects.get(id_localidad=barrio.localidad.id_localidad)
-    if miembro.telefono != None:
-        id_telefono=miembro.telefono.id_telefono
+    if permiso(request, 3):
+        miembro = Miembro.objects.get(dni= dni)
+        id_domicilio=miembro.domicilio.id_domicilio
+        domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
+        barrio = Barrio.objects.get(id_barrio=domicilio.barrio.id_barrio)
+        localidad=Localidad.objects.get(id_localidad=barrio.localidad.id_localidad)
+        if miembro.telefono != None:
+            id_telefono=miembro.telefono.id_telefono
+            telefono=Telefono.objects.get(id_telefono=id_telefono)
+            id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
+            tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
+        else: 
+            telefono=None
+            tipo_telefono=None
+
+        horario=miembro.horario_disponible.all()
+        horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=horario[0].id_horario_disponible)
+
+        if request.method == 'GET':
+            miembro_form=MiembroForm(instance = miembro)
+            domicilio_form=DomicilioForm(instance=domicilio)
+            if miembro.telefono != None:
+                tipo_telefono_form=Tipo_TelefonoForm(instance=tipo_telefono)
+                telefono_form=TelefonoForm(instance=telefono)
+            else:
+                tipo_telefono_form=Tipo_TelefonoForm()
+                telefono_form=TelefonoForm()
+            
+            horario_form=Horario_DisponibleForm(instance=horario_disponible)
+            barrio_form=BarrioForm(instance=barrio)
+            localidad_form=LocalidadForm(instance=localidad)
+        
+        else:
+            miembro_form=MiembroForm(request.POST,instance=miembro)
+            domicilio_form=DomicilioForm(request.POST,instance=domicilio)
+            horario_form=Horario_DisponibleForm(request.POST,instance=horario_disponible)
+            telefono_form=TelefonoForm(request.POST,instance=telefono)
+            tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
+            if miembro_form.is_valid():
+                miembro=miembro_form.save(commit=False)
+                if tipo_telefono_form.is_valid() and telefono_form.is_valid() and horario_form.is_valid() and miembro_form.is_valid() and domicilio_form.is_valid():
+                    if request.POST.get('prefijo') and request.POST.get('numero') != None:
+                        tipo=tipo_telefono_form.save()
+                        telefono=telefono_form.save(commit=False)
+                        telefono.tipo_telefono=tipo
+                        telefono.save()
+                        miembro.telefono=telefono
+
+                    horario=horario_form.save()
+                    domicilio_form.save()
+                    miembro.nombre=miembro.nombre.capitalize()
+                    miembro.apellido=miembro.apellido.upper()
+                    miembro.changeReason ='Modificacion'
+                    miembro.save()
+                    if permiso(request, 4) or permiso(request, 5):
+                        return redirect('/sistema/listarMiembro')
+                    else:
+                        return redirect('home')
+        return render(request,'sistema/editarMiembro.html',{'localidad_form':localidad_form,'barrio_form':barrio_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
+    else:
+        return redirect('home')
+
+@login_required
+def eliminarMiembro(request,dni):
+    if permiso(request, 2):
+        miembroo = Miembro.objects.get(dni=dni)
+        if Grupo.objects.filter(miembro = miembroo,borrado=False).exists():
+            messages.error(request, 'NO SE PUEDE ELIMINAR AL MIEMBRO porque es parte de un grupo') 
+            return redirect('/sistema/listarMiembro')
+        id_domicilio=miembroo.domicilio.id_domicilio
+        domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
+        id_telefono=miembroo.telefono.id_telefono
         telefono=Telefono.objects.get(id_telefono=id_telefono)
         id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
         tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
-    else: 
-        telefono=None
-        tipo_telefono=None
-
-    horario=miembro.horario_disponible.all()
-    horario_disponible = Horario_Disponible.objects.get(id_horario_disponible=horario[0].id_horario_disponible)
-
-    if request.method == 'GET':
-        miembro_form=MiembroForm(instance = miembro)
-        domicilio_form=DomicilioForm(instance=domicilio)
-        if miembro.telefono != None:
-            tipo_telefono_form=Tipo_TelefonoForm(instance=tipo_telefono)
-            telefono_form=TelefonoForm(instance=telefono)
+        domicilio.borrado=True
+        miembroo.borrado=True
+        telefono.borrado=True
+        tipo_telefono.borrado=True
+        domicilio.save()
+        miembroo.changeReason ='Eliminacion'
+        miembroo.save()
+        telefono.save()
+        tipo_telefono.save()
+        if permiso(request, 4) or permiso(request, 5):
+            return redirect('/sistema/listarMiembro')
         else:
-            tipo_telefono_form=Tipo_TelefonoForm()
-            telefono_form=TelefonoForm()
-        
-        horario_form=Horario_DisponibleForm(instance=horario_disponible)
-        barrio_form=BarrioForm(instance=barrio)
-        localidad_form=LocalidadForm(instance=localidad)
-    
-    else:
-        miembro_form=MiembroForm(request.POST,instance=miembro)
-        domicilio_form=DomicilioForm(request.POST,instance=domicilio)
-        horario_form=Horario_DisponibleForm(request.POST,instance=horario_disponible)
-        telefono_form=TelefonoForm(request.POST,instance=telefono)
-        tipo_telefono_form=Tipo_TelefonoForm(request.POST,instance=tipo_telefono)
-        if miembro_form.is_valid():
-            miembro=miembro_form.save(commit=False)
-            if tipo_telefono_form.is_valid() and telefono_form.is_valid() and horario_form.is_valid() and miembro_form.is_valid() and domicilio_form.is_valid():
-                if request.POST.get('prefijo') and request.POST.get('numero') != None:
-                    tipo=tipo_telefono_form.save()
-                    telefono=telefono_form.save(commit=False)
-                    telefono.tipo_telefono=tipo
-                    telefono.save()
-                    miembro.telefono=telefono
+            return redirect('home')
 
-                horario=horario_form.save()
-                domicilio_form.save()
-                miembro.nombre=miembro.nombre.capitalize()
-                miembro.apellido=miembro.apellido.upper()
-                miembro.changeReason ='Modificacion'
-                miembro.save()
-
-                return redirect('/sistema/listarMiembro')
-        
-
-    return render(request,'sistema/editarMiembro.html',{'localidad_form':localidad_form,'barrio_form':barrio_form,'miembro_form':miembro_form,'domicilio_form':domicilio_form,'tipo_telefono_form':tipo_telefono_form,'telefono_form':telefono_form,'horario_form':horario_form})
-
-def eliminarMiembro(request,dni):
-    miembroo = Miembro.objects.get(dni=dni)
-    if Grupo.objects.filter(miembro = miembroo,borrado=False).exists():
-        messages.error(request, 'NO SE PUEDE ELIMINAR AL MIEMBRO porque es parte de un grupo') 
-        return redirect('/sistema/listarMiembro')
-    id_domicilio=miembroo.domicilio.id_domicilio
-    domicilio=Domicilio.objects.get(id_domicilio=id_domicilio)
-    id_telefono=miembroo.telefono.id_telefono
-    telefono=Telefono.objects.get(id_telefono=id_telefono)
-    id_tipo_telefono=telefono.tipo_telefono.id_tipo_telefono
-    tipo_telefono=Tipo_Telefono.objects.get(id_tipo_telefono=id_tipo_telefono)
-    domicilio.borrado=True
-    miembroo.borrado=True
-    telefono.borrado=True
-    tipo_telefono.borrado=True
-    domicilio.save()
-    miembroo.changeReason ='Eliminacion'
-    miembroo.save()
-    telefono.save()
-    tipo_telefono.save()
-    return redirect('/sistema/listarMiembro')
-
+@login_required
 def validarMiembro(request):
     dni = request.GET.get('dni')
     data = {
-        'is_taken': Miembro.objects.filter(dni=dni).exists()
+        'is_taken': Miembro.objects.filter(dni=dni,borrado = False).exists() #ojo el piojo con el sexo
     }
     if data['is_taken']:
         data['error_message'] = 'Este miembro ya existe'
     print(data)
     return JsonResponse(data)
 
+@login_required
 def crearTipo_Reunion(request):
-    if request.method == 'POST':
-        tipo_reunion_form= Tipo_ReunionForm(request.POST)
-        nombrecito=request.POST.get('nombre')
-        if tipo_reunion_form.is_valid():
-            if Tipo_Reunion.objects.filter(nombre=nombrecito):
-                messages.error(request,'Nombre repetido')
-            else:
-                tipo_reunion=tipo_reunion_form.save(commit=False)
-                tipo_reunion.changeReason="Creacion"
-                tipo_reunion.save()
-                return redirect('/sistema/listarTipo_Reunion')
+    if permiso(request, 11):
+        if request.method == 'POST':
+            tipo_reunion_form= Tipo_ReunionForm(request.POST)
+            nombrecito=request.POST.get('nombre')
+            if tipo_reunion_form.is_valid():
+                if Tipo_Reunion.objects.filter(nombre=nombrecito):
+                    messages.error(request,'Nombre repetido')
+                else:
+                    tipo_reunion=tipo_reunion_form.save(commit=False)
+                    tipo_reunion.changeReason="Creacion"
+                    tipo_reunion.save()
+                    if permiso(request, 40):
+                        return redirect('/sistema/listarTipo_Reunion')
+                    else:
+                        return redirect('home')
+        else:
+            tipo_reunion_form=Tipo_ReunionForm()
+        return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
     else:
-        tipo_reunion_form=Tipo_ReunionForm()
-    return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
+        return redirect('home')
 
+@login_required
 def editarTipo_Reunion(request,id_tipo_reunion):
-    tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
-    if request.method == 'GET':
-        tipo_reunion_form = Tipo_ReunionForm(instance = tipo_reunion)
+    if permiso(request, 13):
+        tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
+        if request.method == 'GET':
+            tipo_reunion_form = Tipo_ReunionForm(instance = tipo_reunion)
+        else:
+            tipo_reunion_form=Tipo_ReunionForm(request.POST,instance=tipo_reunion)
+            if tipo_reunion_form.is_valid():
+                tipo_reunion=tipo_reunion_form.save(commit=False)
+                tipo_reunion.changeReason="Modificacion"
+                tipo_reunion.save()
+            return redirect('/sistema/listarTipo_Reunion')
+        return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
     else:
-        tipo_reunion_form=Tipo_ReunionForm(request.POST,instance=tipo_reunion)
-        if tipo_reunion_form.is_valid():
-            tipo_reunion=tipo_reunion_form.save(commit=False)
-            tipo_reunion.changeReason="Modificacion"
-            tipo_reunion.save()
-        return redirect('/sistema/listarTipo_Reunion')
-    return render(request,'sistema/crearTipo_Reunion.html',{'tipo_reunion_form':tipo_reunion_form})
+        return redirect('home')
 
+@login_required
 def listarTipo_Reunion(request):
-    tipo_reuniones = Tipo_Reunion.objects.filter(borrado=False)
-    return render(request,'sistema/listarTipo_Reunion.html',{'tipo_reuniones':tipo_reuniones})
+    if permiso(request, 40):
+        tipo_reuniones = Tipo_Reunion.objects.filter(borrado=False)
+        return render(request,'sistema/listarTipo_Reunion.html',{'tipo_reuniones':tipo_reuniones})
+    else:
+        return redirect('home')
 
+@login_required
 def eliminarTipo_Reunion(request,id_tipo_reunion):
-    tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
-    if Reunion.objects.filter(tipo_reunion=tipo_reunion ).exists():
-        messages.error(request, 'NO SE PUEDE ELIMINAR AL tipo de reunion porque hay una reunion de este tipo activa') 
-        return redirect('/sistema/listarTipo_Reunion')    
+    if permiso(request, 12):
+        tipo_reunion=Tipo_Reunion.objects.get(id_tipo_reunion=id_tipo_reunion)
+        if Reunion.objects.filter(tipo_reunion=tipo_reunion ).exists():
+            messages.error(request, 'NO SE PUEDE ELIMINAR AL tipo de reunion porque hay una reunion de este tipo activa') 
+            return redirect('/sistema/listarTipo_Reunion')    
+        else:
+            tipo_reunion.borrado=False
+            tipo_reunion.changeReason="Eliminacion"
+            tipo_reunion.save()
+        return redirect('/sistema/listarTipo_Reunion/')
     else:
-        tipo_reunion.borrado=False
-        tipo_reunion.changeReason="Eliminacion"
-        tipo_reunion.save()
-    return redirect('/sistema/listarTipo_Reunion/')
+        return redirect('home')
 
+@login_required
 def crearReunion(request):
-    if request.method == 'POST':
-        reunion_form=ReunionForm(request.POST)
-        reunion=reunion_form.save(commit=False)
-        domicilio_form=DomicilioForm(request.POST)
-        horario_form= Horario_DisponibleForm(request.POST)
+    if permiso(request, 6):
+        if request.method == 'POST':
+            reunion_form=ReunionForm(request.POST)
+            reunion=reunion_form.save(commit=False)
+            domicilio_form=DomicilioForm(request.POST)
+            horario_form= Horario_DisponibleForm(request.POST)
 
-        if reunion_form.is_valid()and domicilio_form.is_valid():
-            if Reunion.objects.filter(nombre=reunion.nombre).exists():
-                messages.error(request, 'Nombre no disponible')
-            else:
-                horario=horario_form.save(commit=False)
-                horario.save()
-                domicilio=domicilio_form.save(commit=False)
-                domicilio.save()
-                reunion.changeReason ='Creacion'
-                reunion.domicilio=domicilio
-                reunion.horario=horario
-                reunion.save()
-                return redirect('/sistema/listarReunion')
+            if reunion_form.is_valid()and domicilio_form.is_valid():
+                if Reunion.objects.filter(nombre=reunion.nombre).exists():
+                    messages.error(request, 'Nombre no disponible')
+                else:
+                    horario=horario_form.save(commit=False)
+                    horario.save()
+                    domicilio=domicilio_form.save(commit=False)
+                    domicilio.save()
+                    reunion.changeReason ='Creacion'
+                    reunion.domicilio=domicilio
+                    reunion.horario=horario
+                    reunion.save()
+                    if permiso(request, 9) or permiso(request, 10):
+                        return redirect('/sistema/listarReunion')
+                    else:
+                        return redirect('home')
+        else:
+            localidad_form=LocalidadForm()
+            barrio_form=BarrioForm()
+            reunion_form=ReunionForm()
+            domicilio_form=DomicilioForm()
+            horario_form=Horario_DisponibleForm()
+        return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
     else:
-        localidad_form=LocalidadForm()
-        barrio_form=BarrioForm()
-        reunion_form=ReunionForm()
-        domicilio_form=DomicilioForm()
-        horario_form=Horario_DisponibleForm()
-    return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+        return redirect('home')
 
+@login_required
 def editarReunion(request,id_reunion):
-    reunion = Reunion.objects.get(id_reunion=id_reunion)
-    id = reunion.domicilio.id_domicilio
-    domicilio=Domicilio.objects.get(id_domicilio = id)
-    idd= reunion.horario.id_horario_disponible
-    horario=Horario_Disponible.objects.get(id_horario_disponible=idd)
-    barrio=Barrio.objects.get(id_barrio=domicilio.barrio.id_barrio)
-    localidad=Localidad.objects.get(id_localidad=barrio.localidad.id_localidad)
-    if request.method == 'GET':
-
-        reunion_form=ReunionForm(instance = reunion)
-        domicilio_form=DomicilioForm(instance = domicilio)
-        horario_form = Horario_DisponibleForm(instance=horario)
-        barrio_form= BarrioForm(instance=barrio)
-        localidad_form=LocalidadForm(instance=localidad)        
+    if permiso(request, 8):
+        reunion = Reunion.objects.get(id_reunion=id_reunion)
+        id = reunion.domicilio.id_domicilio
+        domicilio=Domicilio.objects.get(id_domicilio = id)
+        idd= reunion.horario.id_horario_disponible
+        horario=Horario_Disponible.objects.get(id_horario_disponible=idd)
+        barrio=Barrio.objects.get(id_barrio=domicilio.barrio.id_barrio)
+        localidad=Localidad.objects.get(id_localidad=barrio.localidad.id_localidad)
+        if request.method == 'GET':
+            reunion_form=ReunionForm(instance = reunion)
+            domicilio_form=DomicilioForm(instance = domicilio)
+            horario_form = Horario_DisponibleForm(instance=horario)
+            barrio_form= BarrioForm(instance=barrio)
+            localidad_form=LocalidadForm(instance=localidad)        
+        else:
+            reunion_form=ReunionForm(request.POST,instance=reunion)
+            horario_form=Horario_DisponibleForm(request.POST,instance=horario)
+            domicilio_form=DomicilioForm(instance = domicilio)
+            print(reunion_form.errors.as_data())
+            if reunion_form.is_valid():
+                domicilio.save()
+                reunion.changeReason ='Modificacion'
+                reunion.save()
+                if permiso(request, 9) or permiso(request, 10):
+                    return redirect('/sistema/listarReunion')
+                else:
+                    return redirect('home')
+        return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
     else:
-        reunion_form=ReunionForm(request.POST,instance=reunion)
-        horario_form=Horario_DisponibleForm(request.POST,instance=horario)
-        domicilio_form=DomicilioForm(instance = domicilio)
-        print(reunion_form.errors.as_data())
-        if reunion_form.is_valid():
-            domicilio.save()
-            reunion.changeReason ='Modificacion'
-            reunion.save()
-            return redirect('/sistema/listarReunion')
-    return render(request,'sistema/editarReunion.html',{'barrio_form':barrio_form,'localidad_form':localidad_form,'horario_form':horario_form,'reunion_form':reunion_form,'domicilio_form':domicilio_form})
+        return redirect('home')
 
+@login_required
 def listarReunion(request):
-    reuniones = Reunion.objects.filter(borrado=False)
+    if permiso(request, 9):
+        reuniones = Reunion.objects.filter(borrado=False,grupo__encargado=request.user.id)
+    if permiso(request, 10):
+        reuniones = Reunion.objects.filter(borrado=False)
+    if not(permiso(request, 10) or permiso(request, 9)):
+        return redirect('home')
     configuracion_form = Configuracion.objects.all().last()
     return render(request,'sistema/listarReunion.html',{'reuniones':reuniones,'configuracion_form':configuracion_form})      
 
+@login_required
 def eliminarReunion(request,id_reunion):
-    reunion=Reunion.objects.get(id_reunion=id_reunion)
-    domicilio=Domicilio.objects.get(id_domicilio=reunion.domicilio.id_domicilio)
-    reunion.borrado=True
-    domicilio.borrado=True
-    reunion.changeReason ='Eliminacion'
-    reunion.save()
-    domicilio.save()
-    return redirect('/sistema/listarReunion/')
+    if permiso(request, 7):
+        reunion=Reunion.objects.get(id_reunion=id_reunion)
+        domicilio=Domicilio.objects.get(id_domicilio=reunion.domicilio.id_domicilio)
+        reunion.borrado=True
+        domicilio.borrado=True
+        reunion.changeReason ='Eliminacion'
+        reunion.save()
+        domicilio.save()
+        return redirect('/sistema/listarReunion/')
+    else:
+        return redirect('home')
 
+@login_required
 def agregarAsistencia(request):
-    if request.method == 'POST':
-        reunion_form = request.POST.get('reunion')
-        print("-----------------------------------")
-        # print('ast: ',request.POST.get('ast-encargado'))
-        reunion=Reunion.objects.get(id_reunion=reunion_form)
-        grupo= reunion.grupo
-        fecha = request.POST.get('fecha')
-        hoy = date.today()
-        #Weno voy a ver si ya pusieron asistencias ese dia capa, le mando un error
-        print('fecharda: ',fecha)
-        if Asistencia.objects.filter(fecha=fecha,reunion=reunion).exists():
-            print('ni un cargo tu if')
-            messages.error(request, 'Esta Reunion ya registro sus asistencias el dia '+ fecha)
-            return redirect('/sistema/agregarAsistencia')
+    if permiso(request, 19):
+        if request.method == 'POST':
+            reunion_form = request.POST.get('reunion')
+            print("-----------------------------------")
+            # print('ast: ',request.POST.get('ast-encargado'))
+            reunion=Reunion.objects.get(id_reunion=reunion_form)
+            grupo= reunion.grupo
+            fecha = request.POST.get('fecha')
+            hoy = date.today()
+            #Weno voy a ver si ya pusieron asistencias ese dia capa, le mando un error
+            print('fecharda: ',fecha)
+            if Asistencia.objects.filter(fecha=fecha,reunion=reunion).exists():
+                print('ni un cargo tu if')
+                messages.error(request, 'Esta Reunion ya registro sus asistencias el dia '+ fecha)
+                return redirect('/sistema/agregarAsistencia')
 
-        if request.POST.get('ast-encargado') == "True":
-            miembros = Miembro.objects.filter(grupo=grupo)
-            for miembro in miembros:
+            if request.POST.get('ast-encargado') == "True":
+                miembros = Miembro.objects.filter(grupo=grupo)
+                for miembro in miembros:
+                    asistencia=Asistencia()
+                    asistencia.miembro=miembro
+                    asistencia.fecha=fecha
+                    asistencia.reunion=reunion
+                    asistencia.presente=False
+                    justificado=False
+                    asistencia.changeReason="Creacion"
+                    asistencia.save()
+                for check in request.POST.getlist('check[]'):
+                    print('dni: ',check)
+                    miembro=Miembro.objects.get(dni=check)
+                    asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
+                    asistencia.presente=True
+                    justificado=True
+                    asistencia.changeReason="Creacion"
+                    asistencia.save()
+            else:
+                miembro=CustomUser.objects.get(id=grupo.encargado)
+                miembro.faltas +=1
+                miembro.save()
+                miembro=miembro.miembro_id
+                miembro=Miembro.objects.get(dni=miembro)
                 asistencia=Asistencia()
                 asistencia.miembro=miembro
                 asistencia.fecha=fecha
                 asistencia.reunion=reunion
                 asistencia.presente=False
-                justificado=False
-                asistencia.changeReason="Creacion"
+                asistencia.justificado=False
                 asistencia.save()
-            for check in request.POST.getlist('check[]'):
-                print('dni: ',check)
-                miembro=Miembro.objects.get(dni=check)
-                asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha)
-                asistencia.presente=True
-                justificado=True
-                asistencia.changeReason="Creacion"
-                asistencia.save()
+            return redirect('/sistema/verAsistencia')
         else:
-            miembro=CustomUser.objects.get(id=grupo.encargado)
-            miembro.faltas +=1
-            miembro.save()
-            miembro=miembro.miembro_id
-            miembro=Miembro.objects.get(dni=miembro)
-            asistencia=Asistencia()
-            asistencia.miembro=miembro
-            asistencia.fecha=fecha
-            asistencia.reunion=reunion
-            asistencia.presente=False
-            asistencia.justificado=False
-            asistencia.save()
-        return redirect('/sistema/verAsistencia')
+            asistencia_form=AsistenciaForm()
+            reunion_form=Reunion.objects.all()
+            miembro_form=Miembro.objects.all()
+        return render(request,'sistema/agregarAsistencia.html',{'miembro_form':miembro_form,'asistencia_form':asistencia_form,'reunion_form':reunion_form})
     else:
-        asistencia_form=AsistenciaForm()
-        reunion_form=Reunion.objects.all()
-        miembro_form=Miembro.objects.all()
-    return render(request,'sistema/agregarAsistencia.html',{'miembro_form':miembro_form,'asistencia_form':asistencia_form,'reunion_form':reunion_form})
+        return redirect('home')
 
+@login_required
 def editarAsistencia(request,id_asistencia):
-    ast = Asistencia.objects.get(id_asistencia=id_asistencia)
-    asistencia = AsistenciaForm(instance=ast)
-    if request.method == 'POST':
-        edito = False
-        fecha=request.POST.get('fecha')
-        if ast.fecha != fecha:
-            ast.fecha = fecha
-            edito = True
-        asistio = request.POST.get('asistio')
-        if ast.presente != asistio:
-            ast.presente = asistio
-            edito = True
-        if edito == True:
-            ast.changeReason="Modificacion"
-            ast.save()
-        return redirect('/sistema/verAsistencia')
-    
-    return render(request,'sistema/editarAsistencia.html',{'ast':ast,'asistencia':asistencia})
-
-def verAsistencia(request):
-    if request.method == 'POST':
-        print('wenas')
+    if permiso(request, 21):
+        ast = Asistencia.objects.get(id_asistencia=id_asistencia)
+        asistencia = AsistenciaForm(instance=ast)
+        if request.method == 'POST':
+            edito = False
+            fecha=request.POST.get('fecha')
+            if ast.fecha != fecha:
+                ast.fecha = fecha
+                edito = True
+            asistio = request.POST.get('asistio')
+            if ast.presente != asistio:
+                ast.presente = asistio
+                edito = True
+            if edito == True:
+                ast.changeReason="Modificacion"
+                ast.save()
+            return redirect('/sistema/verAsistencia')
+        
+        return render(request,'sistema/editarAsistencia.html',{'ast':ast,'asistencia':asistencia})
     else:
+        return redirect('home')
+
+@login_required
+def verAsistencia(request):
+    if permiso(request, 22):
+        asistencia=[]
+        reunion = Reunion.objects.filter(grupo__encargado=request.user.id)
+        for rn in reunion:
+            asistencias = Asistencia.objects.filter(reunion_id = rn.id_reunion)
+            for ast in asistencias:
+                if not(ast in asistencia):
+                    asistencia.append(ast)
+    if permiso(request, 23):
         reunion=Reunion.objects.all()
         asistencia = Asistencia.objects.all()
+    if not(permiso(request, 23) or permiso(request, 22)):
+        return redirect('home')
     return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia,'reunion':reunion})
 
-def agregarHorario_Disponible(request):
-    if request.method == 'POST':
-        horario_disponible_form = Horario_DisponibleForm(request.POST)
-        if horario_disponible_form.is_valid():
-            horario_disponible_form.save()
-            return redirect('home')
-    else:
-        horario_disponible_form = Horario_DisponibleForm()
-    return render(request,'sistema/agregarHorario_Disponible.html',{'horario_disponible_form':horario_disponible_form})
-
+@login_required
 def agregarEncuesta(request):
-    if request.method == 'POST':
-        tipo=request.POST.get('tipo')
-        if request.POST.get('cantidad',None)=='None':
-            cantidad=request.POST.get('cantidadd')
+    if permiso(request, 27):
+        if request.method == 'POST':
+            tipo=request.POST.get('tipo')
+            if request.POST.get('cantidad',None)=='None':
+                cantidad=request.POST.get('cantidadd')
+            else:
+                cantidad=request.POST.get('cantidad')
+            tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=tipo)
+            tipo.cantidad=cantidad
+            pregunta=request.POST.get('pregunta')
+            tipo.save()
+            tipo.preguntas.set(request.POST.getlist('check[]'))
+            #tipo.changeReason="Creacion"
+            tipo.save()
+            if tipo.id_tipo_encuesta== 2:
+                reuniones=request.POST.getlist('reunion[]')
+                for rn in reuniones:
+                    reunion=Reunion.objects.get(id_reunion=int(rn))
+                    grupo=reunion.grupo
+                    miembross = grupo.miembro.all()
+                    miembros=[]
+                    for miembro in miembross:
+                        miembros.append(miembro)
+                        encuesta=Encuesta(borrado=False,fecha_envio=date.today(),reunion=reunion,tipo=tipo,respondio=False) #creo la encuesta
+                        #a medida que voy creando le voy a ir enviando tmb
+                        encuesta.save()
+                        mensaje=Mensaje.objects.get(id=4)
+                        asunto=mensaje.tipo
+                        mensaje=mensaje.mensaje
+                        enviarWhatsapp(mensaje,miembros)
+                        mensaje=mensaje + ' ->  http://localhost:8000/sistema/agregarRespuestaReunion/'+str(encuesta.id_encuesta)
+                        enviarMail(miembros,asunto,mensaje)
+                        miembros=[]#limpio porque voy a enviar 1 por uno
+            return redirect('home')
         else:
-            cantidad=request.POST.get('cantidad')
-        tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=tipo)
-        tipo.cantidad=cantidad
-        pregunta=request.POST.get('pregunta')
-        tipo.save()
-        tipo.preguntas.set(request.POST.getlist('check[]'))
-        #tipo.changeReason="Creacion"
-        tipo.save()
-        if tipo.id_tipo_encuesta== 2:
-            reuniones=request.POST.getlist('reunion[]')
-            for rn in reuniones:
-                reunion=Reunion.objects.get(id_reunion=int(rn))
-                grupo=reunion.grupo
-                miembross = grupo.miembro.all()
-                miembros=[]
-                for miembro in miembross:
-                    miembros.append(miembro)
-                    encuesta=Encuesta(borrado=False,fecha_envio=date.today(),reunion=reunion,tipo=tipo,respondio=False) #creo la encuesta
-                    #a medida que voy creando le voy a ir enviando tmb
-                    encuesta.save()
-                    mensaje=Mensaje.objects.get(id=4)
-                    asunto=mensaje.tipo
-                    mensaje=mensaje.mensaje
-                    enviarWhatsapp(mensaje,miembros)
-                    mensaje=mensaje + ' ->  http://localhost:8000/sistema/agregarRespuestaReunion/'+str(encuesta.id_encuesta)
-                    enviarMail(miembros,asunto,mensaje)
-                    miembros=[]#limpio porque voy a enviar 1 por uno
+            pregunta=Pregunta.objects.filter(borrado=False)
+            tipo_encuesta=Tipo_Encuesta.objects.all()
+            reuniones=Reunion.objects.filter(borrado=False)
+            return render(request,'sistema/agregarEncuesta.html',{'tipo_encuesta':tipo_encuesta,'pregunta':pregunta,'reuniones':reuniones})
+    else:
         return redirect('home')
-    else:
-        pregunta=Pregunta.objects.filter(borrado=False)
-        tipo_encuesta=Tipo_Encuesta.objects.all()
-        reuniones=Reunion.objects.filter(borrado=False)
-        return render(request,'sistema/agregarEncuesta.html',{'tipo_encuesta':tipo_encuesta,'pregunta':pregunta,'reuniones':reuniones})
 
+@login_required
 def agregarPregunta(request):
-    if request.method =='POST':
-        pregunta = PreguntaForm(request.POST)
-        print("-----------------------------")
-        print(pregunta.errors)
-        print("-----------------------------")
-        pregunta=pregunta.save(commit=False)
-        pregunta.changeReason="Creacion"        
-        tipo=request.POST.get('tipo')
-        print(tipo)
-        print("-----------------------------")
-        pregunta.save()
-        puntos=request.POST.getlist('puntos')
-        print(puntos)
-        print("-----------------------------")
-        i=0
-        if tipo=='2':
-            radios=request.POST.getlist('radiosList')
-            print(radios)
-            for radio in radios:
-                punto=puntos[i]
-                print("--------------pto abajito---------------")
-                print(punto)
-                i+=1
-                opcion=Opciones(pregunta=pregunta, opcion=radio, puntaje=punto)
-                opcion.save()
-        if tipo=='3':
-            checks=request.POST.getlist('check[]')
-            print(checks)
-            for check in checks:
-                punto=puntos[i]
-                print("------------pto-----------------")
-                print(punto)
-                i+=1
-                opcion=Opciones(pregunta=pregunta, opcion=check, puntaje=punto)
-                opcion.save()
-        return redirect('/sistema/agregarEncuesta')
+    if permiso(request, 25):
+        if request.method =='POST':
+            pregunta = PreguntaForm(request.POST)
+            print("-----------------------------")
+            print(pregunta.errors)
+            print("-----------------------------")
+            pregunta=pregunta.save(commit=False)
+            pregunta.changeReason="Creacion"        
+            tipo=request.POST.get('tipo')
+            print(tipo)
+            print("-----------------------------")
+            pregunta.save()
+            puntos=request.POST.getlist('puntos')
+            print(puntos)
+            print("-----------------------------")
+            i=0
+            if tipo=='2':
+                radios=request.POST.getlist('radiosList')
+                print(radios)
+                for radio in radios:
+                    punto=puntos[i]
+                    print("--------------pto abajito---------------")
+                    print(punto)
+                    i+=1
+                    opcion=Opciones(pregunta=pregunta, opcion=radio, puntaje=punto)
+                    opcion.save()
+            if tipo=='3':
+                checks=request.POST.getlist('check[]')
+                print(checks)
+                for check in checks:
+                    punto=puntos[i]
+                    print("------------pto-----------------")
+                    print(punto)
+                    i+=1
+                    opcion=Opciones(pregunta=pregunta, opcion=check, puntaje=punto)
+                    opcion.save()
+            return redirect('/sistema/agregarEncuesta')
+        else:
+            pregunta_form=PreguntaForm()
+            tipos=Tipo_Pregunta.objects.all()
+        return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form,'tipos':tipos})
     else:
-        pregunta_form=PreguntaForm()
-        tipos=Tipo_Pregunta.objects.all()
-    return render(request,'sistema/agregarPregunta.html',{'pregunta_form':pregunta_form,'tipos':tipos})
+        return redirect('home')
 
+@login_required
 def validarPregunta(request):
     nombre = request.GET.get('nombre')
     data = {
@@ -710,15 +860,19 @@ def validarPregunta(request):
     print(data)
     return JsonResponse(data)
 
+@login_required
 def eliminarPregunta(request,id_pregunta):
-    pregunta=Pregunta.objects.get(id_pregunta=id_pregunta)
-    opciones=Opciones.objects.filter(pregunta_id=id_pregunta)
-    for opcion in opciones:
-        opcion.borrado=True
-        opcion.save()
-    pregunta.borrado=True
-    pregunta.save()
-    return redirect('home')
+    if permiso(request, 26):  
+        pregunta=Pregunta.objects.get(id_pregunta=id_pregunta)
+        opciones=Opciones.objects.filter(pregunta_id=id_pregunta)
+        for opcion in opciones:
+            opcion.borrado=True
+            opcion.save()
+        pregunta.borrado=True
+        pregunta.save()
+        return redirect('/sistema/agregarEncuesta/')
+    else:
+        return redirect('home')
 
 def agregarRespuesta(request):
     miembro=Miembro.objects.get(dni=request.user.miembro_id)
@@ -943,6 +1097,7 @@ def agregarRespuestaReunion(request,id_encuesta):
     print('reunion: ', reunion)
     return render(request,'sistema/agregarRespuesta.html',{'preguntas':preguntas,'reunion':reunion})
 
+@login_required
 def recomendacion(request):
     #Bien ahora si la idea es obtener todas las encuestas enviadas a esa reunion en esa fecha
     #ver cuantos respondieron y que respondieron si respondio
@@ -1028,13 +1183,18 @@ def recomendacion(request):
     print('data: ',data)
     return JSONResponse(data)
 
+@login_required
 def verRespuesta(request,id_encuesta):
-    encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
-    respuestas=Respuesta.objects.filter(encuesta=encuesta)
-    if request.method =='POST':
+    if permiso(request, 30):
+        encuesta=Encuesta.objects.get(id_encuesta=id_encuesta)
+        respuestas=Respuesta.objects.filter(encuesta=encuesta)
+        if request.method =='POST':
+            return redirect('home')
+        return render(request,'sistema/verRespuesta.html',{'respuestas':respuestas})
+    else:
         return redirect('home')
-    return render(request,'sistema/verRespuesta.html',{'respuestas':respuestas})
 
+@login_required
 def reasignar(request,dni):
     miembro=Miembro.objects.get(dni=dni)
     usr=CustomUser.objects.get(miembro__dni=dni)
@@ -1115,49 +1275,66 @@ def reasignar(request,dni):
     
     return render(request,'sistema/reasignar.html',{'miembro':miembro,'reuniones':reuniones})
 
+@login_required
 def crearRol(request):
-    if request.method=='POST':
-        nombre=request.POST.get('nombre')
-        rol=Rol(nombre=nombre,borrado=False)
-        rol.save()
-        rol.permisos.set(request.POST.getlist('permisos'))
-        rol.save()
-        return redirect('home')
+    if permiso(request, 31):
+        if request.method=='POST':
+            nombre=request.POST.get('nombre')
+            rol=Rol(nombre=nombre,borrado=False)
+            rol.save()
+            rol.permisos.set(request.POST.getlist('permisos'))
+            rol.save()
+            return redirect('home')
+        else:
+            permisos=Permisos.objects.all()
+            rol_form=RolForm()
+            return render(request,'sistema/crearRol.html',{'rol_form':rol_form,'permisos':permisos})
     else:
-        permisos=Permisos.objects.all()
-        rol_form=RolForm()
-        return render(request,'sistema/crearRol.html',{'rol_form':rol_form,'permisos':permisos}) 
+        return redirect('home') 
 
+@login_required
 def verRol(request):
-    roles=Rol.objects.all()
-    return render(request,'sistema/verRol.html',{'roles':roles})
-
-def editarRol(request,id_rol):
-    rol=Rol.objects.get(id_rol=id_rol)
-    if request.method =="POST":
-        nombre=request.POST.get('nombre')
-        rol.nombre=nombre
-        permisos=request.POST.getlist('permisos')
-        permisos=Permisos.objects.filter(id_permiso__in=permisos)
-        rol.permisos.set(permisos)
-        rol.save()
+    if permiso(request, 32):
+        roles=Rol.objects.all()
+        return render(request,'sistema/verRol.html',{'roles':roles})
+    else:
         return redirect('home')
-    else:
-        rol_form=RolForm(instance=rol)
-        permisos=rol.permisos.all()
-        permisos_excluidos = Permisos.objects.exclude(id_permiso__in=permisos)
-        return render(request,'sistema/editarRol.html',{'rol_form':rol_form,'permisos':permisos,'permisos_excluidos':permisos_excluidos})
 
+@login_required
+def editarRol(request,id_rol):
+    if permiso(request, 34):
+        rol=Rol.objects.get(id_rol=id_rol)
+        if request.method =="POST":
+            nombre=request.POST.get('nombre')
+            rol.nombre=nombre
+            permisos=request.POST.getlist('permisos')
+            permisos=Permisos.objects.filter(id_permiso__in=permisos)
+            rol.permisos.set(permisos)
+            rol.save()
+            return redirect('home')
+        else:
+            rol_form=RolForm(instance=rol)
+            permisos=rol.permisos.all()
+            permisos_excluidos = Permisos.objects.exclude(id_permiso__in=permisos)
+            return render(request,'sistema/editarRol.html',{'rol_form':rol_form,'permisos':permisos,'permisos_excluidos':permisos_excluidos})
+    else:
+        return redirect('home')
+
+@login_required
 def eliminarRol(request,id_rol):
-    rol=Rol.objects.get(id_rol=id_rol)
-    if CustomUser.objects.filter(rol = rol).exists():
-        messages.error(request, 'NO SE PUEDE ELIMINAR EL ROL: existen usuarios con dicho rol') 
-        return redirect('/sistema/verRol')
+    if permiso(request, 33):
+        rol=Rol.objects.get(id_rol=id_rol)
+        if CustomUser.objects.filter(rol = rol).exists():
+            messages.error(request, 'NO SE PUEDE ELIMINAR EL ROL: existen usuarios con dicho rol') 
+            return redirect('/sistema/verRol')
+        else:
+            rol.borrado=True
+            rol.save()
+            return redirect('/sistema/verRol/')
     else:
-        rol.borrado=True
-        rol.save()
-        return redirect('/sistema/verRol/')
+        return redirect('home')
 
+@login_required
 def validarRol(request):
     nombre = request.GET.get('nombre')
     data = {
@@ -1174,6 +1351,7 @@ def validarRol(request):
     print(data)
     return JsonResponse(data)
 
+@login_required
 def auditoria_detalles_miembro(request,dni,id_auditoria):
     print(dni, id_auditoria)
     mb_historial = Miembro.history.filter(dni=dni)
@@ -1201,6 +1379,7 @@ def auditoria_detalles_miembro(request,dni,id_auditoria):
     print("DATA: ", data)
     return JSONResponse(data)
 
+@login_required
 def auditoria_detalles_reunion(request,id,id_auditoria):
     print(id, id_auditoria)
     rn_historial = Reunion.history.filter(id_reunion=id)
@@ -1228,6 +1407,7 @@ def auditoria_detalles_reunion(request,id,id_auditoria):
     print("DATA: ", data)
     return JSONResponse(data)
 
+@login_required
 def auditoria_detalles_asistencia(request,id_asistencia,id_auditoria):
     auditoria_historial = Asistencia.history.filter(id_asistencia=id_asistencia)
     historial = Asistencia.history.filter(id_asistencia=id_asistencia)
@@ -1247,6 +1427,7 @@ def auditoria_detalles_asistencia(request,id_asistencia,id_auditoria):
         data=[{'change':False}]
     return JSONResponse(data)    
 
+@login_required
 def enviarMensaje(request):
     reuniones=Reunion.objects.filter(borrado=False)
     if request.method == 'POST':
@@ -1495,9 +1676,9 @@ def recomendacionTable(request):
                         print('weno esto si que ya es imposible china xd')   
         if best_usr_recomendados:
             serializer=MiembroSerializer(best_usr_recomendados,many=True)
-        elif usr_recomendados:
+        if (not(best_usr_recomendados) and usr_recomendados):
             serializer=MiembroSerializer(usr_recomendados,many=True)
-        elif mb_recomendados:
+        if  (not(best_usr_recomendados and usr_recomendados) and mb_recomendados):
             serializer=MiembroSerializer(mb_recomendados,many=True)
         result=dict()
         result = serializer.data
@@ -1589,7 +1770,7 @@ def reunionList(request):
                                     else:
                                         rn.append(reunion) #Esta voy a ocupar si no es la mejor reunion
                                         #esta reunion coincide con los horarios libres de las personas
-                                elif miembro.domicilio.barrio == reunion.domicilio.barrio:
+                                if (not(Miembro.objects.filter(dni=miembro.dni,horario_disponible=horario).exists()) and miembro.domicilio.barrio == reunion.domicilio.barrio):
                                         rn.append(reunion) #No coincide con los horarios libres pero si con la ubicacion
                                 else: #bueno aca no hay en el mismo barrio ni en el mismo horario
                                     #tonces le pongo la reunion del mismo tipo al menos y genero
@@ -1602,7 +1783,7 @@ def reunionList(request):
                 
                 if best_rn:
                     rn_recomendada.append(best_rn[0])#solo una xD
-                elif rn:
+                if (not(best_rn) and rn):
                     rn_recomendada.append(rn[0])
 
                 print('------------------------------------///------------------------------')
@@ -1815,21 +1996,22 @@ def filtros_asistencias(request):
             cant_ast= len(list(cant_ast))
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
-        elif mb != 'null':
+        if (not(rn != '') and mb != 'null'):
             cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True)
             cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False)
             cant_ast= len(list(cant_ast))
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
-        elif rol != '': 
-            usuarios = CustomUser.objects.filter(rol_id=rol)
-            for usuario in usuarios:
-                miembro = usuario.miembro
-                cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True)
-                cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False)
-                cant_ast= len(list(cant_ast))
-                cant_fal= len(list(cant_fal))
-                cant_total = cant_ast + cant_fal
+        else : 
+            if rol != '':
+                usuarios = CustomUser.objects.filter(rol_id=rol)
+                for usuario in usuarios:
+                    miembro = usuario.miembro
+                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True)
+                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False)
+                    cant_ast= len(list(cant_ast))
+                    cant_fal= len(list(cant_fal))
+                    cant_total = cant_ast + cant_fal
     else: #weno si puso horarios tengo que ver cual
         if request.GET['desde'] != '' and request.GET['hasta'] !='':
             if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn entre esas fechas entonces
@@ -1840,71 +2022,76 @@ def filtros_asistencias(request):
                 cant_fal= len(list(cant_fal))
                 cant_total = cant_ast + cant_fal
 
-            elif mb != 'null':
+            if (not(rn != '') and mb != 'null'):
                 cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__range=(desde,hasta))
                 cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__range=(desde,hasta))
                 cant_ast= len(list(cant_ast))
                 cant_fal= len(list(cant_fal))
                 cant_total = cant_ast + cant_fal
-            elif rol != '': 
-                usuarios = CustomUser.objects.filter(rol_id=rol)
-                for usuario in usuarios:
-                    miembro = usuario.miembro
-                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__range=(desde,hasta))
-                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__range=(desde,hasta))
+            else :
+                if rol != '': 
+                    usuarios = CustomUser.objects.filter(rol_id=rol)
+                    for usuario in usuarios:
+                        miembro = usuario.miembro
+                        cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__range=(desde,hasta))
+                        cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__range=(desde,hasta))
+                        cant_ast= len(list(cant_ast))
+                        cant_fal= len(list(cant_fal))
+                        cant_total = cant_ast + cant_fal
+        else:
+            if request.GET['desde'] != '': #si entra aca es porque uno de los dos esta vacio, hay que ver cual
+                #en este caso cargo solo el desde
+                if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha en adelante
+                    #bueno voy a traer todos los registros de asistencias de esa rn
+                    cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__gte=desde)
+                    cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__gte=desde)
                     cant_ast= len(list(cant_ast))
                     cant_fal= len(list(cant_fal))
                     cant_total = cant_ast + cant_fal
-        elif request.GET['desde'] != '': #si entra aca es porque uno de los dos esta vacio, hay que ver cual
-            #en este caso cargo solo el desde
-            if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha en adelante
-                #bueno voy a traer todos los registros de asistencias de esa rn
-                cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__gte=desde)
-                cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__gte=desde)
-                cant_ast= len(list(cant_ast))
-                cant_fal= len(list(cant_fal))
-                cant_total = cant_ast + cant_fal
 
-            elif mb != 'null':
-                cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__gte=desde)
-                cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__gte=desde)
-                cant_ast= len(list(cant_ast))
-                cant_fal= len(list(cant_fal))
-                cant_total = cant_ast + cant_fal
-            elif rol != '': 
-                usuarios = CustomUser.objects.filter(rol_id=rol)
-                for usuario in usuarios:
-                    miembro = usuario.miembro
-                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__gte=desde)
-                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__gte=desde)
+                if (not(rn != '') and mb != 'null'):
+                    cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__gte=desde)
+                    cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__gte=desde)
                     cant_ast= len(list(cant_ast))
                     cant_fal= len(list(cant_fal))
                     cant_total = cant_ast + cant_fal
-        elif  request.GET['hasta'] != '': #en realidad con un else ya anda pero por la dudas
-            if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha limita hacia atras
-                #bueno voy a traer todos los registros de asistencias de esa rn
-                cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__lte=hasta)
-                cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__lte=hasta)
-                cant_ast= len(list(cant_ast))
-                cant_fal= len(list(cant_fal))
-                cant_total = cant_ast + cant_fal
+                else:
+                    if rol != '': 
+                        usuarios = CustomUser.objects.filter(rol_id=rol)
+                        for usuario in usuarios:
+                            miembro = usuario.miembro
+                            cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__gte=desde)
+                            cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__gte=desde)
+                            cant_ast= len(list(cant_ast))
+                            cant_fal= len(list(cant_fal))
+                            cant_total = cant_ast + cant_fal
+            else:
+                if request.GET['hasta'] != '': #en realidad con un else ya anda pero por la dudas
+                    if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha limita hacia atras
+                        #bueno voy a traer todos los registros de asistencias de esa rn
+                        cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__lte=hasta)
+                        cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__lte=hasta)
+                        cant_ast= len(list(cant_ast))
+                        cant_fal= len(list(cant_fal))
+                        cant_total = cant_ast + cant_fal
 
-            elif mb != 'null':
-                cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__lte=hasta)
-                cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__lte=hasta)
-                cant_ast= len(list(cant_ast))
-                cant_fal= len(list(cant_fal))
-                cant_total = cant_ast + cant_fal
-            elif rol != '': 
-                usuarios = CustomUser.objects.filter(rol_id=rol)
-                for usuario in usuarios:
-                    miembro = usuario.miembro
-                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__lte=hasta)
-                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__lte=hasta)
-                    cant_ast= len(list(cant_ast))
-                    cant_fal= len(list(cant_fal))
-                    cant_total = cant_ast + cant_fal
-        
+                    if (not(rn != '') and mb != 'null'):
+                        cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__lte=hasta)
+                        cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__lte=hasta)
+                        cant_ast= len(list(cant_ast))
+                        cant_fal= len(list(cant_fal))
+                        cant_total = cant_ast + cant_fal
+                    else:
+                        if rol != '': 
+                            usuarios = CustomUser.objects.filter(rol_id=rol)
+                            for usuario in usuarios:
+                                miembro = usuario.miembro
+                                cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__lte=hasta)
+                                cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__lte=hasta)
+                                cant_ast= len(list(cant_ast))
+                                cant_fal= len(list(cant_fal))
+                                cant_total = cant_ast + cant_fal
+                
         
     data = []
     if cant_total != 0: #no tenian ninguna asitencia
