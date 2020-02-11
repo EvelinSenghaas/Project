@@ -8,12 +8,13 @@
             <div class="col-lg-11">
                 {% csrf_token %}
                 <div class="card">
-                    <form method="POST" class="form-horizontal">
-                        <div class="card-header">
-                                <strong> Planilla de  </strong> Configuraciones
+                    <form method="POST" class="form-horizontal" >
+                        <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para configurar reportes">
+                                <strong> Planilla de Configuracion </strong> de Reportes
+                                <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                         </div>
                         
-                        <div class="card-body card-block">
+                        <div class="card-body card-block"  data-step="2" data-intro="Paso 2: Puedes configurar el titulo, el telefono y la direccion que se muestran en tus reportes ">
                         {% for field in configuracion_form %}
                         <div class="row form-group">
                             <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
@@ -23,7 +24,7 @@
                         <br>
                         
                         <div class="card-body">
-                            <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+                            <button  data-step="3" data-intro="Paso 3: Una vez que hayas cargado todo, puedes apretar 'configurar' " type="submit" class="btn btn-success btn-sm">Confirmar</button>
                         </div>
                         </div>
                     </form>
