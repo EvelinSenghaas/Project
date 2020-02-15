@@ -107,7 +107,7 @@
                         <ul  class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-search"></i><a href="/sistema/estadistica_miembro">Estado de Miembros</a></li>
                             <li><i class="menu-icon fa fa-th"></i><a href="/sistema/estadistica_reunion">Estado de Reuniones</a></li>
-                            <li><i class="menu-icon fa fa-th"></i><a href="/sistema/estadistica_asistencias">Estadistica de  Asistecias</a></li>
+                            <li><i class="menu-icon fa fa-th"></i><a href="/sistema/estadistica_asistencias">Estadistica de  Asistencias</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children dropdown">
@@ -115,6 +115,7 @@
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-sign-in"></i><a href="page-login.html">Cerrar Sesion</a></li>
                             <li id="35"><i class="menu-icon fa fa-sign-in"></i><a href="/accounts/signup">Registrar Usuario</a></li>
+                            <li id="38"><i class="menu-icon fa fa-sign-in"></i><a href="/sistema/listarUsuario">Ver Usuario</a></li>
                         </ul>
                     </li>
                     <script>inicial()</script>
@@ -149,7 +150,7 @@
                             </form>
                         </div>
 
-                        <div class="dropdown for-notification">
+                        {% comment %} <div class="dropdown for-notification">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-bell"></i>
                                 <span class="count bg-danger">3</span>
@@ -169,9 +170,9 @@
                                     <p>Server #3 overloaded.</p>
                                 </a>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
 
-                        <div class="dropdown for-message">
+                        {% comment %} <div class="dropdown for-message">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="message" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-envelope"></i>
                                 <span class="count bg-primary">4</span>
@@ -211,7 +212,7 @@
                                     </div>
                                 </a>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
                     </div>
 
                     <div class="user-area dropdown float-right">
@@ -220,13 +221,11 @@
                         </a>
 
                         <div class="user-menu dropdown-menu">
-                            <a class="nav-link" href="#"><i class="fa fa- user"></i>My Profile</a>
+                            <a class="nav-link" href="#"><i class="fa fa- user"></i>Mi Perfil</a>
 
-                            <a class="nav-link" href="#"><i class="fa fa- user"></i>Notifications <span class="count">13</span></a>
+                            <a class="nav-link" href="#"><i class="fa fa -cog"></i>Configuracion</a>
 
-                            <a class="nav-link" href="#"><i class="fa fa -cog"></i>Settings</a>
-
-                            <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-power -off"></i>Logout</a>
+                            <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-power -off"></i>cerrar Sesion</a>
                         </div>
                     </div>
 

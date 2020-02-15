@@ -24,6 +24,7 @@ class Login(FormView):
             return HttpResponseRedirect(self.get_success_url())
         else:
             print("No hay usuario logueado")
+            print(request.user)
             return super(Login, self).dispatch(request,*args,**kwargs)
     def form_valid(self, form):
         dj_login(self.request,form.get_user())

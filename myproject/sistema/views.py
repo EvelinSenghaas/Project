@@ -36,20 +36,33 @@ def permiso(request, p):
 
 def days_between(d1, d2):
     return abs(d2 - d1).days
-    
+
+def listarUsuario(request):
+    configuracion_form = Configuracion.objects.all().last()
+    usuarios = CustomUser.objects.all()
+    context ={'usuarios':usuarios,'configuracion_form':configuracion_form,'usuarios':usuarios}
+    return render(request,'sistema/listarUsuario.html',context)
+
+def reactivarUsuario(request,id):
+    if permiso(request, 36):
+        usuario = CustomUser.objects.get(id=id)
+        estado = Estado(estado='Muy Bueno',confirmado=True,usuario_id = usuario.id)
+        estado.save()
+        usuario.is_active=True
+        usuario.save()
+        return redirect('/sistema/listarUsuario')
+
 @login_required
 def Home(request):
     #Tengo que ver de recuperar el ultimo registro de asistencia por reunion, si pasaron mas de 7 dias 
     #y no hubo un registro, ponerle falta al encargado
     usuario = request.user
-    usuarios = CustomUser.objects.all()
     miembro = Miembro.objects.get(dni=usuario.miembro_id)
-    configuracion_form = Configuracion.objects.all().last()
     if miembro.sexo=="Femenino":
         sexo="Femenino"
     else:
         sexo="Masculino"
-    context ={'usuario':usuario,'sexo':sexo,'usuarios':usuarios,'configuracion_form':configuracion_form}
+    context ={'usuario':usuario,'sexo':sexo}
     miembros=[]
     miembros.append(str(miembro.dni))
     # asunto="Wenas"
@@ -140,7 +153,7 @@ def estadistica_asistencias(request):
     if permiso(request, 43):
         reuniones = Reunion.objects.all()
         miembros = Miembro.objects.all()
-        roles = Rol.objects.all()
+        roles = Rol.objects.filter(borrado=False)
         return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
     else:
         return redirect('home')
@@ -587,10 +600,10 @@ def crearReunion(request):
                     reunion.domicilio=domicilio
                     reunion.horario=horario
                     reunion.save()
-                    if permiso(request, 9) or permiso(request, 10):
-                        return redirect('/sistema/listarReunion')
-                    else:
-                        return redirect('home')
+            if permiso(request, 9) or permiso(request, 10):
+                return redirect('/sistema/listarReunion')
+            else:
+                return redirect('home')
         else:
             localidad_form=LocalidadForm()
             barrio_form=BarrioForm()
@@ -983,7 +996,7 @@ def agregarRespuesta(request):
                 estado.save()
                 mensaje=Mensaje.objects.get(id=3)
                 asunto = mensaje.tipo.tipo
-                mensaje = mensaje.mensaje + "por favor ingrese en el siguiente enlace http://localhost:8000/sistema/reasignar/"+str(encuesta.miembro)
+                mensaje = mensaje.mensaje + "por favor ingrese en el siguiente enlace http://localhost:8000/sistema/reasignar/"+str(encuesta.miembro.dni)
                 miembros=[]
                 miembros.append(request.user.miembro)
                 enviarMail(miembros, asunto, mensaje)
@@ -1211,67 +1224,78 @@ def reasignar(request,dni):
     print('------------------//-----------------------------')
     print('Reuniones: ',reuniones)
     if request.method=='POST':
-        print(request.POST)
-        reuniones_encargado=request.POST.getlist('reunion-encargado')
-        print('reuniones:',reuniones_encargado) #esto devuelve toda una lista que la voy a ir corando
-        if reuniones_encargado:
-            for reunion_cambio in reuniones_encargado: 
-                rn,mb=reunion_cambio.split("-") #reunion uso para cortar no mas reunion tiene esto "id_r+id_m"
-                print("rn-mb",rn,mb)
-                #tengo que buscar esta reunion y ese miembro
-                rn=Reunion.objects.get(id_reunion=rn)
-                mb=Miembro.objects.get(dni=mb)
-                #Bien, aca empieza la reasignacion de miembros y el envio de correo para los encargados, vamos a empezar reasignando miembros
-                #Hay que ver si el miembro ya no es parte de esa reunion
-                #primero obtengo el grupo de la reunion
-                if mb in rn.grupo.miembro.all(): #si el miembro esta en la rn
-                    print('ya ta')
-                else:
-                    rn.grupo.miembro.add(mb)
-                    rn.grupo.changeReason='Modificacion' 
-                    rn.grupo.save()
-                    #es hora de avisar!
-                    msj=Mensaje.objects.get(id=5)
-                    mensaje=msj.mensaje
-                    miembros=[]
-                    usr=CustomUser.objects.get(id=reunion.grupo.encargado)
-                    mb_new=Miembros.objects.get(dni=usr.miembro_id)
-                    miembros.append(mb_new)
-                    asunto = msj.tipo
-                    enviarWhatsapp(mensaje,miembros)
-                    mensaje += 'El miembro ' + miembro.nombre + 'fue añadido a tu reunion ' + reunion.nombre 
-                    enviarMail(miembros,asunto,mensaje)
-                    #hasta aca avisamos al lider, ahora vamos al mb
-                    miembros.clear()
-                    miembros.append(mb)
-                    mensaje=msj.mensaje + 'Fuiste añadido a la reunion ' + reunion.nombre 
-                    enviarWhatsapp(miembros,mensaje) #le mandamos whatsapp
-                    mensaje = msj.mensaje + 'Fuiste añadido a la reunion ' + reunion.nombre + ' habla con ' + mb_new.nombre+' para mas informacion'
-                    enviarMail(miembros,asunto,mensaje)
-        
-        for reunion in reuniones:
-            if request.POST.get(reunion.nombre+'-encargado') != None :
-                encargado=request.POST.get(reunion.nombre+'-encargado')
-                print('encargado: ',encargado)
-                if CustomUser.objects.filter(miembro_id=encargado).exists():
-                    print('entre al if china')
-                    enc=CustomUser.objects.get(miembro__dni=encargado)
-                    reunion.grupo.encargado=enc.id
+        if 'confirm' in request.POST:
+            print(request.POST)
+            reuniones_encargado=request.POST.getlist('reunion-encargado')
+            print('reuniones:',reuniones_encargado) #esto devuelve toda una lista que la voy a ir cortando
+            if reuniones_encargado:
+                for reunion_cambio in reuniones_encargado: 
+                    rn,mb=reunion_cambio.split("-") #reunion uso para cortar no mas reunion tiene esto "id_r+id_m"
+                    print("rn-mb",rn,mb)
+                    #tengo que buscar esta reunion y ese miembro
+                    rn=Reunion.objects.get(id_reunion=rn)
+                    mb=Miembro.objects.get(dni=mb)
+                    #Bien, aca empieza la reasignacion de miembros y el envio de correo para los encargados, vamos a empezar reasignando miembros
+                    #Hay que ver si el miembro ya no es parte de esa reunion
+                    #primero obtengo el grupo de la reunion
+                    if mb in rn.grupo.miembro.all(): #si el miembro esta en la rn
+                        print('ya ta')
+                    else:
+                        rn.grupo.miembro.add(mb)
+                        rn.grupo.changeReason='Modificacion' 
+                        rn.grupo.save()
+                        #es hora de avisar!
+                        msj=Mensaje.objects.get(id=5)
+                        mensaje=msj.mensaje
+                        miembros=[]
+                        usr=CustomUser.objects.get(id=rn.grupo.encargado)
+                        mb_new=Miembro.objects.get(dni=usr.miembro_id)
+                        miembros.append(mb_new)
+                        asunto = msj.tipo
+                        enviarWhatsapp(mensaje,miembros)
+                        mensaje += 'El miembro ' + miembro.nombre + 'fue añadido a tu reunion ' + rn.nombre 
+                        enviarMail(miembros,asunto,mensaje)
+                        #hasta aca avisamos al lider, ahora vamos al mb
+                        miembros.clear()
+                        miembros = []
+                        miembros.append(mb_new)
+                        msj=Mensaje.objects.get(id=5)
+                        mensaje=msj.mensaje + 'Fuiste añadido a una nueva reunion '
+                        enviarWhatsapp(miembros,mensaje) #le mandamos whatsapp
+                        mensaje = msj.mensaje + 'Fuiste añadido a la reunion ' + rn.nombre + ' habla con ' + mb_new.nombre+' para mas informacion'
+                        enviarMail(miembros,asunto,mensaje)
+            
+            for reunion in reuniones:
+                if request.POST.get(reunion.nombre+'-encargado') != None :
+                    encargado=request.POST.get(reunion.nombre+'-encargado')
+                    print('encargado: ',encargado)
+                    if CustomUser.objects.filter(miembro_id=encargado).exists():
+                        print('entre al if china')
+                        enc=CustomUser.objects.get(miembro__dni=encargado)
+                        reunion.grupo.encargado=enc.id
+                        reunion.grupo.save()
+                    else:
+                        print('hay un encargado pero no es un usr ', encargado)
+                        #Weno aca no se que hacer
+                else: #si no tienen un nuevo encargado bye bye
+                    reunion.borrado = True
+                    reunion.changeReason='Eliminacion'
+                    reunion.save()
+                    reunion.grupo.borrado= True
+                    #vacio tmb el grupo, porque si quiere reactivar la reunion tendra miembros nuevos
+                    #dejo el encargado?
+                    reunion.grupo.miembro.clear() #tengo miedo
+                    reunion.grupo.changeReason='Elimincaion'
                     reunion.grupo.save()
-                else:
-                    print('hay un encargado pero no es un usr ', encargado)
-                    #Weno aca no se que hacer
-            else: #si no tienen un nuevo encargado bye bye
-                reunion.borrado = True
-                reunion.changeReason='Eliminacion'
-                reunion.save()
-                reunion.grupo.borrado= True
-                #vacio tmb el grupo, porque si quiere reactivar la reunion tendra miembros nuevos
-                #dejo el encargado?
-                reunion.grupo.miembro.clear() #tengo miedo
-                reunion.grupo.changeReason='Elimincaion'
-                reunion.grupo.save()
-                
+            usr.is_active=False
+            estado = Estado(estado='Suspendido',confirmado=True,usuario_id = usr.id)
+            usr.save()
+            estado.save()
+            return redirect('home')
+        if 'cancelar' in request.POST:
+            estado = Estado(estado='Bueno',confirmado=True,usuario_id = usr.id)
+            estado.save()
+            return redirect('home')
     
     return render(request,'sistema/reasignar.html',{'miembro':miembro,'reuniones':reuniones})
 
@@ -1602,6 +1626,7 @@ def recomendacionTable(request):
         encargado=reunion.grupo.encargado
         usr_encargado=CustomUser.objects.get(id=encargado)
         mb_encargado=usr_encargado.miembro
+        miembro= CustomUser.objects.get(id=1)
         #bueno la idea ahora es ver en que horario se da esta reunion y ver que usuario tiene libre ese horario
         #si ninguno tiene, entonces vemos el domicilio, a ver a quien le queda mas cerca
         #y ver a que grupo de personas atiende esa persona tmb, por ejemplo si el grupo es femenino vemos una chica
@@ -1610,7 +1635,7 @@ def recomendacionTable(request):
             horarios=Horario_Disponible.objects.filter(dia=hs_rn.dia,desde__gte=hs_rn.desde,hasta__lte=hs_rn.hasta)
             for horario in horarios:
                 if Miembro.objects.filter(horario_disponible=horario).exclude(dni=mb_encargado.dni).exists():
-                    miembros=Miembro_Horario_Disponible.objects.filter(horario=horario).exclude(dni=mb_encargado.dni)
+                    miembros=Miembro.objects.filter(horario=horario).exclude(dni=mb_encargado.dni)
                     #bien aca traje todos los miembros que tienen ese hs disponible a continuacion veo si hay un usr
                     for miembro in miembros:
                         if Usuario.objects.filter(miembro=miembro.dni).exists():
@@ -1680,6 +1705,8 @@ def recomendacionTable(request):
             serializer=MiembroSerializer(usr_recomendados,many=True)
         if  (not(best_usr_recomendados and usr_recomendados) and mb_recomendados):
             serializer=MiembroSerializer(mb_recomendados,many=True)
+        
+        
         result=dict()
         result = serializer.data
         return JSONResponse(result)
@@ -1986,7 +2013,9 @@ def filtros_asistencias(request):
     print('MIEMBRO ',mb)
     print('ROL: ',rol)
     cant_ast=0 #cantidad de estados muy buenos
-    cant_fal=0   #cantidad de miembros que no respondieron
+    cant_fal=0
+    cant_total=0   
+    #cantidad de miembros que no respondieron
     #lo primero y mas importante tiene que seleccionar una reunion
     if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
         if rn != '': #weno si no hay limite de fecha y rn esta seleccionado
@@ -1996,14 +2025,14 @@ def filtros_asistencias(request):
             cant_ast= len(list(cant_ast))
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
-        if (not(rn != '') and mb != 'null'):
+        if (not(rn != '') and mb != ''):
             cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True)
             cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False)
             cant_ast= len(list(cant_ast))
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
         else : 
-            if rol != '':
+            if rol != 'null':
                 usuarios = CustomUser.objects.filter(rol_id=rol)
                 for usuario in usuarios:
                     miembro = usuario.miembro
@@ -2022,14 +2051,14 @@ def filtros_asistencias(request):
                 cant_fal= len(list(cant_fal))
                 cant_total = cant_ast + cant_fal
 
-            if (not(rn != '') and mb != 'null'):
+            if (not(rn != '') and mb != ''):
                 cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__range=(desde,hasta))
                 cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__range=(desde,hasta))
                 cant_ast= len(list(cant_ast))
                 cant_fal= len(list(cant_fal))
                 cant_total = cant_ast + cant_fal
             else :
-                if rol != '': 
+                if rol != 'null': 
                     usuarios = CustomUser.objects.filter(rol_id=rol)
                     for usuario in usuarios:
                         miembro = usuario.miembro
@@ -2049,14 +2078,14 @@ def filtros_asistencias(request):
                     cant_fal= len(list(cant_fal))
                     cant_total = cant_ast + cant_fal
 
-                if (not(rn != '') and mb != 'null'):
+                if (not(rn != '') and mb != ''):
                     cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__gte=desde)
                     cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__gte=desde)
                     cant_ast= len(list(cant_ast))
                     cant_fal= len(list(cant_fal))
                     cant_total = cant_ast + cant_fal
                 else:
-                    if rol != '': 
+                    if rol != 'null': 
                         usuarios = CustomUser.objects.filter(rol_id=rol)
                         for usuario in usuarios:
                             miembro = usuario.miembro
@@ -2075,14 +2104,14 @@ def filtros_asistencias(request):
                         cant_fal= len(list(cant_fal))
                         cant_total = cant_ast + cant_fal
 
-                    if (not(rn != '') and mb != 'null'):
+                    if (not(rn != '') and mb != ''):
                         cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__lte=hasta)
                         cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__lte=hasta)
                         cant_ast= len(list(cant_ast))
                         cant_fal= len(list(cant_fal))
                         cant_total = cant_ast + cant_fal
                     else:
-                        if rol != '': 
+                        if rol != 'null': 
                             usuarios = CustomUser.objects.filter(rol_id=rol)
                             for usuario in usuarios:
                                 miembro = usuario.miembro

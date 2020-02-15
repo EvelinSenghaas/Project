@@ -48,31 +48,26 @@ def enviarWhatsapp(mensaje,miembros):
     auth_token = 'acae54e2314b668844bfebc74fb9a83a' 
     client = Client(account_sid, auth_token) 
     from_whatsapp_number='whatsapp:+14155238886'
-    # to_whatsapp_number='whatsapp:+5493764706442'
+    to_whatsapp_number='whatsapp:+5493764816893'
     #5493764675702 hernan
-    for miembro in miembros:
-        print('tiene whatsapp si ', miembro.telefono.whatsapp)
-        if miembro.telefono.whatsapp == True:
-            if not(Mensaje.objects.filter(mensaje=mensaje).exists()):
-                mensaje=mensaje
-            else:
-                mensaje=mensaje + ' revisa tu correo para mas informacion'
-            to_whatsapp_number = 'whatsapp:+549'+ str(miembro.telefono.prefijo)+str(miembro.telefono.numero)
-            message = client.messages.create(body=mensaje,from_= from_whatsapp_number,to=to_whatsapp_number)
+    print('mensaje: ', mensaje)
+    mensaje=mensaje + ' revisa tu correo para mas informacion'
+            #to_whatsapp_number = 'whatsapp:+549'+ str(miembro.telefono.prefijo)+str(miembro.telefono.numero)
+    message = client.messages.create(body=mensaje,from_= from_whatsapp_number,to=to_whatsapp_number)
             
-        else:
-            #deberia ver el tema de telefono de contactos, pero veo si tiene mail
-            if miembro.correo != None:
-                if not(Mensaje.objects.filter(mensaje=mensaje).exists()):
-                    tipo = Tipo_Mensaje.objects.get(id=1)
-                    mensaje = Mensaje(mensaje=mensaje,tipo=tipo)
-                else:
-                    mensaje=Mensaje.objects.filter(mensaje=mensaje)[:1]
-                    mensaje=Mensaje.objects.get(id=mensaje[0].id)
-                asunto=mensaje.tipo
-                mensaje=mensaje.mensaje
-                miembros=[]
-                miembros.append(miembro)
-                enviarMail(miembros,asunto,mensaje)
-            print("mira tu correo capa")
+        # else:
+        #     #deberia ver el tema de telefono de contactos, pero veo si tiene mail
+        #     if miembro.correo != None:
+        #         if not(Mensaje.objects.filter(mensaje=mensaje).exists()):
+        #             tipo = Tipo_Mensaje.objects.get(id=1)
+        #             mensaje = Mensaje(mensaje=mensaje,tipo=tipo)
+        #         else:
+        #             mensaje=Mensaje.objects.filter(mensaje=mensaje)[:1]
+        #             mensaje=Mensaje.objects.get(id=mensaje[0].id)
+        #         asunto=mensaje.tipo
+        #         mensaje=mensaje.mensaje
+        #         miembros=[]
+        #         miembros.append(miembro)
+        #         enviarMail(miembros,asunto,mensaje)
+        #     print("mira tu correo capa")
     
