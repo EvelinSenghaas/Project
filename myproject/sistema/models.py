@@ -8,6 +8,7 @@ class Tipo_Reunion(models.Model):
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     descripcion = models.CharField('Descripcion',max_length=200,blank = False, null = True)
     borrado = models.BooleanField('borrado',default=False)
+    frecuencia = models.IntegerField() #cada cuanto se va a dar este tipo de reunion
     history = HistoricalRecords()
 
     def __str__(self):
@@ -156,6 +157,7 @@ class Grupo(models.Model):
     nombre=models.CharField('Nombre', max_length=50,blank=False,null=False)
     borrado = models.BooleanField('borrado',default=False)
     miembro=models.ManyToManyField(Miembro)
+    capacidad = models.IntegerField()
     encargado=models.IntegerField('Encargado')#aca guardo el id del usuario encargado
     history = HistoricalRecords()
 
@@ -206,7 +208,8 @@ class Pregunta(models.Model):
 class Tipo_Encuesta(models.Model):
     id_tipo_encuesta= models.AutoField(primary_key=True)
     tipo=models.CharField("Tipo de Encuesta", max_length=50)
-    cantidad = models.IntegerField('Cantidad de Faltas',null=True, blank = True)
+    aviso =  models.IntegerField(null=True, blank = True) #este campo sera utilizado para dar aviso solamente, por ej si la persona falto 2 veces ya aviso, pero no mando encuentas ni nada
+    cantidad = models.IntegerField('Cantidad de Faltas', null=True, blank = True)
     preguntas=models.ManyToManyField(Pregunta)
     def __str__(self):
         return self.tipo
@@ -225,7 +228,6 @@ class Encuesta(models.Model):
     def __str__(self):
         return str(self.id_encuesta)
     
-
 class Opciones(models.Model):
     id=models.AutoField(primary_key=True)
     pregunta=models.ForeignKey(Pregunta, on_delete=models.PROTECT)
@@ -242,7 +244,7 @@ class Respuesta(models.Model):
     encuesta=models.ForeignKey(Encuesta, on_delete=models.PROTECT)
     opcion=models.ForeignKey(Opciones,on_delete=models.PROTECT)
     
-class Configuracion(models.Model):
+class Configuracion(models.Model): #esto es de encuestas
     id=models.AutoField(primary_key=True)
     titulo= models.CharField('Titulo', max_length=255,blank=False, null= False)
     telefono = models.CharField('Telefono', max_length=255,blank=False, null= False)

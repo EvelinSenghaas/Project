@@ -41,6 +41,7 @@
                                     <thead>
                                         <tr>
                                             <th data-step="2" data-intro="Paso 2: Puede utilizar las flechitas a la derecha de cada columna para ordenar las filas">Nombre</th>
+                                            <th>Encargado</th>
                                             <th>Miembro</th>
                                             <th data-step="3" data-intro="Paso 3: Podra editar y eliminar grupos, si el grupo esta en una reunion, debera eliminar la reunion primero" class='noExport'> </th>
                                         </tr>
@@ -50,6 +51,7 @@
                                             {% for grupo in grupos %}
                                                 <tr>
                                                     <td>{{grupo.nombre}}</td>
+                                                    <td id = "encargado">{{grupo.encargado}}</td>
                                                     <td>{% for grupo in grupo.miembro.all %}
                                                             {{grupo.apellido}}, 
                                                             {{grupo.nombre}}

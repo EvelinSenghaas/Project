@@ -14,7 +14,20 @@
                                 <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                             </div>
                             <form method="POST" class="form-horizontal">
-                                    
+                                
+                                {% if messages %}
+                                    <div class="col-md-12">
+                                        <ul class="messages">
+                                            {% for message in messages %}
+                                                <div class="alert alert-danger">
+                                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                                    <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
                                 <div class="row form-group" data-step="2" data-intro="Paso 2: Debe ingresar el nombre del grupo, este nombre no debe ser repetido, en caso exista otro grupo con el mismo nombre se le notificara">
                                     <div class="col-md-3"><label for="text-input">Nombre del Grupo (*)</label></div>
                                     <div class="col-md-5"><input type="text" id="nombre" class="form-control" name="nombre"></div>
@@ -36,8 +49,8 @@
                                 <div class="row form-group" data-step="4" data-intro="Paso 4: Debe seleccionar para que personas es el grupo, por ejemplo: si es un grupo de mujeres seleccione 'Femenino'">
                                     <div class="col-md-3"><label for="text-input">Sexo(*)</label></div>
                                     <div class="col-md-5">
-                                        <select id="sexo" class="form-control" name="sexo">
-                                            <option value="null"> ------------</option>
+                                        <select id="sexo" class="form-control filtro" name="sexo">
+                                            <option value=""> ------------</option>
                                             <option value='Femenino'>Femenino</option>
                                             <option value='Masculino'>Masculino</option>
                                             <option value='Ambos'>Ambos</option>
@@ -54,22 +67,43 @@
                                     <div class="col-md-1"><label id="edad-hasta" for="text-input">Hasta(*)</label></div>
                                     <div class="col-md-3">{{grupo_form.hasta}}</div>
                                 </div>
-
+                                <br>
+                                <div class="row form-group">
+                                    <div class="col-md-3"><label id="capacidad" for="text-input">Capacidad Maxima del Grupo (*)</label></div>
+                                    <div class="col-md-3">{{grupo_form.capacidad}}</div>
+                                </div>
                                 <br>
                                     <div class="col-md-5"><strong>MIEMBROS</strong></div>
                                 <br>
 
-                                <div class="row form-group" data-step="6" data-intro="Paso 6: Una vez seleccionado el sexo y el rango etario puede seleccionar los miembros, lo puede buscar si conoce su nombre escribiedo">
+                                <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input"></label></div>
-                                    <div class="col-md-7">
-                                    <select required id="select-miembro" class="js-example-basic-multiple  form-control" name="miembro" multiple="multiple">
-                                        
-                                    </select>
+                                    <div class="col-md-10">
+                                    <table name="miembro" id="tablitax" class="table table-striped table-bordered">
+                                        <thead data-step="6" data-intro="Paso 6:Una vez seleccionado el sexo y el rango etario puede seleccionar los miembros, lo puede buscar si conoce su nombre escribiedo">
+                                            <tr>
+                                                <th>Apellido</th>
+                                                <th>Nombre</th>
+                                                <th data-step="7" data-intro="Paso 7: Si desea agregar a todos puede seleccionar aqui"><input type="checkbox" name="all" id="select-all" /></label></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mi-tabla" name="miembro"> 
+                                            {% comment %} {% for miembro in miembros %}
+                                                <tr>
+                                                    <td></td>
+                                                    <td>{{miembro.nombre}}</td>
+                                                    <td>{{miembro.apellido}}</td>
+                                                    <td><input type="checkbox" name="check[]" value="{{miembro.dni}}" /></td>
+                                                </tr>
+                                            {% endfor %}  {% endcomment %}
+                                            
+                                        </tbody>
+                                    </table>
                                     </div>
                                     
                                 </div>
                                 <div class="card">
-                                    <div class="card-body" data-step="7" data-intro="Paso 7: Una vez cargados todos los datos obligatorios puede presionar Confirmar ">
+                                    <div class="card-body" data-step="8" data-intro="Paso 8: Una vez cargados todos los datos obligatorios puede presionar Confirmar ">
                                         <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
                                     </div>
                                 </div>
@@ -78,43 +112,123 @@
     </div>
         
     </form>
-<script src="http://code.jquery.com/jquery-latest.js"></script>
-<script src="{% static 'assets/js/select2.min.js'%}"></script> 
+
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="{% static 'assets/js/lib/data-table/datatables.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/dataTables.bootstrap.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/dataTables.buttons.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.bootstrap.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/jszip.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/vfs_fonts.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.html5.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.print.min.js'%}"></script>
+    <script src="{% static 'assets/js/lib/data-table/buttons.colVis.min.js'%}"></script>
+    <script src="{% static 'assets/js/init/datatables-init.js'%}"></script>
+    <script src="{% static 'assets/js/jquery.dataTables.min.js'%}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
 
 
 {% comment %} <script src="{%static 'assets/js/grupo.js'%}"></script> {% endcomment %}
+<script>
+    $('#desde').change(function() {
+        var min = $('#desde').val();
+        $('#hasta').attr('min',min);
+    });
+</script>
 
 <script>
-    $('#sexo').change(function() {
-        var sx = $(this).val();
-        console.log(sx);
-        $.ajax({
-            url: '/sistema/sexoList',
-            data: {
-                'mb': sx,
-            },
-            dataType: 'json',
-            success: function(data) {
-                var html = "";
-                console.log('wenas y wenardas');
-                console.log(data.length);
-                $('#select-miembro').html("");
-                for (var i = 0; i < data.length; i++) {
-                    html += "<option value=" + data[i].dni + ">" + data[i].apellido +", "+data[i].nombre + "</option>";
+    //tengo que mostrar la tabla cuando se hayan cargado todos los filtros, y eso no  se hacer
+    $('.filtro').change(function() {
+        var t = $('#tablitax').DataTable();
+        var sx = $('#sexo').val();
+        var desde = $('#desde').val();
+        var hasta = $('#hasta').val();
+        $('#tablitax').hide();
+        if( sx!='' && desde !='' && hasta !=''){
+            $('#tablitax').show();
+            $.ajax({
+                url: '/sistema/miembroTable',
+                data: {
+                    'sx':sx,
+                    'desde':desde,
+                    'hasta':hasta,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    var html = "";
+                    $('#select-miembro').html("");
+                    t.clear().draw();
+                    for (var i = 0; i < data.length; i++) {
+                            /*html += "<tr>"   
+                            html += "<td>" + data[i].apellido + "</td>";
+                            html += "<td>" + data[i].nombre + "</td>";
+                            html += "<td>" + 12 + "añitos </td>";
+                            html += "<td>" + "<input type='checkbox' name='check[]' value="+data[i].dni + ">"+"</td>";
+                            html += "</tr>"*/
+                            t.row.add( [
+                                data[i].apellido,
+                                data[i].nombre,
+                                "<input type='checkbox' name='miembro' value="+data[i].dni + ">",
+                            ] ).draw( false );
+                        }
+                        //$('#mi-tabla').html(html);
                 }
-                $('#select-miembro').append(html);
-                $("#select-miembro").select2({
-                    theme: "classic"
-                });
-            }
-        })
+            })
+        }
     });
+
+    $('#select-all').click(function(event) {
+        console.log('olii');
+        if(this.checked) { // Iterate each checkbox
+            $(':checkbox').each(function() {
+                this.checked = true;
+            });
+        }
+        else {
+            $(':checkbox').each(function() {
+                this.checked = false;
+            });
+        }
+    });
+
 </script>
 
 
 <script>
     $(document).ready(function(){
-        $('#select-miembro').select2();
+        $('#tablitax').DataTable({
+                "language": {
+                    "lengthMenu": "Mostrando _MENU_ registros",
+                    "zeroRecords": "No hay registros encontrados - Lo Sentimos =( ",
+                    "info": "Mostrando pagina _PAGE_ de _PAGES_",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(Filtrado de _MAX_ registros en Total)",
+                    "search":"Buscar",
+                },
+                /*initComplete: function() {
+                    console.log('entro en la funtion');
+                    this.api().columns().every(function() {
+                        var column = this;
+                        var select = $('<select><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function() {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                            );
+                            column
+                            .search(val ? '^' + val + '$' : '', true, false)
+                            .draw();
+                        });
+
+                        column.data().unique().sort().each(function(d, j) {
+                            console.log('agregando '+d);
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        });
+                });
+                }*/
+        });
+        $('#tablitax').hide();
         $("#nombre").change(function () {
             var nombre = $(this).val();
             console.log("oli");
@@ -134,5 +248,6 @@
         });
     });
 </script>
+
 {% endblock body%}
 

@@ -207,9 +207,19 @@ def configuracion(request):
 def crearGrupo(request):
     if permiso(request, 14):
         miembros=Miembro.objects.all()
+        usuarios=CustomUser.objects.filter(is_active=True)
         if request.method == 'POST':
             grupo_form = GrupoForm(request.POST)
+            print('request querido: ', request.POST)
+            print('---------------------')
+            print('errores ', grupo_form.errors)
             grupo=grupo_form.save(commit=False)
+            capacidad = grupo.capacidad
+            print('capa: ', capacidad, 'long', (len(request.POST.get('miembro'))))
+            if capacidad < len(request.POST.get('miembro')):
+                messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
+                return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
+                
             grupo.encargado=request.POST.get('encargado')
             grupo.changeReason ='Creacion'
             grupo.save()
@@ -220,7 +230,6 @@ def crearGrupo(request):
             else:
                 return redirect('home')
         else:
-            usuarios=CustomUser.objects.all()
             grupo_form=GrupoForm()
         return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'miembros':miembros,'usuarios':usuarios})
     else:
@@ -234,6 +243,12 @@ def listarGrupo(request):
         grupos = Grupo.objects.filter(borrado=False)
     if not(permiso(request, 18) or permiso(request, 17)):
         return redirect('home')
+    #bien ahora la idea es ponerle el nombre y apellido del encargado en grupo.encargado, vemos
+    for grupo in grupos:
+        enc = grupo.encargado
+        enc = CustomUser.objects.get(id=enc)
+        encargado = Miembro.objects.get(dni = enc.miembro_id)
+        grupo.encargado = encargado.apellido + ", " + encargado.nombre
     configuracion_form = Configuracion.objects.all().last()
     return render(request,'sistema/listarGrupo.html',{'grupos':grupos,'configuracion_form':configuracion_form})
 
@@ -1472,10 +1487,7 @@ def enviarMensaje(request):
 
 @csrf_exempt
 def provinciasList(request):
-    """
-    List all code serie, or create a new serie.
-    """
-    if request.method == 'GET':
+    if request.method == 'GET': #uso para reuniones y miembros
         provincia = Provincia.objects.all()
         serializer = ProvinciaSerializer(provincia, many=True)
         result = dict()
@@ -1484,10 +1496,7 @@ def provinciasList(request):
 
 @csrf_exempt
 def localidadesList(request):
-    """
-    List all code serie, or create a new serie.
-    """
-    pv=request.GET.get('provincia',None)
+    pv=request.GET.get('provincia',None) #uso para reuniones y miembros
     prov=Provincia.objects.get(provincia=pv)
     if request.method == 'GET':
         localidad = Localidad.objects.filter(provincia=prov).order_by('localidad')
@@ -1498,7 +1507,7 @@ def localidadesList(request):
 
 @csrf_exempt
 def barriosList(request):
-    lc=request.GET.get('localidad',None)
+    lc=request.GET.get('localidad',None) #uso para reuniones y miembros
     print(request.GET)
     localidad=Localidad.objects.get(id_localidad=lc)
     if request.method == 'GET':
@@ -1510,7 +1519,7 @@ def barriosList(request):
 
 @csrf_exempt
 def GrupoTable(request):
-    print(request.GET)
+    print(request.GET) #Uso para agregar Asistencias
     reunion= request.GET.get('grupo',None)
     rn = Reunion.objects.get(id_reunion=reunion)
     gr= rn.grupo
@@ -1523,14 +1532,32 @@ def GrupoTable(request):
         return JSONResponse(result)
 
 @csrf_exempt
-def MiembroTable(request):
-    print('0')
+def miembroTable(request):
+    print('entro en miembroTable') #Voy a usar para hacer filtros de edades y de sexo en crear grupo
+    sx = request.GET.get('sx')
+    desde = request.GET.get('desde')
+    hasta = request.GET.get('hasta')
+    #tengo que ver los anhos si quiero tenes un grupo desde los 15 hasta los 20 por ej
+    hoy = date.today()
+    #el hasta es mas chico que el desde, por lo tanto para filtrar un fecha de nac tiene que estar entre
+    # fecha__range(f_min,f_max)
+    #donde f_min = al hasta anho 2000 y la f_max va a ser 2005 seria el desde
+    dif = hoy.year - int(hasta)
+    f_min = date(int(dif),12,31)
+    dif = hoy.year - int(desde)
+    f_max = date(int(dif),12,31)
+    print('sx ', sx)
+    print('desde ', f_min)
+    print('hasta ', f_max)
     if request.method == 'GET':
-        miembros=Miembro.objects.prefetch_related('grupo_set')
+        if sx != 'Ambos':
+            miembros=Miembro.objects.filter(sexo = sx, fecha_nacimiento__range=(f_min,f_max))
+        else:
+            miembros=Miembro.objects.filter(fecha_nacimiento__range=(f_min,f_max))
+        print(miembros)
         serializer = MiembroSerializer(miembros, many=True)
         result = dict()
         result = serializer.data
-        #print("No ta")
         return JSONResponse(result)
 
 @csrf_exempt
@@ -2004,19 +2031,17 @@ def filtros_asistencias(request):
     mb = request.GET['mb']
     rn = request.GET['rn']
     rol = request.GET['rol']
-    if Reunion.objects.filter(nombre=rn).exists():
-        reunion= Reunion.objects.filter(nombre=rn).last()
+    if Reunion.objects.get(nombre=rn).exists():
+        reunion= Reunion.objects.get(nombre=rn) 
         rn = reunion.id_reunion
     else:
         rn=''
     print('REUNION ', rn)
     print('MIEMBRO ',mb)
     print('ROL: ',rol)
-    cant_ast=0 #cantidad de estados muy buenos
+    cant_ast=0 #cantidad de faltas
     cant_fal=0
     cant_total=0   
-    #cantidad de miembros que no respondieron
-    #lo primero y mas importante tiene que seleccionar una reunion
     if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
         if rn != '': #weno si no hay limite de fecha y rn esta seleccionado
             #bueno voy a traer todos los registros de asistencias de esa rn

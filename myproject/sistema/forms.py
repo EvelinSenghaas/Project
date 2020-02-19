@@ -6,15 +6,15 @@ class GrupoForm(forms.ModelForm):
     def __init__(self,*args, **kwargs):
             super(GrupoForm, self).__init__(*args, **kwargs)
             self.fields['miembro'].queryset = Miembro.objects.filter(borrado=False)
-             
     class Meta:
         model=Grupo
-        fields=['nombre','miembro','sexo','desde','hasta']
+        fields=['nombre','miembro','sexo','desde','hasta','capacidad']
         widgets={
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'miembro':forms.CheckboxSelectMultiple(),
-            'desde':forms.TextInput(attrs={'class':'form-control','type':'number','min':'0'}),
-            'hasta':forms.TextInput(attrs={'class':'form-control','type':'number','max':'100'})
+            'desde':forms.TextInput(attrs={'id':'desde','class':'form-control filtro','type':'number','min':'0'}),
+            'hasta':forms.TextInput(attrs={'id':'hasta','class':'form-control filtro','type':'number','max':'100'}),
+            'capacidad': forms.TextInput(attrs={'class':'form-control', 'type':'number', 'min':'0'}),
         }
         
 class Tipo_ReunionForm(forms.ModelForm):

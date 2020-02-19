@@ -13,7 +13,7 @@
     <form method="POST">
         <div id="form">
         <img src="{% static 'images/login.png '%}">
-            {% csrf_token %}
+        {% csrf_token %}
 
         <div class="logo">
         </div>
@@ -28,7 +28,7 @@
                     <p><a href="#" ><small>Olvidate la Contraseña ?</small></a></p>	
                 </div>
                 <div class="form-item text-right">
-                <button type="submit" class="btn btn-success btn-flat m-b-30 m-t-30">Iniciar Sesión</button>
+                <button type="submit" class="btn btn-primary btn-flat m-b-30 m-t-30">Iniciar Sesión</button>
                 </div>
         </div>
     </form>
