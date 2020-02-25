@@ -153,7 +153,11 @@ def estadistica_miembro(request):
 @login_required
 def estadistica_reunion(request):
     if permiso(request, 43):
-        reuniones = Reunion.objects.all()
+        if permiso(request, 10):
+            reuniones=Reunion.objects.all()
+        else:
+            reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
+        #reuniones = Reunion.objects.all()
         return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones})
     else:
         return redirect('home')
@@ -161,7 +165,11 @@ def estadistica_reunion(request):
 @login_required
 def estadistica_asistencias(request):
     if permiso(request, 43):
-        reuniones = Reunion.objects.all()
+        if permiso(request, 10):
+            reuniones=Reunion.objects.all()
+        else:
+            reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
+        #reuniones = Reunion.objects.all()
         miembros = Miembro.objects.all()
         roles = Rol.objects.filter(borrado=False)
         return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
@@ -229,7 +237,12 @@ def crearGrupo(request):
             grupo.encargado=request.POST.get('encargado')
             grupo.changeReason ='Creacion'
             grupo.save()
-            grupo.miembro.set(request.POST.getlist('miembro'))
+            encargado = CustomUser.objects.get(id=grupo.encargado)
+            miembros=request.POST.getlist('miembro')
+            #obtengo el encargado y tengo que ver si el miembro esta y si no esta le agrego
+            if not(encargado.miembro in miembros):
+                miembros.append(encargado.miembro)
+            grupo.miembro.set(miembros)
             grupo.save()
             if permiso(request, 17) or permiso(request, 18):
                 return redirect('/sistema/listarGrupo')
@@ -773,8 +786,11 @@ def agregarAsistencia(request):
             return redirect('/sistema/verAsistencia')
         else:
             asistencia_form=AsistenciaForm()
-            reunion_form=Reunion.objects.all()
-            miembro_form=Miembro.objects.all()
+            if permiso(request, 10):
+                reunion_form=Reunion.objects.filter(borrado=False)
+            else:
+                reunion_form=Reunion.objects.filter(grupo__encargado=request.user.id,borrado=False)
+            miembro_form=Miembro.objects.filter(borrado=False)
         return render(request,'sistema/agregarAsistencia.html',{'miembro_form':miembro_form,'asistencia_form':asistencia_form,'reunion_form':reunion_form})
     else:
         return redirect('home')
