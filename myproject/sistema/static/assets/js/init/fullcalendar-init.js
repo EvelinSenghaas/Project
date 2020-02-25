@@ -13,6 +13,7 @@
         this.$calendarObj = null
     };
 
+    
 
     /* on drop */
     CalendarApp.prototype.onDrop = function (eventObj, date) { 
@@ -38,8 +39,16 @@
     CalendarApp.prototype.onEventClick =  function (calEvent, jsEvent, view) {
         var $this = this;
             var form = $("<form></form>");
-            form.append("<label>Change event name</label>");
-            form.append("<div class='input-group'><input class='form-control' type=text value='" + calEvent.title + "' /><span class='input-group-btn'><button type='submit' class='btn btn-success waves-effect waves-light'><i class='fa fa-check'></i> Save</button></span></div>");
+            form.append("<label>Reunion</label>");
+            form.append("<div class='input-group'><input class='form-control' type=text value='" + calEvent.title + "' /><span class='input-group-btn'></span></div>");
+            if(calEvent.asistencia==0){
+                form.append("<br><label>No hubo reunion</label>");
+            }else{ 
+            form.append("<label>Asistencia</label>");
+            form.append("<div class='input-group'><input class='form-control' type=text value='" + calEvent.asistencia + "' /><span class='input-group-btn'></span></div>");
+            form.append("<label>Faltas</label>");
+            form.append("<div class='input-group'><input class='form-control' type=text value='" + calEvent.faltas + "' /><span class='input-group-btn'></span></div>");
+            }
             $this.$modal.modal({
                 backdrop: 'static'
             });
@@ -66,7 +75,7 @@
             form.append("<div class='row'></div>");
             form.find(".row")
                 .append("<div class='col-md-6'><div class='form-group'><label class='control-label'>Event Name</label><input class='form-control' placeholder='Insert Event Name' type='text' name='title'/></div></div>")
-                .append("<div class='col-md-6'><div class='form-group'><label class='control-label'>Category</label><select class='form-control' name='category'></select></div></div>")
+                .append("<div class='col-md-6'><div class='form-group'><label class='control-label'>Categoria</label><select class='form-control' name='category'></select></div></div>")
                 .find("select[name='category']")
                 .append("<option value='bg-danger'>Danger</option>")
                 .append("<option value='bg-success'>Success</option>")
@@ -101,6 +110,7 @@
             });
             $this.$calendarObj.fullCalendar('unselect');
     },
+
     CalendarApp.prototype.enableDrag = function() {
         //init events
         $(this.$event).each(function () {
@@ -129,22 +139,15 @@
         var y = date.getFullYear();
         var form = '';
         var today = new Date($.now());
+        
+        //console.log(datos);
+        // var defaultEvents =  [{
+        //         title: 'Tema de Prueba',
+        //         start: new Date($.now()),
+        //         className: 'bg-primary'
+        //     }];
 
-        var defaultEvents =  [{
-                title: 'Hey!',
-                start: new Date($.now() + 158000000),
-                className: 'bg-dark'
-            }, {
-                title: 'See John Deo',
-                start: today,
-                end: today,
-                className: 'bg-danger'
-            }, {
-                title: 'Buy a Theme',
-                start: new Date($.now() + 338000000),
-                className: 'bg-primary'
-            }];
-
+        //console.log(defaultEvents);
         var $this = this;
         $this.$calendarObj = $this.$calendar.fullCalendar({
             slotDuration: '00:15:00', /* If we want to split day time each 15minutes */
@@ -158,7 +161,6 @@
                 center: 'title',
                 right: 'month,agendaWeek,agendaDay'
             },
-            events: defaultEvents,
             editable: true,
             droppable: true, // this allows things to be dropped onto the calendar !!!
             eventLimit: true, // allow "more" link when too many events
@@ -166,9 +168,34 @@
             drop: function(date) { $this.onDrop($(this), date); },
             select: function (start, end, allDay) { $this.onSelect(start, end, allDay); },
             eventClick: function(calEvent, jsEvent, view) { $this.onEventClick(calEvent, jsEvent, view); }
-
+            
         });
-
+        //okis tengo que usar ajax y cargar la wea!
+        $.ajax({
+            url: '/sistema/Calendario',
+            data: {
+            },
+            dataType: 'json',
+            success: function(data) {
+                var html = "";
+                console.log('function success')
+                //console.log(data);
+                for(var i =0;i<data.length;i++){
+                    $this.$calendarObj.fullCalendar('renderEvent', {
+                    title: data[i]['reunion'],
+                    start:data[i]['fecha'],
+                    allDay: false,
+                    color:data[i]['color'],
+                    asistencia:data[i]['cant_a'],
+                    faltas:data[i]['cant_f'],
+                    //className: 'bg-primary'
+                }, true);
+                //datos.push("{title:"+data[i]['reunion']+", start:"+data[i]['fecha'] +", className: 'bg-primary'}")
+                }
+            }
+        });
+    
+        console.log('inicio');
         //on new event
         this.$saveCategoryBtn.on('click', function(){
             var categoryName = $this.$categoryForm.find("input[name='category-name']").val();
@@ -179,6 +206,7 @@
             }
 
         });
+
     },
 
    //init CalendarApp
@@ -189,5 +217,5 @@
 //initializing CalendarApp
 function($) {
     "use strict";
-    $.CalendarApp.init()
+    $.CalendarApp.init();
 }(window.jQuery);

@@ -68,4 +68,5 @@ urlpatterns = [
     path("recomendacion/", recomendacion, name="recomendacion"),
     path("listarUsuario/", listarUsuario, name="listarUsuario"),
     path('reactivarUsuario/<int:id>',reactivarUsuario, name='reactivarUsuario'),
+    path('Calendario/',Calendario,name="Calendario"),
 ]

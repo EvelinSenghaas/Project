@@ -12,6 +12,7 @@ class GrupoForm(forms.ModelForm):
         widgets={
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'miembro':forms.CheckboxSelectMultiple(),
+            'sexo': forms.Select(attrs={'class':'form-control','id':'sexo'}),
             'desde':forms.TextInput(attrs={'id':'desde','class':'form-control filtro','type':'number','min':'0'}),
             'hasta':forms.TextInput(attrs={'id':'hasta','class':'form-control filtro','type':'number','max':'100'}),
             'capacidad': forms.TextInput(attrs={'class':'form-control', 'type':'number', 'min':'0'}),

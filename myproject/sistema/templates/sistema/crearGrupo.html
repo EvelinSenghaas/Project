@@ -7,7 +7,6 @@
     <form method="POST">
         {% csrf_token %}
         <div class="col-lg-11">
-        
                         <div class="card">
                             <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para crear grupos, los campos con '(*)' son obligatorios" >
                                 <strong>Planilla de Registro de </strong> Grupos
@@ -30,7 +29,7 @@
 
                                 <div class="row form-group" data-step="2" data-intro="Paso 2: Debe ingresar el nombre del grupo, este nombre no debe ser repetido, en caso exista otro grupo con el mismo nombre se le notificara">
                                     <div class="col-md-3"><label for="text-input">Nombre del Grupo (*)</label></div>
-                                    <div class="col-md-5"><input type="text" id="nombre" class="form-control" name="nombre"></div>
+                                    <div class="col-md-5">{{grupo_form.nombre}}</div>
                                 </div>
 
                                 <div class="row form-group" data-step="3" data-intro="Paso 3: Debe seleccionar que usuario es el encargado del grupo">
@@ -39,7 +38,11 @@
                                         <select required id="encargado" class="form-control" name="encargado">
                                             <option value="null"> ------------</option>
                                             {% for usuario  in usuarios %}
-                                                <option value='{{usuario.id}}'>{{usuario.miembro}}</option>
+                                                {% if usuario.id == encargado %}
+                                                    <option selected value='{{usuario.id}}'>{{usuario.miembro}}</option>
+                                                {% else %}
+                                                    <option value='{{usuario.id}}'>{{usuario.miembro}}</option>
+                                                {% endif %}
                                             {% endfor %}
                                             
                                         </select>
@@ -48,13 +51,13 @@
                                 
                                 <div class="row form-group" data-step="4" data-intro="Paso 4: Debe seleccionar para que personas es el grupo, por ejemplo: si es un grupo de mujeres seleccione 'Femenino'">
                                     <div class="col-md-3"><label for="text-input">Sexo(*)</label></div>
-                                    <div class="col-md-5">
-                                        <select id="sexo" class="form-control filtro" name="sexo">
+                                    <div class="col-md-5">{{grupo_form.sexo}}
+                                        {% comment %} <select id="sexo" class="form-control filtro" name="sexo">
                                             <option value=""> ------------</option>
                                             <option value='Femenino'>Femenino</option>
                                             <option value='Masculino'>Masculino</option>
                                             <option value='Ambos'>Ambos</option>
-                                        </select>
+                                        </select> {% endcomment %}
                                     </div>
                                 </div>
 
@@ -87,16 +90,20 @@
                                                 <th data-step="7" data-intro="Paso 7: Si desea agregar a todos puede seleccionar aqui"><input type="checkbox" name="all" id="select-all" /></label></th>
                                             </tr>
                                         </thead>
-                                        <tbody id="mi-tabla" name="miembro"> 
-                                            {% comment %} {% for miembro in miembros %}
-                                                <tr>
-                                                    <td></td>
-                                                    <td>{{miembro.nombre}}</td>
-                                                    <td>{{miembro.apellido}}</td>
-                                                    <td><input type="checkbox" name="check[]" value="{{miembro.dni}}" /></td>
-                                                </tr>
-                                            {% endfor %}  {% endcomment %}
-                                            
+                                        <tbody id="mi-tabla" name="miembro">
+                                            {% if grupo_form.miembro %}
+                                                {% for miembro in todos%}
+                                                    <tr>
+                                                        <td>{{miembro.apellido}}</td>
+                                                        <td>{{miembro.nombre}}</td>
+                                                        {% if miembro in miembros %}
+                                                            <td><input checked type="checkbox" name="miembro" value="{{miembro.dni}}" /></td>
+                                                        {% else %}
+                                                            <td><input type="checkbox" name="miembro" value="{{miembro.dni}}" /></td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endif %}
                                         </tbody>
                                     </table>
                                     </div>
@@ -112,7 +119,7 @@
     </div>
         
     </form>
-
+    
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="{% static 'assets/js/lib/data-table/datatables.min.js'%}"></script>
     <script src="{% static 'assets/js/lib/data-table/dataTables.bootstrap.min.js'%}"></script>
@@ -179,11 +186,15 @@
     });
 
     $('#select-all').click(function(event) {
-        console.log('olii');
+        var t = $('#tablitax').DataTable();
+        var info = t.page.info();
+        console.log('filas ' + info.pages );
         if(this.checked) { // Iterate each checkbox
-            $(':checkbox').each(function() {
-                this.checked = true;
-            });
+            for(var i = 0; i< info.pages;i++){
+                $(':checkbox').each(function() {
+                    this.checked = true;
+                });
+            }
         }
         else {
             $(':checkbox').each(function() {
@@ -228,7 +239,7 @@
                 });
                 }*/
         });
-        $('#tablitax').hide();
+        // $('#tablitax').hide();
         $("#nombre").change(function () {
             var nombre = $(this).val();
             console.log("oli");

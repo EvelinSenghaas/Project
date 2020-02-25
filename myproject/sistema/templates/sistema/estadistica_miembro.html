@@ -65,6 +65,24 @@ Miembro en Estado Critico
     $('#filtrar').click(function() {
         var desde = $('#desde').val();
         var hasta = $('#hasta').val();
+        var titulo = "";
+        //cambiar el formato de las fechas para mostrar el titulo
+        if(desde == "" && hasta == "") {
+            titulo = 'Mostrando el estado actual de los miembros';
+        }
+        else{
+            if(desde != "" && hasta != ""){
+                titulo = "Mostrando el estado de los miembros del "+ desde +" al "+ hasta;
+            }
+            else{ // si uno de los 2 no esta vacio entonces veo cual
+                if (desde != ""){
+                    titulo = "Mostrando el estado de los miembros del "+ desde + "en adelante"
+                }
+                else{
+                    titulo = "Mostrando el estado de los miembros hasta el "+ hasta 
+                }
+            }
+        }
         $.ajax({
             url: '/sistema/filtros_estado_miembro/',
             data: {
@@ -87,7 +105,7 @@ Miembro en Estado Critico
                     options: {
                         title: {
                             display: true,
-                            text: 'Estado de Miembros'
+                            text: titulo
                         }
                     }
                 });

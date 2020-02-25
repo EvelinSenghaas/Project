@@ -6,6 +6,9 @@ from mensajeria.views import *
 from datetime import date
 import datetime
 from usuario.models import *
+from django.db.models import Avg
+from django.db.models import Count
+from django.db import models
 from django.db.models import Max
 from django.contrib import messages
 from django.core import serializers
@@ -17,7 +20,7 @@ import json
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
+import random
 
 class JSONResponse(HttpResponse):
     """
@@ -33,9 +36,18 @@ def permiso(request, p):
     for permiso in permisos:
         if p == permiso.id_permiso:
             return True
+    return False
 
 def days_between(d1, d2):
     return abs(d2 - d1).days
+
+def color():
+    print("")
+    print('entre al menos')
+    random_number = random.randint(0,16777215)
+    hex_number = str(hex(random_number))
+    hex_number ='#'+ hex_number[2:]
+    return hex_number
 
 def listarUsuario(request):
     configuracion_form = Configuracion.objects.all().last()
@@ -210,12 +222,8 @@ def crearGrupo(request):
         usuarios=CustomUser.objects.filter(is_active=True)
         if request.method == 'POST':
             grupo_form = GrupoForm(request.POST)
-            print('request querido: ', request.POST)
-            print('---------------------')
-            print('errores ', grupo_form.errors)
             grupo=grupo_form.save(commit=False)
             capacidad = grupo.capacidad
-            print('capa: ', capacidad, 'long', (len(request.POST.get('miembro'))))
             if capacidad < len(request.POST.get('miembro')):
                 messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
                 return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
@@ -266,20 +274,47 @@ def validarGrupo(request):
 @login_required
 def editarGrupo(request,id_grupo):
     if permiso(request, 16):
+        usuarios= CustomUser.objects.filter(is_active=True)
         grupo = Grupo.objects.get(id_grupo=id_grupo)
+        encargado = grupo.encargado
+        miembros = grupo.miembro.all()
+        #bien tengo que ver todos los miembros que estan en ese rango etario
+        desde = grupo.desde
+        hasta = grupo.hasta
+        sx = grupo.sexo
+        hoy = date.today()
+        #el hasta es mas chico que el desde, por lo tanto para filtrar un fecha de nac tiene que estar entre
+        # fecha__range(f_min,f_max)
+        #donde f_min = al hasta anho 2000 y la f_max va a ser 2005 seria el desde
+        dif = hoy.year - int(hasta)
+        f_min = date(int(dif),12,31)
+        dif = hoy.year - int(desde)
+        f_max = date(int(dif),12,31)
+        if sx != 'Ambos':
+            todos=Miembro.objects.filter(sexo = sx, fecha_nacimiento__range=(f_min,f_max))
+        else:
+            todos=Miembro.objects.filter(fecha_nacimiento__range=(f_min,f_max))
+        print(todos)
         if request.method =='GET':
             grupo_form=GrupoForm(instance=grupo)
         else:
             grupo_form=GrupoForm(request.POST,instance=grupo)
             if grupo_form.is_valid():
                 grupo=grupo_form.save(commit=False)
+                capacidad = grupo.capacidad
+                if capacidad < len(request.POST.get('miembro')):
+                    messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
+                    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
+                
+                grupo.miembro.set(request.POST.getlist('miembro'))
+                print('encargadito: ', grupo.encargado)
                 grupo.changeReason='Modificacion'
                 grupo.save()
             if permiso(request, 17) or permiso(request, 18):
                 return redirect('/sistema/listarGrupo')
             else:
                 return redirect('home')
-        return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form})
+        return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form,'encargado':encargado,'todos':todos,'miembros':miembros,'usuarios':usuarios})
     else:
         return redirect('home')
 
@@ -1895,6 +1930,10 @@ def filtros_estado_miembro(request):
                 cant_mb += 1 
         #bien ahora porcentajes
         if cant_total != 0:
+            print('cant_mb ',cant_mb)
+            print('cant_b ',cant_b)
+            print('cant__m ',cant_m)
+            print('cant_c ',cant_c)
             cant_mb = (cant_mb * 100) / cant_total
             cant_b = (cant_b * 100) / cant_total
             cant_m = (cant_m * 100) / cant_total
@@ -2157,4 +2196,57 @@ def filtros_asistencias(request):
             #ver de poner un mensajito
     print("-----------------------------//-----------------------")
     print('data: ',data)
+    return JSONResponse(data)
+
+def Calendario(request):
+    #Weno la idea es recuperar las asistencias de todas las reuniones, todas todas
+    #lo primero es traer las reuniones
+    reuniones = Reunion.objects.all()
+    #por cada reunion voy a ver las asistencias
+    data=[]
+    for reunion in reuniones:
+        #traigo todas las asistencias que tuvo esa reunion
+        #tendria que ver las fechas ahora
+        #print("--------------------------------------------"+reunion.nombre)
+        #print("consulta: ", Asistencia.objects.values("fecha").filter(reunion=reunion,presente=False).annotate(count=Count("fecha")))
+        #se como traer los presentes y ausentes de cada fecha de cada reunion
+        registros_f= Asistencia.objects.values("fecha").filter(reunion=reunion,presente=False).annotate(count=Count("fecha"))
+        registros_a= Asistencia.objects.values("fecha").filter(reunion=reunion,presente=True).annotate(count=Count("fecha"))
+        color_rn = color()
+        print('Reunion, color ',reunion, color_rn)
+        for registro in registros_a: #por cada registro de asistencias (fechas agrupadas)
+            print("")
+            #print('registro.fechona: ', registro.get('fecha'))
+            print("")
+            cant_a=0 #cantidad de presentes
+            cant_f =0 #cantidad de faltantantes
+            fecha=registro['fecha']
+            #print(' ta o no ', registros_f.get(fecha=fecha))
+            try:
+                if registros_f.get(fecha=fecha): #si esa fecha esta en las faltas obtengo ese reg
+                    reg = registros_f.get(fecha=fecha)
+                    cant_f = reg['count']
+            except:
+                print("Oops!  no hay registros")
+
+            cant_a = registro['count']
+            dic = {'reunion':reunion.nombre,'fecha':fecha,'cant_a':cant_a,'cant_f':cant_f,'color':color_rn}
+            data.append(dic)
+        for registro in registros_f:
+            cant_a=0 #cantidad de presentes
+            cant_f =0 #cantidad de faltantantes
+            fecha=registro['fecha'] 
+            #print('fecha ',fecha)
+            try:
+                if registros_a.get(fecha=fecha): #si esa fecha esta en las ast, entonces y cargue
+                    print('ya ta')
+            except:
+                print('faltaron todos ', reunion.nombre)
+                print('fecha, ', fecha)
+                cant_f = registro['count']
+                dic = {'reunion':reunion.nombre,'fecha':fecha,'cant_a':cant_a,'cant_f':cant_f,'color':"#F78181"}
+                data.append(dic)
+        
+    #print("-----------------------------//-----------------------")
+    #print('data: ',data)
     return JSONResponse(data)

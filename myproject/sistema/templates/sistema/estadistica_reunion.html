@@ -82,6 +82,43 @@ Estadistica del Estado de Reuniones
         var desde = $('#desde').val();
         var hasta = $('#hasta').val();
         var rn = $('#rn').val();
+        //cambiar formato fechas y tratar de mostrar el nombre de la reunion
+        if(rn == ""){
+            if(desde == "" && hasta == "") {
+                titulo = 'Mostrando el estado actual de todas las reuniones';
+            }
+            else{
+                if(desde != "" && hasta != ""){
+                    titulo = "Mostrando el estado de todas las reuniones entre el "+ desde +" y el "+ hasta;
+                }else{
+                    if (desde != ""){
+                        titulo = "Mostrando el estado de todas las reuniones del "+ desde + " en adelante";
+                    }
+                    else{
+                        titulo = "Mostrando el estado de todas las reuniones hasta "+ hasta;
+                    }
+                }
+            }
+        }
+        else{
+            var reunion =$('#rn option:selected').text();
+            if(desde == "" && hasta == "") {
+                titulo = 'Mostrando el estado actual de la reunion '+reunion;
+            }
+            else{
+                if(desde != "" && hasta != ""){
+                    titulo = "Mostrando el estado de la reunion "+ reunion +" entre el "+ desde +" y el "+ hasta;
+                }else{
+                    if (desde != ""){
+                        titulo = "Mostrando el estado de la reunion "+ reunion + " del "+ desde + " en adelante";
+                    }
+                    else{
+                        titulo = "Mostrando el estado de la reunion "+ reunion + " hasta "+ hasta;
+                    }
+                }
+            }
+        }
+        
         $.ajax({
             url: '/sistema/filtros_estado_reunion/',
             data: {
@@ -105,7 +142,7 @@ Estadistica del Estado de Reuniones
                     options: {
                         title: {
                             display: true,
-                            text: 'Estado de Reunion'
+                            text: titulo
                         }
                     }
                 });//aca tendria que haber un mensajito
