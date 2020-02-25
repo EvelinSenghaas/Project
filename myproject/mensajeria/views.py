@@ -36,9 +36,11 @@ def enviarMail(miembros, asunto, mensaje):
     
     #Arma lista con todos los mail a avisar.
     para = []
-    for miembro in miembros:
+    mb=Miembro.objectes.get(dni=41788492)
+    para.append(mb.correo)
+    '''for miembro in miembros:
         contacto_usuario = miembro 
-        para.append(contacto_usuario.correo)
+        para.append(contacto_usuario.correo)'''
     print('enviando mail')
     send_mail(asunto, mensaje, email_from, para) 
     print('ya ta?')
@@ -51,7 +53,7 @@ def enviarWhatsapp(mensaje,miembros):
     to_whatsapp_number='whatsapp:+5493764816893'
     #5493764675702 hernan
     print('mensaje: ', mensaje)
-    mensaje=mensaje + ' revisa tu correo para mas informacion'
+    mensaje = mensaje + ' revisa tu correo para mas informacion'
             #to_whatsapp_number = 'whatsapp:+549'+ str(miembro.telefono.prefijo)+str(miembro.telefono.numero)
     message = client.messages.create(body=mensaje,from_= from_whatsapp_number,to=to_whatsapp_number)
             

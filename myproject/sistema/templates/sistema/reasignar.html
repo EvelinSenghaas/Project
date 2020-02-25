@@ -20,10 +20,11 @@ Miembro en Estado Critico
                 var html = "";
                 for (var i = 0; i < data.length; i++) {
                     html += "<tr>";
-                    html += "<td>" + data[i].nombre + "</td>";
+                    html += "<td>" + data[i]['miembro'] + "</td>";
+                    html += "<td>"+data[i]['motivos']+"</td>"
                     html += "<td>" + "<input type='radio' name='"+ rn + "-encargado' value="+data[i].dni+ ">"+"</td>";
                     html += "</tr>";
-                } 
+                }
                 $('#mi-reunion ').html(html);
                 $("#mi-reunion").attr("id","tabla -"+rn);
                 
@@ -44,7 +45,8 @@ Miembro en Estado Critico
             dataType: 'json',
             success: function(data) {
                 var html = "";
-                console.log(data[0]['nombre'])
+                console.log('datitos china');
+                //console.log(data);
                 if (data['error_message']){
                     console.log('vacio china')
                     html='<input hidden="True" type="text" id="msg" value="'+data['error_message']+'">'
@@ -56,9 +58,27 @@ Miembro en Estado Critico
                     for (var i = 0; i < data.length; i++) {
                         html += "<tr>";
                         html += "<td>"+data[i]['nombre']+"</td>";
-                        html += "<td>" + data[i]['reunion'] + "</td>";
+                        if(data[i]['reunion'].length > 1){
+                            console.log('candi a select');
+                            for(var j =0;j<data[i]['reunion'].length;j++){
+                                if(j!=0){
+                                    html += "<tr>";
+                                    html+= "<td></td>";
+                                }
+                                html += "<td>" + data[i]['reunion'][j]+ "</td>";
+                                html += "<td>" + data[i]['motivos'][j]+ "</td>";
+                                html += "<td>" + "<input type='radio' name='reunion-encargado "+ data[i]['nombre']+ "' value="+data[i]['id_reunion'][j]+"-"+data[i]['id_miembro']+ ">"+"</td>";
+                                html += "<tr>";
+                            }
+                        }else{
+                            html += "<td>" + data[i]['reunion'] + "</td>";
+                            html += "<td>" + data[i]['motivos'] + "</td>";
+                            html += "<td>" + "<input type='checkbox' name='reunion-encargado "+ data[i]['nombre']+ "' value="+data[i]['id_reunion']+"-"+data[i]['id_miembro']+ ">"+"</td>";
+                            html += "</tr>";
+                        }
+                        /*html += "<td>" + data[i]['motivos'] + "</td>";
                         html += "<td>" + "<input type='checkbox' name='reunion-encargado' value="+data[i]['id_reunion']+"-"+data[i]['id_miembro']+ ">"+"</td>";
-                        html += "</tr>";
+                        html += "</tr>";*/
                     } 
                     $('#rn-rn').html(html);
                     $('#rn-rn').attr("id","rn-"+rn);
@@ -68,6 +88,7 @@ Miembro en Estado Critico
         $("#rn").attr("id","id-rn"+     rn);
     };
 </script>
+
 <form method="POST">
         
     <div class="col-lg-11">
@@ -110,8 +131,9 @@ Miembro en Estado Critico
                                     <thead>
                                         <tr>
                                             <th>Miembro</th>
-                                            <th>Reunion</th>
-                                            <th>Confirmar<input type="checkbox" name="all" id="select-all" /></label></th>
+                                            <th>Reunion Recomenda</th>
+                                            <th>Motivos de Recomendacion</th>
+                                            <th>Confirmar</label></th>
                                         </tr>
                                     </thead>
                                     <tbody id="rn-rn">
@@ -139,7 +161,8 @@ Miembro en Estado Critico
                                         <thead>
                                             <tr>
                                                 <th>Miembro</th>
-                                                <th>Confirmar<input type="checkbox" name="all" id="select-all" /></label></th>
+                                                <th>Motivo de Recomendacion</th>
+                                                <th>Confirmar</th>
                                             </tr>
                                         </thead>
                                         <tbody id="mi-reunion">
@@ -153,7 +176,7 @@ Miembro en Estado Critico
 
                             {% endfor %}
                         <div>
-                            <p>Los miembros que no fueron confirmados no seran reasignados a ninguna reunion</p>
+                            <p>Si no reasigna un miembro, la reunion quedara como esta actualmente</p>
                         </div>
                     </div>
 
