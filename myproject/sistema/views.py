@@ -239,10 +239,11 @@ def crearGrupo(request):
             grupo.save()
             encargado = CustomUser.objects.get(id=grupo.encargado)
             miembros=request.POST.getlist('miembro')
-            #obtengo el encargado y tengo que ver si el miembro esta y si no esta le agrego
-            if not(encargado.miembro in miembros):
-                miembros.append(encargado.miembro)
-            grupo.miembro.set(miembros)
+            miembros.append(encargado.miembro)
+            try:
+                grupo.miembro.set(miembros)
+            except:
+                grupo.miembro.set(request.POST.getlist('miembro'))
             grupo.save()
             if permiso(request, 17) or permiso(request, 18):
                 return redirect('/sistema/listarGrupo')
@@ -961,6 +962,7 @@ def agregarRespuesta(request):
         print('tene si una pendiente ameo')
         reunion = encuesta.reunion
     else:
+        messages.error(request, 'NO TIENE ENCUESTAS PENDIENTES') 
         return redirect('home')
 
     if request.method == 'POST':
@@ -2140,7 +2142,7 @@ def filtros_asistencias(request):
     mb = request.GET['mb']
     rn = request.GET['rn']
     rol = request.GET['rol']
-    if Reunion.objects.get(nombre=rn).exists():
+    if Reunion.objects.filter(nombre=rn).exists():
         reunion= Reunion.objects.get(nombre=rn) 
         rn = reunion.id_reunion
     else:

@@ -36,7 +36,7 @@ def enviarMail(miembros, asunto, mensaje):
     
     #Arma lista con todos los mail a avisar.
     para = []
-    mb=Miembro.objectes.get(dni=41788492)
+    mb=Miembro.objects.get(dni=41788492)
     para.append(mb.correo)
     '''for miembro in miembros:
         contacto_usuario = miembro 
