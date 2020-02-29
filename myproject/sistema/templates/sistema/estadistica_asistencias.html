@@ -163,6 +163,57 @@ Estadistica de Asistencia
         var rn = $('#rn').val();
         var rol= $('#rol').val();
         var mb = $('#mb').val();
+        console.log('desde '+desde);
+        console.log('hasta '+hasta);
+        if(desde == "" && hasta == "") {
+            console.log('mb '+mb);
+            if(rn!="null"){ 
+                titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn;
+            }
+            if(rol!="null"){
+                titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol;
+            }
+            if(mb!="null"){
+                titulo = 'Mostrando todas las Asistencias del miembro seleccionado';
+            }
+        }
+        else{
+            if(desde != "" && hasta != ""){
+                if(rn!="null"){ 
+                    titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn+' entre las fechas'+ desde +" y "+ hasta;
+                }
+                if(rol!="null"){
+                    titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol +' entre las fechas'+ desde +" y "+ hasta;
+                }
+                if(mb!=""){
+                    titulo = 'Mostrando todas las Asistencias del miembro seleccionado' +' entre las fechas'+ desde +" y "+ hasta;
+                }
+            }
+            else{ // si uno de los 2 no esta vacio entonces veo cual
+                if (desde != ""){
+                    if(rn!="null"){ 
+                        titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn +' desde el '+ desde + ' en adelante';
+                    }
+                    if(rol!="null"){
+                        titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' desde el '+ desde + ' en adelante';
+                    }
+                    if(mb!=""){
+                        titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' desde el '+ desde + ' en adelante';
+                    }
+                }
+                else{
+                    if(rn!="null"){ 
+                        titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn +' hasta el '+ hasta;
+                    }
+                    if(rol!="null"){
+                        titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' hasta el '+ hasta;
+                    }
+                    if(mb!=""){
+                        titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' hasta el '+ hasta;
+                    }
+                }
+            }
+        }
         $.ajax({
             url: '/sistema/filtros_asistencias/',
             data: {
@@ -188,7 +239,7 @@ Estadistica de Asistencia
                     options: {
                         title: {
                             display: true,
-                            text: 'Estadisticas de Asistencias'
+                            text: titulo
                         }
                     }
                 });

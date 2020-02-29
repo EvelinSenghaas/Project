@@ -2,6 +2,7 @@ from django import forms
 from .models import Miembro,Grupo,Tipo_Reunion,Reunion,Domicilio,Asistencia,Tipo_Telefono,Telefono,Horario_Disponible,Encuesta,Pregunta,Respuesta
 from .models import Barrio,Localidad,Provincia,Estado_Civil,Telefono_Contacto,Configuracion,Tipo_Pregunta,Tipo_Encuesta
 from .models import Rol
+
 class GrupoForm(forms.ModelForm):
     def __init__(self,*args, **kwargs):
             super(GrupoForm, self).__init__(*args, **kwargs)

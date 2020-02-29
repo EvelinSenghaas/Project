@@ -21,6 +21,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 import random
+from usuario.forms import CustomUserCreationForm
 
 class JSONResponse(HttpResponse):
     """
@@ -1154,7 +1155,7 @@ def agregarRespuestaReunion(request,id_encuesta):
             print('critico')
             #tengo que crear ese estado critico y que quede en la espera de confirmacion
             #para la baja
-            estado=Estado_Reunion(estado="Critico",reunion=reunion)
+            estado=Estado_Reunion(estado="Critico",reunion=reunion,encuesta = encuesta)
             estado.save()
             #aca pum ya notifico
             #para las mejoras le podria mandar un mensaje: 'En estas areas obtuviste un puntaje bajo'
@@ -1541,6 +1542,21 @@ def enviarMensaje(request):
         print('en teoria envio')
     return render(request,'sistema/enviarMensaje.html',{'reuniones':reuniones})
 
+def configurarUsuario(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST, instance=request.user)
+        if form.is_valid():
+            print(' es valido pero no anda xD')
+            #form.save()
+    else:
+        form = CustomUserCreationForm(instance=request.user)
+        if permiso(request, 34):
+            permi=True
+        else:
+            permi=False
+        return render(request,'sistema/configuracion_usr.html',{'form':form,'permi':permi})
+    return redirect('home')
+        
 @csrf_exempt
 def provinciasList(request):
     if request.method == 'GET': #uso para reuniones y miembros
@@ -1851,15 +1867,16 @@ def rolList(request):
 @csrf_exempt
 def estadoList(request):
     usr= request.GET.get('usr')
-    print('usr ', usr)
     usuario = CustomUser.objects.get(id=usr)
     estado = Estado.objects.filter(usuario_id=usuario.id).order_by('-fecha').first()
     data=[]
     if estado != None:
+        print('usr ', usuario)
         print('estado ',estado)
-        encuesta = Encuesta.objects.filter(tipo_id=3,fecha_respuesta = estado.fecha,miembro_id=usuario.miembro.dni)
+        encuesta = Encuesta.objects.filter(tipo_id=3,fecha_respuesta =estado.fecha,miembro_id=usuario.miembro.dni)
         # encuesta = Encuesta.objects.get(id_encuesta=encuesta[0]['id_encuesta'])4
-        print('---------------------------')
+        print('-------------usr-------------- ', usuario)
+        print('encuesta: ', encuesta)
         print('encuesta ',encuesta[0])
         link = '/sistema/verRespuesta/'+str(encuesta[0])
         #bueno ya tengo el link y el estado ahora tengo que contar cuantas reuniones tiene
@@ -2161,22 +2178,27 @@ def filtros_asistencias(request):
             cant_ast= len(list(cant_ast))
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
-        if (not(rn != '') and mb != ''):
+        if (not(rn != '') and mb != 'null'):
             cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True)
             cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False)
             cant_ast= len(list(cant_ast))
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
-        else : 
-            if rol != 'null':
-                usuarios = CustomUser.objects.filter(rol_id=rol)
-                for usuario in usuarios:
-                    miembro = usuario.miembro
-                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True)
-                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False)
-                    cant_ast= len(list(cant_ast))
-                    cant_fal= len(list(cant_fal))
-                    cant_total = cant_ast + cant_fal
+        if rol != 'null':
+            # print('')
+            # print('entre en el rol')
+            print('')
+            usuarios = CustomUser.objects.filter(rol_id=int(rol))
+            print('usuarios ',usuarios)
+            print('')
+            for usuario in usuarios:
+                miembro = usuario.miembro
+                cant_asti = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True)
+                cant_falt= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False)
+                cant_ast += len(list(cant_asti))
+                cant_fal += len(list(cant_falt))
+                cant_total += cant_ast + cant_fal
+                print(cant_total)
     else: #weno si puso horarios tengo que ver cual
         if request.GET['desde'] != '' and request.GET['hasta'] !='':
             if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn entre esas fechas entonces
@@ -2187,22 +2209,24 @@ def filtros_asistencias(request):
                 cant_fal= len(list(cant_fal))
                 cant_total = cant_ast + cant_fal
 
-            if (not(rn != '') and mb != ''):
+            if (not(rn != '') and mb != 'null'):
                 cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__range=(desde,hasta))
                 cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__range=(desde,hasta))
                 cant_ast= len(list(cant_ast))
                 cant_fal= len(list(cant_fal))
                 cant_total = cant_ast + cant_fal
-            else :
-                if rol != 'null': 
-                    usuarios = CustomUser.objects.filter(rol_id=rol)
-                    for usuario in usuarios:
-                        miembro = usuario.miembro
-                        cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__range=(desde,hasta))
-                        cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__range=(desde,hasta))
-                        cant_ast= len(list(cant_ast))
-                        cant_fal= len(list(cant_fal))
-                        cant_total = cant_ast + cant_fal
+
+            if rol != 'null': 
+                print('')
+                print('entre en el rol')
+                usuarios = CustomUser.objects.filter(rol_id=rol)
+                for usuario in usuarios:
+                    miembro = usuario.miembro
+                    cant_ast = Asistencia.objects.filter(miembro_id=miembro.dni,presente=True,fecha__range=(desde,hasta))
+                    cant_fal= Asistencia.objects.filter(miembro_id=miembro.dni,presente=False,fecha__range=(desde,hasta))
+                    cant_ast= len(list(cant_ast))
+                    cant_fal= len(list(cant_fal))
+                    cant_total = cant_ast + cant_fal
         else:
             if request.GET['desde'] != '': #si entra aca es porque uno de los dos esta vacio, hay que ver cual
                 #en este caso cargo solo el desde
@@ -2214,7 +2238,7 @@ def filtros_asistencias(request):
                     cant_fal= len(list(cant_fal))
                     cant_total = cant_ast + cant_fal
 
-                if (not(rn != '') and mb != ''):
+                if (not(rn != '') and mb != 'null'):
                     cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__gte=desde)
                     cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__gte=desde)
                     cant_ast= len(list(cant_ast))
@@ -2240,7 +2264,7 @@ def filtros_asistencias(request):
                         cant_fal= len(list(cant_fal))
                         cant_total = cant_ast + cant_fal
 
-                    if (not(rn != '') and mb != ''):
+                    if (not(rn != '') and mb != 'null'):
                         cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__lte=hasta)
                         cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__lte=hasta)
                         cant_ast= len(list(cant_ast))

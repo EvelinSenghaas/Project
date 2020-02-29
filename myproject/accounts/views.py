@@ -22,6 +22,7 @@ class SignUp(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
 
+
 def validarNombre(request):
     nombre = request.GET.get('nombre')
     data = {
@@ -30,3 +31,4 @@ def validarNombre(request):
     if data['is_taken']:
         data['error_message']  = 'Este nombre de Usuario ya existe, por favor elige otro nombre'
     return JsonResponse(data)
+
