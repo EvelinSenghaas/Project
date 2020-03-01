@@ -16,14 +16,10 @@ class FormularioLogin(AuthenticationForm):
 class CustomUserCreationForm(UserCreationForm):
     def __init__(self,*args, **kwargs):
             super(CustomUserCreationForm, self).__init__(*args, **kwargs)
-            self.fields['rol'].queryset = Rol.objects.filter(borrado=False)
-            
-    password1 = forms.Field(widget=forms.PasswordInput(attrs={'class':'form-control'}))
-    password2 = forms.Field(widget=forms.PasswordInput(attrs={'class':'form-control'}))
-    
+            self.fields['rol'].queryset = Rol.objects.filter(borrado=False) 
     class Meta:
         model = CustomUser
-        fields = ('username', 'miembro', 'email','rol','password1','password2')
+        fields = ('username', 'miembro', 'email','rol')
         
         widgets={
             'username': forms.TextInput(attrs={'class':'form-control'}),

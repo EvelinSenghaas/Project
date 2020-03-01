@@ -22,6 +22,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 import random
 from usuario.forms import CustomUserCreationForm
+from django.contrib.auth import login as dj_login, logout, authenticate
 
 class JSONResponse(HttpResponse):
     """
@@ -1542,20 +1543,61 @@ def enviarMensaje(request):
         print('en teoria envio')
     return render(request,'sistema/enviarMensaje.html',{'reuniones':reuniones})
 
-def configurarUsuario(request):
-    if request.method == "POST":
-        form = CustomUserCreationForm(request.POST, instance=request.user)
-        if form.is_valid():
-            print(' es valido pero no anda xD')
-            #form.save()
+def configurarUsuario(request,id):
+    user=CustomUser.objects.get(id=id)
+    if request.user.id == user.id:
+        contra=True  #me estoy queriendo editar a mi, por lo tanto puedo editar mi contrania
     else:
-        form = CustomUserCreationForm(instance=request.user)
-        if permiso(request, 34):
-            permi=True
-        else:
-            permi=False
-        return render(request,'sistema/configuracion_usr.html',{'form':form,'permi':permi})
-    return redirect('home')
+        contra=False
+    if permiso(request, 34): #si tengo permisos para cambiar roles
+        permi=True
+    else:
+        permi=False
+    if request.method == "POST":
+        if 'change' in request.POST:
+            passV = request.POST.get('inputPassword4', None)#pass vieja
+            nuevapass = request.POST.get('inputPassword6', None)
+            nuevapassVer = request.POST.get('inputPassword8', None) #la repe de la pass nueva
+            if passV=="" or nuevapass=="" or nuevapassVer=="":
+                messages.error(request, "Debe cargar todos los datos requeridos para cambiar la contraseña")
+                form = CustomUserCreationForm(request.POST) #se va a redirigir bien abajo pero le paso los datos que ya tenia
+            else:
+                usuario = authenticate(username=request.user.username, password=passV)
+                if nuevapass == nuevapassVer:
+                    iguales = True
+                    if (usuario is not None):
+                        request.user.set_password(nuevapass)
+                        request.user.save()
+                        form = CustomUserCreationForm(instance=user)
+                        return redirect('home')
+                    else:
+                        messages.error(request, "Constraseñas incorrectas")
+                        form = CustomUserCreationForm(request.POST)
+                        return render(request,'sistema/configuracion_usr.html',{'form':form,'permi':permi,'contra':contra})
+                else:
+                    messages.error(request, "Las Constraseñas no coinciden")
+                    form = CustomUserCreationForm(request.POST)
+                    return render(request,'sistema/configuracion_usr.html',{'form':form,'permi':permi,'contra':contra})
+
+        if 'confirmar' in request.POST:
+            username = request.POST.get('username', None)
+            email = request.POST.get('email', None)
+            rl = request.POST.get('rol', None)
+            rol = Rol.objects.get(id_rol=rl)
+            user.username = username
+            user.email = email
+            user.rol = rol
+            user.save()
+            try:
+                if permiso(request, 38):
+                    return redirect('/sistema/listarUsuario')
+            except:
+                print('grrrrrrrrrrrrrrrrrrrrrr')
+                return redirect('home')
+            #aca podria irse al listar usr si tiene permiso, sino al home
+    else:
+        form = CustomUserCreationForm(instance=user)
+    return render(request,'sistema/configuracion_usr.html',{'form':form,'permi':permi,'contra':contra})
         
 @csrf_exempt
 def provinciasList(request):

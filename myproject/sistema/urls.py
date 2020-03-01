@@ -69,5 +69,5 @@ urlpatterns = [
     path("listarUsuario/", listarUsuario, name="listarUsuario"),
     path('reactivarUsuario/<int:id>',reactivarUsuario, name='reactivarUsuario'),
     path('Calendario/',Calendario,name="Calendario"),
-    path('configurarUsuario',configurarUsuario,name="configurarUsuario"),
+    path('configurarUsuario/<int:id>',configurarUsuario,name="configurarUsuario"),
 ]
