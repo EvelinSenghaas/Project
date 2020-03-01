@@ -1592,7 +1592,6 @@ def configurarUsuario(request,id):
                 if permiso(request, 38):
                     return redirect('/sistema/listarUsuario')
             except:
-                print('grrrrrrrrrrrrrrrrrrrrrr')
                 return redirect('home')
             #aca podria irse al listar usr si tiene permiso, sino al home
     else:

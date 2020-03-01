@@ -76,7 +76,9 @@
                                                         <td> <span class="product">{{usr.rol}}</span> </td>
                                                         <td id="cant-{{usr.id}}" class="text-center"></td>
                                                         <td id="estado-{{usr.id}}"></td>
-                                                        <td class="text-center"><a href="#" id="detalles-{{usr.id}}" class="btn btn-outline-primary btn-sm" ><i class="fa fa-eye"></i></a></td>
+                                                        <td class="text-center"><a href="#" id="detalles-{{usr.id}}" class="btn btn-outline-primary btn-sm" ><i class="fa fa-eye"></i></a>
+                                                        <a href="/sistema/configurarUsuario/{{usr.id}}" class="btn btn-outline-success btn-sm" ><i class="fa fa-edit"></i></a>
+                                                        </td>
                                                         {% if not usr.is_active %}
                                                             <td><a href="#myModal2"class="btn btn-secondary btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{usr.id}}"><i class="fa fa-unlock"></i></a></td>
                                                             <!-- inicio del modal-->
