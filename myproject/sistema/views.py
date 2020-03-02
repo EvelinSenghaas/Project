@@ -1060,11 +1060,13 @@ def agregarRespuesta(request):
                 print('critico')
                 #tengo que crear ese estado critico y que quede en la espera de confirmacion
                 #para la baja
-                estado=Estado(usuario=request.user,estado="Pendiente",confirmado=False)
+                est = Estado.objects.get(id=4)
+                #critico sin confirmar es pendiente
+                estado=Estado_Usuario(usuario=request.user,estado=est,confirmado=False) 
                 estado.save()
                 mensaje=Mensaje.objects.get(id=3)
                 asunto = mensaje.tipo.tipo
-                mensaje = mensaje.mensaje + "por favor ingrese en el siguiente enlace http://localhost:8000/sistema/reasignar/"+str(encuesta.miembro.dni)
+                mensaje = mensaje.mensaje + "se trata de " + request.user.miembro.apellido + ", " + request.user.miembro.nombre + ". Por favor ingrese en el siguiente enlace http://localhost:8000/sistema/reasignar/"+str(encuesta.miembro.dni)
                 miembros=[]
                 miembros.append(request.user.miembro)
                 enviarMail(miembros, asunto, mensaje)
@@ -1074,16 +1076,19 @@ def agregarRespuesta(request):
                 #aca pum ya notifico
             if puntos <= puntos_total/2 and puntos > puntos_total/4:
                 print("Medio")
-                estado=Estado(usuario=request.user,estado="Medio")
+                est = Estado.objects.get(id=3)
+                estado=Estado_Usuario(usuario=request.user,estado=est)
                 estado.save()
             if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
                 print("Bueno")
-                estado=Estado(usuario=request.user,estado="Bueno")
+                est = Estado.objects.get(id=2)
+                estado=Estado_Usuario(usuario=request.user,estado=est)
                 estado.save()
                 
             if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
                 print('Re bien!!')
-                estado=Estado(usuario=request.user,estado="Muy Bueno")
+                est = Estado.objects.get(id=1)
+                estado=Estado_Usuario(usuario=request.user,estado=est)
                 estado.save()
             
         return redirect('home')
@@ -1154,23 +1159,25 @@ def agregarRespuestaReunion(request,id_encuesta):
         reunion=encuesta.reunion
         if puntos <= puntos_total/4:
             print('critico')
-            #tengo que crear ese estado critico y que quede en la espera de confirmacion
-            #para la baja
-            estado=Estado_Reunion(estado="Critico",reunion=reunion,encuesta = encuesta)
+            est = Estado.objects.get(id=4) #estado Critico
+            estado=Estado_Reunion(estado=est,reunion=reunion,encuesta = encuesta)
             estado.save()
-            #aca pum ya notifico
-            #para las mejoras le podria mandar un mensaje: 'En estas areas obtuviste un puntaje bajo'
+            #si no le informo nunca se entera que su reunion esta en estado critico...
+
         if puntos <= puntos_total/2 and puntos > puntos_total/4:
             print("medio")
-            estado=Estado_Reunion(estado="Medio",reunion=reunion,encuesta = encuesta)
+            est = Estado.objects.get(id=3) #estado Medio
+            estado=Estado_Reunion(estado=est,reunion=reunion,encuesta = encuesta)
             estado.save()
         if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
             print("Bueno")
-            estado=Estado_Reunion(estado="Bueno",reunion=reunion,encuesta = encuesta)
+            est = Estado.objects.get(id=2) #Estado Bueno
+            estado=Estado_Reunion(estado=est,reunion=reunion,encuesta = encuesta)
             estado.save()
         if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
             print('Re bien!!')
-            estado=Estado_Reunion(estado="Muy Bueno",reunion=reunion,encuesta = encuesta)
+            est = Estado.objects.get(id=1) #estado muy Bueno
+            estado=Estado_Reunion(estado=est,reunion=reunion,encuesta = encuesta)
             estado.save()
         return redirect('home')    
 
@@ -1909,7 +1916,7 @@ def rolList(request):
 def estadoList(request):
     usr= request.GET.get('usr')
     usuario = CustomUser.objects.get(id=usr)
-    estado = Estado.objects.filter(usuario_id=usuario.id).order_by('-fecha').first()
+    estado = Estado_Usuario.objects.filter(usuario_id=usuario.id).order_by('-fecha').first()
     data=[]
     if estado != None:
         print('usr ', usuario)
@@ -2045,17 +2052,19 @@ def filtros_estado_miembro(request):
         usuarios= CustomUser.objects.filter(is_active=True)
         cant_total=len(list(usuarios))
         for usuario in usuarios:
-            estado = Estado.objects.filter(usuario_id=usuario.id).first()
+            estado = Estado_Usuario.objects.filter(usuario_id=usuario.id).order_by('-fecha').first() #orden descendente
+            #en mi mente trae del mas actual al mas viejo, descienden las fechas
+            #tengo que comprobar
             print('estado: ',estado)
             if estado != None:
-                if estado.estado == 'Muy Bueno':
+                if estado.estado == 'Muy Bueno': #weno ver si anda el str o cambiar esto a numeritos xd
                     cant_mb += 1
                 if estado.estado == 'Bueno':
                     cant_b += 1
                 if estado.estado == 'Medio':
                     cant_m += 1
-                if estado.estado == 'Pendiente' or estado.estado == 'Critico' : #critico que falta confirmar
-                    cant_c += 1
+                if  estado.estado == 'Critico' :
+                    cant_c += 1 #critico o pendiente da igual aca
             else: #si nunca registro un estado es porque esta mb, nunca falto consecutivamente ni nada
                 cant_mb += 1 
         #bien ahora porcentajes
@@ -2072,11 +2081,13 @@ def filtros_estado_miembro(request):
         if request.GET['desde'] != '' and request.GET['hasta'] !='':
             #castear hasta pa que sea un timedate
             new_h = datetime.datetime.strptime(hasta, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
+            #new_h = datetime(hasta.year,hasta.month,hasta.day)
             print('new_h: ', new_h)
             usuarios= CustomUser.objects.filter(date_joined__lte=new_h) #traigo todos los usr que estaban creados antes de la fecha max (hasta)
             cant_total=len(list(usuarios))
             for usuario in usuarios:
-                estado= Estado.objects.filter(usuario_id=usuario.id,fecha__range=(desde,hasta)).first()
+                estado= Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__range=(desde,hasta)).order_by('-fecha').first()
+                #traigo un estado por miembro, el mas actual
                 print('estado: ',estado)
                 if estado != None:
                     if estado.estado == 'Muy Bueno':
@@ -2085,20 +2096,20 @@ def filtros_estado_miembro(request):
                         cant_b += 1
                     if estado.estado == 'Medio':
                         cant_m += 1
-                    if estado.estado == 'Pendiente' or estado.estado == 'Critico' : #critico que falta confirmar
+                    if estado.estado == 'Pendiente' or estado.estado == 'Critico' : 
                         cant_c += 1
                 else: #si no registro un estado en ese rango voy a ver el ultimo estado que tenia
-                    estado = Estado.objects.filter(usuario_id=usuario.id,fecha__lte=desde).last()
+                    estado = Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__lte=desde).order_by('-fecha').first()
                     if estado != None:
-                        if estado.estado == 'Pendiente' or estado.estado == 'Critico' : #critico que falta confirmar
+                        if estado.estado == 'Critico' : 
                             cant_c += 1
                         else:
                             cant_mb+=1 #osea si no esta suspendido ni nada entonces ta mb
                     else:
-                        cant_mb+=1 #osea si no esta suspendido ni nada entonces ta mb
+                        cant_mb+=1 #osea no registro nada antes que la fecha desde, estaba mb
             if cant_total != 0:
                 cant_mb = (cant_mb * 100) / cant_total
-                cant_b = (cant_b * 100) / cant_total
+                cant_b = (cant_b * 100) /cant_total
                 cant_m = (cant_m * 100) / cant_total
                 cant_c = (cant_c * 100) / cant_total
         
