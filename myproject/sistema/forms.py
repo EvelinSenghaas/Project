@@ -22,10 +22,11 @@ class GrupoForm(forms.ModelForm):
 class Tipo_ReunionForm(forms.ModelForm):
     class Meta:
         model=Tipo_Reunion
-        fields=['nombre','descripcion']
+        fields=['nombre','descripcion','frecuencia']
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'descripcion': forms.TextInput(attrs={'class':' form-control'}),
+            'frecuencia': forms.TextInput(attrs={'class':'form-control','type':'number'})
         }
 
 class Estado_CivilForm(forms.ModelForm):
@@ -45,9 +46,6 @@ class ReunionForm(forms.ModelForm):
     class Meta:
         model=Reunion
         fields=['nombre','tipo_reunion','grupo']
-        labels={
-            'nombre':'Nombre'
-        }
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'tipo_reunion':  forms.Select(attrs={'class':'form-control'}),
@@ -84,7 +82,7 @@ class DomicilioForm(forms.ModelForm):
         fields=['calle','nro','mz','departamento','piso','barrio']
         widgets={
             'calle':forms.TextInput(attrs={'class':'form-control'}),
-            'nro':forms.TextInput(attrs={'class':'form-control'}),
+            'nro':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             'mz':forms.TextInput(attrs={'class':'form-control'}),
             'departamento':forms.TextInput(attrs={'class':'form-control'}),
             'piso':forms.TextInput(attrs={'class':'form-control'}),
@@ -100,7 +98,7 @@ class MiembroForm(forms.ModelForm):
             'apellido':forms.TextInput(attrs={'class':'form-control'}),
             'dni':forms.TextInput(attrs={'class':'form-control','readonly':'readonly'}),
             'fecha_nacimiento':forms.DateInput(attrs={'class':'form-control f_nac'}),
-            'cant_hijo':forms.TextInput(attrs={'class':'form-control'}),
+            'cant_hijo':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             'estado_civil': forms.Select(attrs={'class':'form-control'}),
             'correo':forms.EmailInput(attrs={'class':'form-control'}),
             #'horario_disponible': grrr

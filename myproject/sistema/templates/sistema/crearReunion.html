@@ -5,7 +5,6 @@
 {% endblock titulo %}
 {% block body %}
         <form method="POST" class="form-horizontal">
-        <script src="http://code.jquery.com/jquery-latest.js"></script>
             <div class="col-lg-11">
                 {% csrf_token %}
                 <div class="card">
@@ -27,16 +26,12 @@
                                         </div>
                             {% endif %}
                         
-                        {% comment %} <div class="row form-group">
-                            <div "col col-md-3"><label for="text-input" class="form-control-label">Pruebita (*)</label></div>
-                            <div "col col-md-4"><input type="text" onkeypress="return Solo_Texto(event);" class="form-control"></div>
-
-                        </div>     {% endcomment %}
+                        
 
                         <div class="card-body card-block" data-step="2" data-intro="Paso 2: A continuacion, carge los campos 'nombre' con el nombre de la reuion, seleccione el tipo de reunion y el grupo al que pertenece" >
                         {% for field in reunion_form %}
                         <div class="row form-group">
-                            <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}} (*)</label></div>
+                            <div class="col col-md-2"><label style="text-transform: capitalize;"  for="{{field.id_for_label}}">{{field.html_name}} (*)</label></div>
                             <div class = "col col-md-4">{{field}}</div>
                         </div>
                         {% endfor %}
@@ -110,8 +105,14 @@
                 </div>
             </div>
         </form>
-    
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="{% static 'assets/js/recustom.js'%}"></script>
+    <script>
+        $(document).ready(function() {
+            console.log( "ready!" );
+            //$("label").attrs("style","text-transform: capitalize;");
+        });
+    </script>
 {% endblock body %}
 
 

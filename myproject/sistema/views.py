@@ -75,12 +75,8 @@ def Home(request):
     else:
         sexo="Masculino"
     context ={'usuario':usuario,'sexo':sexo}
-    miembros=[]
-    miembros.append(str(miembro.dni))
-    # asunto="Wenas"
-    # mensaje=" Gracias lina! entra aca -> http://localhost:8000/Home"
-    # enviarMail(miembros,asunto,mensaje)
-    #tengo que ver si el usr no tiene una falta que no ingreso para eso
+    
+    #tengo que ver si el usr tiene una falta que no ingreso para eso
     #obtengo todas sus reuniones
     tipo= Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
     cant=tipo.cantidad #obtendo la cantidad de faltas consecutivas actuales admisibles
@@ -100,7 +96,7 @@ def Home(request):
         cantidad = len (list(consulta)) #paso la cantidad de registros de faltas que encontro a cantidad
         if cantidad >= cant: #si la cantidad es >= al numero admisible de consecutivas entonces le creo una encuesta pendiente
             encuesta= Encuesta()
-            encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
+            encuesta.tipo=tipo
             encuesta.miembro=miembro
             encuesta.fecha_envio=date.today()
             encuesta.respondio=False
@@ -111,17 +107,22 @@ def Home(request):
     if Asistencia.objects.filter(miembro=miembro,justificado=False).exists():
         #tiene que haber un counter lo necesito para elegir el tipo xd
         #aca tengo que contar cuantas faltas tiene por ahora es cada 1 y poner la reunion jiji
-        encuesta= Encuesta()
-        encuesta.borrado=False #ver si realmente puedo borrar una encuesta xd creeria que no se debe
-        encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=1)
-        encuesta.miembro=miembro
-        encuesta.fecha_envio=date.today()
-        encuesta.respondio=False
-        ast=Asistencia.objects.filter(miembro=miembro,justificado=False).last()
-        encuesta.reunion=ast.reunion
-        encuesta.save() #Esto quiere decir que tenia una falta no mas
-        #aca deberia notificarle o algo, de que tiene una encuesta pendiente
-        #return redirect('agregarRespuesta') asi estaba antes
+        faltas=Asistencia.objects.filter(miembro=miembro,justificado=False)
+        for falta in faltas:
+            if not(Encuesta.objects.filter(tipo_id=1,miembro_id=miembro.dni,fecha_envio=falta.fecha,reunion=falta.reunion).exists()):
+                encuesta= Encuesta()
+                encuesta.borrado=False #ver si realmente puedo borrar una encuesta xd creeria que no se debe
+                encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=1)
+                encuesta.miembro=miembro
+                encuesta.respondio=False
+                encuesta.fecha = falta.fecha
+                encuesta.reunion=falta.reunion
+                encuesta.save() #Esto quiere decir que tenia una falta no mas
+                mensaje= "Hola "+miembro.nombre+"! tienes una encuesta pendiente por la falta en la reunion "+falta.reunion.nombre+" el dia "+falta.fecha+" por favor ingresa al sistema y dirigete a 'encuestas pendientes'"
+                miembros=[] #porque no le voy a mandar realmente jiji
+                enviarWhatsapp(mensaje,miembros)
+                asunto = "Encuesta Pendiente"
+                enviarMail(miembros,asunto,mensaje)
 
     #Bueno esto no es lo mejor pero la idea es ver cuando fue la ultima vez que envie la encuesta tipo 2 osea estado de las reuniones
     #Para eso obtengo el ultimo registro de encuesta.tipo==2 veo cuantos dias pasaron y si pasa a la cantidad especificada
@@ -141,8 +142,7 @@ def Home(request):
             #Pero deberia crear una encuesta por miembro?? o simplemente le envio el link y si respondo cuento cuantos respondieron
             #eso me parece las obvio, entonces le mando el enlace y a medida que van entrando le creo
             #localhost:8000/sistema/agregarRespuesta/reunion=1 y pum envio
-    else:
-        print('weno alguien tiene que empezar no?')
+    
     return render(request,'sistema/index.html',context)
 
 @login_required
@@ -867,7 +867,7 @@ def agregarEncuesta(request):
                         encuesta=Encuesta(borrado=False,fecha_envio=date.today(),reunion=reunion,tipo=tipo,respondio=False) #creo la encuesta
                         #a medida que voy creando le voy a ir enviando tmb
                         encuesta.save()
-                        mensaje=Mensaje.objects.get(id=4)
+                        mensaje=Mensaje.objects.get(tipo_id=4)
                         asunto=mensaje.tipo
                         mensaje=mensaje.mensaje
                         enviarWhatsapp(mensaje,miembros)
@@ -954,6 +954,7 @@ def eliminarPregunta(request,id_pregunta):
     else:
         return redirect('home')
 
+@login_required
 def agregarRespuesta(request):
     miembro=Miembro.objects.get(dni=request.user.miembro_id)
     if(Encuesta.objects.filter(miembro_id=miembro,respondio=False)).exists():
@@ -1064,13 +1065,13 @@ def agregarRespuesta(request):
                 #critico sin confirmar es pendiente
                 estado=Estado_Usuario(usuario=request.user,estado=est,confirmado=False) 
                 estado.save()
-                mensaje=Mensaje.objects.get(id=3)
+                mensaje=Mensaje.objects.get(tipo_id=3)
                 asunto = mensaje.tipo.tipo
                 mensaje = mensaje.mensaje + "se trata de " + request.user.miembro.apellido + ", " + request.user.miembro.nombre + ". Por favor ingrese en el siguiente enlace http://localhost:8000/sistema/reasignar/"+str(encuesta.miembro.dni)
                 miembros=[]
                 miembros.append(request.user.miembro)
                 enviarMail(miembros, asunto, mensaje)
-                mensaje=Mensaje.objects.get(id=3)
+                mensaje=Mensaje.objects.get(tipo_id=3)
                 mensaje=mensaje.mensaje
                 enviarWhatsapp(mensaje,miembros)
                 #aca pum ya notifico
@@ -1190,8 +1191,6 @@ def recomendacion(request):
     #Bien ahora si la idea es obtener todas las encuestas enviadas a esa reunion en esa fecha
     #ver cuantos respondieron y que respondieron si respondio
     rn = request.GET.get('rn')
-    print('-----------------')
-    print('rn: ',rn)
     reunion = Reunion.objects.get(id_reunion=rn)
     cant_m=0  #cantidad de estados medios
     cant_c=0  #cantidad de estados criticos
@@ -1210,9 +1209,8 @@ def recomendacion(request):
         data=[]
     else:
         for encuesta in encuestas: #por cada encuesta que respondio
-            estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
-            print('estado: ',estado)
-            if estado.estado == 'Medio':
+            estado= Estado_Reunion.objects.filter(encuesta_id=encuesta.id_encuesta,reunion_id=rn).last()
+            if estado.estado_id == 3:
                 cant_m += 1
                 #aca tengo que ver que le hizo estar en este estado
                 #para eso voy a obtener las respuestas de esta encuesta
@@ -1223,7 +1221,7 @@ def recomendacion(request):
                         if not(respuesta.pregunta in preguntas): #si la pregunta no esta aca la agrego
                             preguntas.append(respuesta.pregunta)
                             opciones.append(respuesta.opcion)
-            if estado.estado == 'Critico' :
+            if estado.estado_id == 4 :
                 cant_c += 1
                 #aca tengo que ver que le hizo estar en este estado
                 #para eso voy a obtener las respuestas de esta encuesta
@@ -1240,20 +1238,18 @@ def recomendacion(request):
         #-------Bien ahora tendria que ver su estado anterior( :c ) ----- para ver si presenta mejoras
 
         puntos_negativos = 0
-        encuesta = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2).exclude(fecha_respuesta=None,fecha_envio=fecha_envio).order_by('-fecha_envio').first()#ahora obtengo la ante ultima que envie
-        cant_total =0
-        if encuesta != None:
-            print('hay una para comparar')
-            fecha_envio = encuesta.fecha_envio
+        enc = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2,fecha_envio__lte=fecha_envio).exclude(fecha_envio=fecha_envio).first() #ahora obtengo la ante ultima que envie
+        c =0
+        if enc != None:
+            fecha_envio = enc.fecha_envio
             encuestas = Encuesta.objects.filter(reunion_id=reunion.id_reunion,tipo=2,fecha_envio=fecha_envio).exclude(fecha_respuesta=None) #con respuestas
-            cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha con respuestas
-        if cant_total != 0: #si alguien respondio 
+            c=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha con respuestas
+        if c != 0: #si alguien respondio 
             for encuesta in encuestas: #por cada encuesta que respondio
-                estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
-                print('estado: ',estado)
-                if estado.estado == 'Medio':
+                estado= Estado_Reunion.objects.filter(encuesta_id=encuesta.id_encuesta,reunion_id=rn).last()
+                if estado.estado_id == 3:
                     puntos_negativos +=1
-                if estado.estado == 'Critico' :
+                if estado.estado_id == 4:
                     puntos_negativos +=1
             if (puntos_negativos > (cant_m + cant_c)): # si los pontajes negativos de la ante ultima son mayores que los de la ultima entonces mejoro
                 mejora = True
@@ -1325,7 +1321,7 @@ def reasignar(request,dni):
                                 rn.grupo.changeReason='Modificacion' 
                                 rn.grupo.save()
                                 #es hora de avisar!
-                                msj=Mensaje.objects.get(id=5)
+                                msj=Mensaje.objects.get(tipo_id=5)
                                 mensaje=msj.mensaje
                                 miembros=[]
                                 usr=CustomUser.objects.get(id=rn.grupo.encargado)
@@ -1339,7 +1335,7 @@ def reasignar(request,dni):
                                 miembros.clear()
                                 miembros = []
                                 miembros.append(miembro)
-                                msj=Mensaje.objects.get(id=5)
+                                msj=Mensaje.objects.get(tipo_id=5)
                                 mensaje=msj.mensaje + ' Fuiste añadido a una nueva reunion'
                                 enviarWhatsapp(miembros,mensaje) #le mandamos whatsapp
                                 mensaje = msj.mensaje + 'Fuiste añadido a la reunion ' + rn.nombre + ' habla con ' + mb_new.nombre +' para mas informacion'
@@ -2148,15 +2144,17 @@ def filtros_estado_reunion(request):
                 print('cantidad total ', cant_total)
                 print('------------------')
                 for encuesta in encuestas:
-                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
+                    print('id_e: ',encuesta.id_encuesta)
+                    print("rn, ",rn)
+                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn)
                     print('estado: ',estado)
-                    if estado.estado == 'Muy Bueno':
+                    if estado.estado_id == 1:
                         cant_mb += 1
-                    if estado.estado == 'Bueno':
+                    if estado.estado_id == 2:
                         cant_b += 1
-                    if estado.estado == 'Medio':
+                    if estado.estado_id == 3:
                         cant_m += 1
-                    if estado.estado == 'Critico' :
+                    if estado.estado_id == 4:
                         cant_c += 1
                 #bien ahora porcentajes
                 if cant_total != 0:
@@ -2166,7 +2164,7 @@ def filtros_estado_reunion(request):
                     cant_c = (cant_c * 100) / cant_total
                     cant_s = (cant_s * 100) / cant_total
         else: #es porque hay un desde y/o un hasta
-            if request.GET['desde'] != '' and request.GET['hasta'] !='':
+            if request.GET['desde'] != ' ' and request.GET['hasta'] !='':
                 #traigo todas las encuestas que fueron enviadas entre esas fechas
                 encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__range=(desde,hasta)).exclude(fecha_respuesta=None)
                 cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas

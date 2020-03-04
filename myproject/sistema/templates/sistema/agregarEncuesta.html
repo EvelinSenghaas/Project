@@ -47,10 +47,10 @@ Agregar Encuesta
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Cada Cuantas Faltas?(*)</label></div>
                     <div class="col col-md-4"><input id="cantidadd" type="text" name="cantidadd" class="form-control"></div>
                 </div>
-
+                <br>
                 <div class="row form-group">
                     <div class="col col-md-12" data-step="3" data-intro="Paso 3: Debes seleccionar las preguntas que quieres que tenga la encuesta" >
-                        <table id="tabla-pregunta" class="table table-striped table-bordered" name="pregunta">
+                        <table id="tabla-pregunta" class="display" style="width:100%" name="pregunta">
                             <thead>
                                 <tr>
                                     <th data-step="4" data-intro="Paso 4: Si deseas agregar otra pregunta apreta '+'" >Pregunta <a  href="/sistema/agregarPregunta/" class="btn btn-primary" > + </a></th>
@@ -114,9 +114,22 @@ Agregar Encuesta
 </form>
 
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
     <script src="{% static 'assets/js/select2.min.js'%}"></script>
     <script>
         $(document).ready(function(){
+            $('#tabla-pregunta').DataTable( {
+                "language": {
+                    "lengthMenu": "Mostrando _MENU_ registros",
+                    "zeroRecords": "No hay registros encontrados - Lo Sentimos =( ",
+                    "info": "Mostrando pagina _PAGE_ de _PAGES_",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(Filtrado de _MAX_ registros en Total)",
+                    "search":"Buscar",
+                },
+            } );
+
             $('#cantidad').hide();
             $('#envio').hide();
             

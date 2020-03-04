@@ -8,20 +8,23 @@ from .forms import *
 from .models import *
 from sistema.models import *
 
+#implementar permisos y login aqui
 def configurarMensajes(request):
     mensajes=[]
     #el tipo 1 y 7 seran dinamicos
     tipo=Tipo_Mensaje.objects.all().exclude(id=1)
     for tp in tipo:
         if not(tp.id == 7):
-            msj= Mensaje.objects.filter(tipo=tp)[:1]
+            msj= Mensaje.objects.filter(tipo=tp)
             mensajes.append(msj[0])
     if request.method == 'POST':
         for tp in tipo:
             print(tp)
             msj = request.POST.get(str(tp))
-            if not(Mensaje.objects.filter(tipo=tp,mensaje=msj).exists()):
-                mensaje=Mensaje(mensaje=msj,tipo=tp)
+            mensaje = Mensaje.objects.get(tipo=tp)
+            if mensaje.mensaje != msj:
+                mensaje.mensaje=msj
+                mensaje.save()
                 mensaje.changeReason= "Modificacion"
                 mensaje.save()
         return redirect('home')

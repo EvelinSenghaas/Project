@@ -1,13 +1,14 @@
 from django.db import models
+from datetime import date
 from simple_history.models import HistoricalRecords
 from django.core.validators import MinValueValidator
 
 class Tipo_Reunion(models.Model):
     id_tipo_reunion =  models.AutoField(primary_key = True)
-    nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
-    descripcion = models.CharField('Descripcion',max_length=200,blank = False, null = True)
+    nombre=models.CharField('Nombre (*)',max_length=200,blank = False, null = False)
+    descripcion = models.CharField('Descripcion (*)',max_length=200,blank = False, null = True)
     borrado = models.BooleanField('borrado',default=False)
-    frecuencia = models.IntegerField() #cada cuanto se va a dar este tipo de reunion
+    frecuencia = models.IntegerField('Frecuencia (*)') #cada cuanto se va a dar este tipo de reunion
     history = HistoricalRecords()
 
     def __str__(self):
@@ -166,7 +167,7 @@ class Grupo(models.Model):
 class Reunion(models.Model):
     id_reunion=models.AutoField(primary_key=True)
     tipo_reunion=models.ForeignKey(Tipo_Reunion, on_delete=models.PROTECT)
-    nombre =models.CharField('Nombre', max_length=100,blank=False,null=True)
+    nombre =models.CharField(' Nombre (*)', max_length=100,blank=False,null=True)
     domicilio=models.ForeignKey(Domicilio,on_delete=models.PROTECT,blank=False,null=True)
     grupo=models.ForeignKey(Grupo, on_delete=models.PROTECT,null=True)
     borrado = models.BooleanField('borrado',default=False)
