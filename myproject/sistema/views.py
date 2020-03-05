@@ -115,10 +115,10 @@ def Home(request):
                 encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=1)
                 encuesta.miembro=miembro
                 encuesta.respondio=False
-                encuesta.fecha = falta.fecha
+                encuesta.fecha_envio = falta.fecha
                 encuesta.reunion=falta.reunion
                 encuesta.save() #Esto quiere decir que tenia una falta no mas
-                mensaje= "Hola "+miembro.nombre+"! tienes una encuesta pendiente por la falta en la reunion "+falta.reunion.nombre+" el dia "+falta.fecha+" por favor ingresa al sistema y dirigete a 'encuestas pendientes'"
+                mensaje= "Hola "+miembro.nombre+"! tienes una encuesta pendiente por la falta en la reunion "+falta.reunion.nombre+" el dia "+ str(falta.fecha) +" por favor ingresa al sistema y dirigete a 'encuestas pendientes'"
                 miembros=[] #porque no le voy a mandar realmente jiji
                 enviarWhatsapp(mensaje,miembros)
                 asunto = "Encuesta Pendiente"
@@ -1364,7 +1364,8 @@ def reasignar(request,dni):
                     reunion.grupo.changeReason='Elimincaion'
                     reunion.grupo.save()
             usr.is_active=False
-            estado = Estado(estado='Suspendido',confirmado=True,usuario_id = usr.id)
+            est= Estado.objects.get(id=4) #traigo el estado critico, esta vez estara confirmado
+            estado = Estado_Usuario(estado=est,confirmado=True,usuario_id = usr.id) #creo otro estado para ese usr
             usr.save()
             estado.save()
             return redirect('home')
@@ -1793,14 +1794,14 @@ def recomendacionTable(request):
                                             best_usr_recomendados.append(miembro) #el mejor
                                             nombre= miembro.apellido +", "+miembro.nombre
                                             motivos=['Es un Usuario','Cuenta con Horario Disponible','Mismo Barrio','Mismo Sexo que el grupo']
-                                            dic ={'miembro': nombre, 'motivos':motivos}
+                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
                                             data.append(dic)
                                     else:
                                         if not(miembro in usr_recomendados) and not(miembro in best_usr_recomendados):
                                             usr_recomendados.append(miembro) #no es tan weno
                                             nombre= miembro.apellido +", "+miembro.nombre
                                             motivos=['Es un Usuario','Cuenta con Horario Disponible','Mismo Sexo que el grupo']
-                                            dic={'miembro': nombre, 'motivos':motivos}
+                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
                                             data.append(dic)
                         else: #aca no hay ningun user, entonces... vamos por miembros del mismo genero
                                 if miembro.sexo == reunion.grupo.sexo or reunion.grupo.sexo=="Ambos":
@@ -1808,7 +1809,7 @@ def recomendacionTable(request):
                                         mb_recomendados.append(miembro)
                                         nombre= miembro.apellido +", "+miembro.nombre
                                         motivos=['Cuenta con Horario Disponible','Mismo Sexo que el grupo']
-                                        dic={'miembro': nombre, 'motivos':motivos}
+                                        dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
                                         data.append(dic) 
                 
                 else: #osea si ningun MIEMBRO tiene hs disponibles
@@ -1829,7 +1830,7 @@ def recomendacionTable(request):
                                                 usr_recomendados.append(miembro)
                                                 nombre= miembro.apellido +", "+miembro.nombre
                                                 motivos=['Es un Usuario','Mismo Barrio','Mismo Sexo que el grupo']
-                                                dic={'miembro': nombre, 'motivos':motivos}
+                                                dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
                                                 data.append(dic)  
                                             #aca no pregunto por el domicilio porque ya tamos en el domicilio XD osea no es best porque no tiene hs disponible
                                 else: #aca hay cura, no tienen hs disponible, no hay usr, pero hay miembros en ese barrio
@@ -1838,7 +1839,7 @@ def recomendacionTable(request):
                                             mb_recomendados.append(miembro) #esto ya es para la ultima opcion
                                             nombre= miembro.apellido +", "+miembro.nombre
                                             motivos=['Mismo Barrio','Mismo Sexo que el grupo']
-                                            dic={'miembro': nombre, 'motivos':motivos} 
+                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos} 
                                             data.append(dic) 
                                         
                         else: #aca no tienen ni hs ni domicilio nadie de nadie osea fritos #pero no es el ultimo ciclo lina
@@ -1857,7 +1858,7 @@ def recomendacionTable(request):
                             usr_recomendados.append(mb)
                             nombre= mb.apellido +", "+mb.nombre
                             motivos=['Es un Usuario','Mismo Sexo que el grupo','Atiende el mismo grupo etario']
-                            dic={'miembro': nombre, 'motivos':motivos}
+                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
                             data.append(dic)  
                 if not(usr_recomendados) and not(mb_recomendados): #aca si que no hay nada de nada, entonces vamos a darle usr del mismo genero
                     if CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id).exists():
@@ -1868,7 +1869,7 @@ def recomendacionTable(request):
                                 usr_recomendados.append(mb)
                                 nombre= mb.apellido +", "+mb.nombre
                                 motivos=['Es un Usuario','Mismo Sexo que el grupo']
-                                dic={'miembro': nombre, 'motivos':motivos}
+                                dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
                                 data.append(dic)  
                     else:
                         print('weno esto si que ya es imposible china xd')   
@@ -1947,12 +1948,18 @@ def reunionList(request):
         rn_base=Reunion.objects.get(nombre=rn) #no se si me va a dejar
         #vemos si hay una reunion posible para recomendar, osea aca ya entran las del mismo tipo
         encargado=rn_base.grupo.encargado
+        print("")
+        print('encargadito: ',encargado)
+        print("")
         dic=[]
         data=[]
         motivos=[]
         i=0
-        if Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion).exclude(grupo__encargado=encargado).exists():
-            reuniones=Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion).exclude(grupo__encargado=encargado,borrado=True)
+        if Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion,borrado=False).exclude(grupo__encargado=encargado).exists():
+            reuniones=Reunion.objects.filter(tipo_reunion=rn_base.tipo_reunion,borrado=False).exclude(grupo__encargado=encargado)
+            print('')
+            print('reunionesss: ',reuniones)
+            print('')
             miembros=rn_base.grupo.miembro.all()
             for miembro in miembros:
                 #print('miembro: ',miembro + 'base: ',rn_base.nombre)
@@ -1960,7 +1967,8 @@ def reunionList(request):
                 ids=[]
                 motivos=[]
                 for reunion in reuniones:
-                    #print('reunion: ',reunion)
+                    print('reunion: ',reunion)
+                    print('borrado: ',reunion.borrado)
                     if reunion.grupo.sexo== "Ambos" or reunion.grupo.sexo == miembro.sexo:
                         #print('esa reunion coincide con el sexo de la base')
                         hs_rn=reunion.horario
