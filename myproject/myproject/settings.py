@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'sistema',
     'accounts.apps.AccountsConfig',
     'usuario',
-    'simple_history',
     'mensajeria',
+    'simple_history',
 ]
 
 MIDDLEWARE = [

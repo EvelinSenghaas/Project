@@ -58,9 +58,12 @@ def listarUsuario(request):
 def reactivarUsuario(request,id):
     if permiso(request, 36):
         usuario = CustomUser.objects.get(id=id)
-        estado = Estado(estado='Muy Bueno',confirmado=True,usuario_id = usuario.id)
+        est=Estado.objects.get(id=1)
+        estado = Estado_Usuario(estado=est,confirmado=True,usuario_id = usuario.id)
+        estado.changeReason = "Reactivacion"
         estado.save()
         usuario.is_active=True
+        usuario.changeReason = "Modificacion"
         usuario.save()
         return redirect('/sistema/listarUsuario')
 
@@ -1064,6 +1067,7 @@ def agregarRespuesta(request):
                 est = Estado.objects.get(id=4)
                 #critico sin confirmar es pendiente
                 estado=Estado_Usuario(usuario=request.user,estado=est,confirmado=False) 
+                estado.changeReason="Creacion"
                 estado.save()
                 mensaje=Mensaje.objects.get(tipo_id=3)
                 asunto = mensaje.tipo.tipo
@@ -1079,17 +1083,20 @@ def agregarRespuesta(request):
                 print("Medio")
                 est = Estado.objects.get(id=3)
                 estado=Estado_Usuario(usuario=request.user,estado=est)
+                estado.changeReason="Creacion"
                 estado.save()
             if (puntos > puntos_total/2) and (puntos <= (puntos_total-(puntos_total/4))):
                 print("Bueno")
                 est = Estado.objects.get(id=2)
                 estado=Estado_Usuario(usuario=request.user,estado=est)
+                estado.changeReason="Creacion"
                 estado.save()
                 
             if (puntos > (puntos_total-(puntos_total/4))) and (puntos <= puntos_total):
                 print('Re bien!!')
                 est = Estado.objects.get(id=1)
                 estado=Estado_Usuario(usuario=request.user,estado=est)
+                estado.changeReason="Creacion"
                 estado.save()
             
         return redirect('home')
@@ -1364,15 +1371,16 @@ def reasignar(request,dni):
                     reunion.grupo.changeReason='Elimincaion'
                     reunion.grupo.save()
             usr.is_active=False
-            est= Estado.objects.get(id=4) #traigo el estado critico, esta vez estara confirmado
-            estado = Estado_Usuario(estado=est,confirmado=True,usuario_id = usr.id) #creo otro estado para ese usr
+            estado = Estado_Usuario.objects.filter(estado_id=4,confirmado=False,usuario_id = usr.id).last()
+            estado.confirmado = True
+            usr.changeReason = "Modificacion" #se desactivo
+            estado.changeReason = "Modificacion"
             usr.save()
             estado.save()
             return redirect('home')
         if 'cancelar' in request.POST:
-            estado = Estado(estado='Bueno',confirmado=True,usuario_id = usr.id)
-            estado.save()
-            return redirect('home')
+            #dejo el estado en pendiente, hasta que el admin personalmente lo cambie
+            return redirect('sistema/listarUsuario')
     
     return render(request,'sistema/reasignar.html',{'miembro':miembro,'reuniones':reuniones})
 
@@ -1913,28 +1921,36 @@ def rolList(request):
 def estadoList(request):
     usr= request.GET.get('usr')
     usuario = CustomUser.objects.get(id=usr)
-    estado = Estado_Usuario.objects.filter(usuario_id=usuario.id).order_by('-fecha').first()
+    estado = Estado_Usuario.objects.filter(usuario_id=usuario.id).last()
     data=[]
+    cant_r = Reunion.objects.filter(grupo__encargado=usuario.id,borrado=False)
+    cant_r = len(list(cant_r))
     if estado != None:
         print('usr ', usuario)
         print('estado ',estado)
-        encuesta = Encuesta.objects.filter(tipo_id=3,fecha_respuesta =estado.fecha,miembro_id=usuario.miembro.dni)
-        # encuesta = Encuesta.objects.get(id_encuesta=encuesta[0]['id_encuesta'])4
-        print('-------------usr-------------- ', usuario)
-        print('encuesta: ', encuesta)
-        print('encuesta ',encuesta[0])
-        link = '/sistema/verRespuesta/'+str(encuesta[0])
-        #bueno ya tengo el link y el estado ahora tengo que contar cuantas reuniones tiene
-        cant_r = Reunion.objects.filter(grupo__encargado=usuario.id,borrado=False)
-        cant_r = len(list(cant_r))
-        if estado.estado == 'Critico' and estado.confirmado == None:
-            estado.estado='Suspendido'
-        dic = {'link':link,'estado':estado.estado,'rn':cant_r}
+        print('')
+        fechona=estado.fecha.date()
+        print('FECHONA: ',fechona)
+        print('')
+        if Encuesta.objects.filter(tipo_id=3,fecha_respuesta =fechona,miembro_id=usuario.miembro.dni).exists():
+            encuesta = Encuesta.objects.filter(tipo_id=3,fecha_respuesta =fechona,miembro_id=usuario.miembro.dni)
+            # encuesta = Encuesta.objects.get(id_encuesta=encuesta[0]['id_encuesta'])4
+            print('-------------usr-------------- ', usuario)
+            print('encuesta: ', encuesta)
+            print('encuesta ',encuesta[0])
+            link = '/sistema/verRespuesta/'+str(encuesta[0])
+            #bueno ya tengo el link y el estado ahora tengo que contar cuantas reuniones tiene
+            
+            if estado.estado.estado == 'Critico' and estado.confirmado == True:
+                estado.estado.estado='Suspendido'
+            dic = {'link':link,'estado':estado.estado.estado,'rn':cant_r}
+        else:
+            link=''
+            dic = {'link':link,'estado':estado.estado.estado,'rn':cant_r}
+
     else:
         link=''
-        estado='Muy Bueno'
-        cant_r = Reunion.objects.filter(grupo__encargado=usuario.id,borrado=False)
-        cant_r = len(list(cant_r))
+        estado="Muy Bueno"
         dic = {'link':link,'estado':estado,'rn':cant_r}
     data.append(dic)
     print("-----------------------------//-----------------------")
