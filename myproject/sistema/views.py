@@ -322,7 +322,6 @@ def editarGrupo(request,id_grupo):
                 if capacidad < len(request.POST.get('miembro')):
                     messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
                     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
-                
                 grupo.miembro.set(request.POST.getlist('miembro'))
                 print('encargadito: ', grupo.encargado)
                 grupo.changeReason='Modificacion'

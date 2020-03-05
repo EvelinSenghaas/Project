@@ -9,7 +9,7 @@ class GrupoForm(forms.ModelForm):
             self.fields['miembro'].queryset = Miembro.objects.filter(borrado=False)
     class Meta:
         model=Grupo
-        fields=['nombre','miembro','sexo','desde','hasta','capacidad']
+        fields=['nombre','miembro','sexo','desde','hasta','capacidad','encargado']
         widgets={
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'miembro':forms.CheckboxSelectMultiple(),
