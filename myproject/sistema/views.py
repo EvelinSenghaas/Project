@@ -311,7 +311,6 @@ def editarGrupo(request,id_grupo):
             todos=Miembro.objects.filter(sexo = sx, fecha_nacimiento__range=(f_min,f_max))
         else:
             todos=Miembro.objects.filter(fecha_nacimiento__range=(f_min,f_max))
-        print(todos)
         if request.method =='GET':
             grupo_form=GrupoForm(instance=grupo)
         else:
@@ -323,7 +322,6 @@ def editarGrupo(request,id_grupo):
                     messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
                     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
                 grupo.miembro.set(request.POST.getlist('miembro'))
-                print('encargadito: ', grupo.encargado)
                 grupo.changeReason='Modificacion'
                 grupo.save()
             if permiso(request, 17) or permiso(request, 18):
@@ -2059,8 +2057,6 @@ def reunionList(request):
 def filtros_estado_miembro(request):
     desde = request.GET['desde']
     hasta = request.GET['hasta']
-    print(desde)
-    print(hasta)
     cant_mb=0 #cantidad de estados muy buenos
     cant_b=0  #cantidad de estados buenos
     cant_m=0  #cantidad de estados medios
@@ -2074,24 +2070,19 @@ def filtros_estado_miembro(request):
             estado = Estado_Usuario.objects.filter(usuario_id=usuario.id).order_by('-fecha').first() #orden descendente
             #en mi mente trae del mas actual al mas viejo, descienden las fechas
             #tengo que comprobar
-            print('estado: ',estado)
             if estado != None:
-                if estado.estado == 'Muy Bueno': #weno ver si anda el str o cambiar esto a numeritos xd
-                    cant_mb += 1
-                if estado.estado == 'Bueno':
-                    cant_b += 1
-                if estado.estado == 'Medio':
-                    cant_m += 1
-                if  estado.estado == 'Critico' :
-                    cant_c += 1 #critico o pendiente da igual aca
+                    if estado.estado.id == 1:
+                        cant_mb += 1
+                    if estado.estado.id == 2:
+                        cant_b += 1
+                    if estado.estado.id == 3:
+                        cant_m += 1
+                    if estado.estado.id == 4 : 
+                        cant_c += 1
             else: #si nunca registro un estado es porque esta mb, nunca falto consecutivamente ni nada
                 cant_mb += 1 
         #bien ahora porcentajes
         if cant_total != 0:
-            print('cant_mb ',cant_mb)
-            print('cant_b ',cant_b)
-            print('cant__m ',cant_m)
-            print('cant_c ',cant_c)
             cant_mb = (cant_mb * 100) / cant_total
             cant_b = (cant_b * 100) / cant_total
             cant_m = (cant_m * 100) / cant_total
@@ -2100,27 +2091,25 @@ def filtros_estado_miembro(request):
         if request.GET['desde'] != '' and request.GET['hasta'] !='':
             #castear hasta pa que sea un timedate
             new_h = datetime.datetime.strptime(hasta, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
-            #new_h = datetime(hasta.year,hasta.month,hasta.day)
-            print('new_h: ', new_h)
             usuarios= CustomUser.objects.filter(date_joined__lte=new_h) #traigo todos los usr que estaban creados antes de la fecha max (hasta)
             cant_total=len(list(usuarios))
+            desde=datetime.datetime.strptime(desde, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
+            hasta=datetime.datetime.strptime(hasta, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
             for usuario in usuarios:
                 estado= Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__range=(desde,hasta)).order_by('-fecha').first()
-                #traigo un estado por miembro, el mas actual
-                print('estado: ',estado)
                 if estado != None:
-                    if estado.estado == 'Muy Bueno':
+                    if estado.estado.id == 1:
                         cant_mb += 1
-                    if estado.estado == 'Bueno':
+                    if estado.estado.id == 2:
                         cant_b += 1
-                    if estado.estado == 'Medio':
+                    if estado.estado.id == 3:
                         cant_m += 1
-                    if estado.estado == 'Pendiente' or estado.estado == 'Critico' : 
+                    if estado.estado.id == 4 : 
                         cant_c += 1
                 else: #si no registro un estado en ese rango voy a ver el ultimo estado que tenia
                     estado = Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__lte=desde).order_by('-fecha').first()
                     if estado != None:
-                        if estado.estado == 'Critico' : 
+                        if estado.estado.id == 4: 
                             cant_c += 1
                         else:
                             cant_mb+=1 #osea si no esta suspendido ni nada entonces ta mb
@@ -2131,6 +2120,61 @@ def filtros_estado_miembro(request):
                 cant_b = (cant_b * 100) /cant_total
                 cant_m = (cant_m * 100) / cant_total
                 cant_c = (cant_c * 100) / cant_total
+        else: #Weno ahora tengo que ver cual de las 2 estan vacias
+            if desde !='':
+                desde=datetime.datetime.strptime(desde, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
+                usuarios= CustomUser.objects.all() #traigo todos los usr
+                cant_total=len(list(usuarios))
+                for usuario in usuarios:
+                    estado= Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__gte=desde).order_by('-fecha').first()
+                    #traigo un estado por miembro, el mas actual
+                    if estado != None:
+                        if estado.estado.id == 1:
+                            cant_mb += 1
+                        if estado.estado.id == 2:
+                            cant_b += 1
+                        if estado.estado.id == 3:
+                            cant_m += 1
+                        if estado.estado.id == 4 : 
+                            cant_c += 1
+                    else: #si no registro un estado en ese rango voy a ver el ultimo estado que tenia
+                        estado = Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__lte=desde).order_by('-fecha').first()
+                        if estado != None:
+                            if estado.estado.id == 4 : 
+                                cant_c += 1
+                            else:
+                                cant_mb+=1 #osea si no esta suspendido ni nada entonces ta mb
+                        else:
+                            cant_mb+=1 #osea no registro nada antes que la fecha desde, estaba mb
+                if cant_total != 0:
+                    cant_mb = (cant_mb * 100) / cant_total
+                    cant_b = (cant_b * 100) /cant_total
+                    cant_m = (cant_m * 100) / cant_total
+                    cant_c = (cant_c * 100) / cant_total
+            else:
+                #castear hasta pa que sea un timedate
+                new_h = datetime.datetime.strptime(hasta, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
+                usuarios= CustomUser.objects.filter(date_joined__lte=new_h) #traigo todos los usr que estaban creados antes de la fecha max (hasta)
+                cant_total=len(list(usuarios))
+                hasta=datetime.datetime.strptime(hasta, '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%S.%f')
+                for usuario in usuarios:
+                    estado= Estado_Usuario.objects.filter(usuario_id=usuario.id,fecha__lte=hasta).order_by('-fecha').first()
+                    if estado != None:
+                        if estado.estado.id == 1:
+                            cant_mb += 1
+                        if estado.estado.id == 2:
+                            cant_b += 1
+                        if estado.estado.id == 3:
+                            cant_m += 1
+                        if estado.estado.id == 4 : 
+                            cant_c += 1
+                    else: 
+                        cant_mb+=1 #osea no registro nada antes que la fecha desde, estaba mb
+                if cant_total != 0:
+                    cant_mb = (cant_mb * 100) / cant_total
+                    cant_b = (cant_b * 100) /cant_total
+                    cant_m = (cant_m * 100) / cant_total
+                    cant_c = (cant_c * 100) / cant_total
         
     data = [cant_mb,cant_b,cant_m,cant_c]
     print("-----------------------------//-----------------------")

@@ -72,14 +72,18 @@ Miembro en Estado Critico
         }
         else{
             if(desde != "" && hasta != ""){
-                titulo = "Mostrando el estado de los miembros del "+ desde +" al "+ hasta;
+                var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+                var hh=hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+                titulo = "Mostrando el estado de los miembros del "+ dd +" al "+ hh;
             }
             else{ // si uno de los 2 no esta vacio entonces veo cual
                 if (desde != ""){
-                    titulo = "Mostrando el estado de los miembros del "+ desde + "en adelante"
+                    var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+                    titulo = "Mostrando el estado de los miembros del "+ dd + " en adelante"
                 }
                 else{
-                    titulo = "Mostrando el estado de los miembros hasta el "+ hasta 
+                    var hh=hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+                    titulo = "Mostrando el estado de los miembros hasta el "+ hh 
                 }
             }
         }
