@@ -2274,16 +2274,16 @@ def filtros_estado_reunion(request):
     desde = request.GET['desde']
     hasta = request.GET['hasta']
     rn = request.GET['rn']
-
-    print(desde)
-    print(hasta)
+    print('desde ',desde)
+    print('hasta ',hasta)
     cant_mb=0 #cantidad de estados muy buenos
     cant_b=0  #cantidad de estados buenos
     cant_m=0  #cantidad de estados medios
     cant_c=0  #cantidad de estados criticos
     cant_s=0  #cantidad de miembros que no respondieron
+    cant_total=0
     #lo primero y mas importante tiene que seleccionar una reunion
-    if rn != '':
+    if rn != '': #siemre va ser distinto de vacio no le doy otra chance
         if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
             #bueno primero tengo que ver cual fue la ultima encuesta que le mande a esa reunion
             enc = Encuesta.objects.filter(reunion_id = rn, tipo = 2).order_by('-fecha_envio').first()
@@ -2312,15 +2312,9 @@ def filtros_estado_reunion(request):
                         cant_m += 1
                     if estado.estado_id == 4:
                         cant_c += 1
-                #bien ahora porcentajes
-                if cant_total != 0:
-                    cant_mb = (cant_mb * 100) / cant_total
-                    cant_b = (cant_b * 100) / cant_total
-                    cant_m = (cant_m * 100) / cant_total
-                    cant_c = (cant_c * 100) / cant_total
-                    cant_s = (cant_s * 100) / cant_total
+
         else: #es porque hay un desde y/o un hasta
-            if request.GET['desde'] != ' ' and request.GET['hasta'] !='':
+            if request.GET['desde'] != '' and request.GET['hasta'] !='':
                 #traigo todas las encuestas que fueron enviadas entre esas fechas
                 encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__range=(desde,hasta)).exclude(fecha_respuesta=None)
                 cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en ese rango de fechas
@@ -2332,27 +2326,83 @@ def filtros_estado_reunion(request):
                 print('cantidad total ', cant_total)
                 print('------------------')
                 for encuesta in encuestas:
-                    estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn,fecha=encuesta.fecha_respuesta)
-                    print('estado: ',estado)
-                    if estado.estado == 'Muy Bueno':
-                        cant_mb += 1
-                    if estado.estado == 'Bueno':
-                        cant_b += 1
-                    if estado.estado == 'Medio':
-                        cant_m += 1
-                    if estado.estado == 'Critico' :
-                        cant_c += 1
-                #bien ahora porcentajes
-                if cant_total != 0:
-                    cant_mb = (cant_mb * 100) / cant_total
-                    cant_b = (cant_b * 100) / cant_total
-                    cant_m = (cant_m * 100) / cant_total
-                    cant_c = (cant_c * 100) / cant_total
-                    cant_s = (cant_s * 100) / cant_total
-            
-        
-        data = [cant_mb,cant_b,cant_m,cant_c,cant_s]
-        if cant_mb ==0 and cant_b==0 and cant_m == 0 and cant_s==0 :
+                    print('encuesta: ',encuesta.id_encuesta)
+                    if Estado_Reunion.objects.filter(encuesta_id=encuesta.id_encuesta,reunion_id=rn).exists():
+                        estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn)
+                        print('estado: ',estado)
+                        if estado.estado_id == 1:
+                            cant_mb += 1
+                        if estado.estado_id == 2:
+                            cant_b += 1
+                        if estado.estado_id == 3:
+                            cant_m += 1
+                        if estado.estado_id == 4:
+                            cant_c += 1
+            else:
+                if request.GET['desde'] != '':
+                    print('DESDE NO ESTABA VACIO')
+                    #traigo todas las encuestas que fueron enviadas entre esas fechas
+                    encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__gte=desde).exclude(fecha_respuesta=None)
+                    cant_total=len(list(encuestas)) #cantidad de encuestas enviadas desde esa fecha en adelate
+                    cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None,fecha_envio__gte=desde)
+                    cant_s = len(list(cant_s)) #cantidad de encuestas enviadas a esa rn a desde esa fecha en adelante y sin respuestas
+                    cant_total += cant_s
+                    print('------------------')
+                    print('cantidad sin responder ', cant_s)
+                    print('cantidad total ', cant_total)
+                    print('------------------')
+                    for encuesta in encuestas:
+                        print('encuesta: ',encuesta.id_encuesta)
+                        if Estado_Reunion.objects.filter(encuesta_id=encuesta.id_encuesta,reunion_id=rn).exists():
+                            estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn)
+                            print('estado: ',estado)
+                            if estado.estado_id == 1:
+                                cant_mb += 1
+                            if estado.estado_id == 2:
+                                cant_b += 1
+                            if estado.estado_id == 3:
+                                cant_m += 1
+                            if estado.estado_id == 4:
+                                cant_c += 1
+                else:
+                    #traigo todas las encuestas que fueron hasta esa fecha
+                    print('ACA TENGO QUE ENTRAR')
+                    encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio__lte=hasta).exclude(fecha_respuesta=None)
+                    cant_total=len(list(encuestas)) #cantidad de encuestas enviadas hasta esa fecha
+                    cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None,fecha_envio__lte=hasta)
+                    cant_s = len(list(cant_s)) #cantidad de encuestas enviadas a esa rn a hasta esa fecha y sin respuestas
+                    cant_total += cant_s
+                    print('------------------')
+                    print('cantidad sin responder ', cant_s)
+                    print('cantidad total ', cant_total)
+                    print('------------------')
+                    for encuesta in encuestas:
+                        print('encuesta: ',encuesta.id_encuesta)
+                        if Estado_Reunion.objects.filter(encuesta_id=encuesta.id_encuesta,reunion_id=rn).exists():
+                            estado= Estado_Reunion.objects.get(encuesta_id=encuesta.id_encuesta,reunion_id=rn)
+                            print('estado: ',estado)
+                            if estado.estado_id == 1:
+                                cant_mb += 1
+                            if estado.estado_id == 2:
+                                cant_b += 1
+                            if estado.estado_id == 3:
+                                cant_m += 1
+                            if estado.estado_id == 4:
+                                cant_c += 1
+
+
+        #bien ahora porcentajes
+        if cant_total != 0:
+            print('aca tenia que entrar')
+            cant_mb = (cant_mb * 100) / cant_total
+            cant_b = (cant_b * 100) / cant_total
+            cant_m = (cant_m * 100) / cant_total
+            cant_c = (cant_c * 100) / cant_total
+            cant_s = (cant_s * 100) / cant_total
+            data = [cant_mb,cant_b,cant_m,cant_c,cant_s]
+            print('datitos bn en teoria ', data)
+        else:
+            print('entre mal cabeza')
             data = []
             #ver de poner un mensajito
     print("-----------------------------//-----------------------")
