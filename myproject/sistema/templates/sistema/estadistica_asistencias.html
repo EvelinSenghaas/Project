@@ -59,7 +59,7 @@ Estadistica de Asistencia
                                     <div class="col-3" data-step="7" data-intro="Paso 7: Puedes seleccionar un miembro y te mostraremos solo sus registros de asistencias">
                                         <p style="margin-bottom:0;text-align: left;">Miembros</p>
                                         <select class="form form-control" name="miembro" id="mb">
-                                            <option selected value="" > ------------------ </option>
+                                            <option selected value="null" > ------------------ </option>
                                             {% for miembro in miembros %}
                                             <option value="{{miembro.dni}}">{{miembro.nombre}}, {{miembro.apellido}}</option>
                                             {% endfor %}
@@ -165,6 +165,8 @@ Estadistica de Asistencia
         var mb = $('#mb').val();
         console.log('desde '+desde);
         console.log('hasta '+hasta);
+        console.log('mb '+mb);
+
         if(desde == "" && hasta == "") {
             console.log('mb '+mb);
             if(rn!="null"){ 
@@ -185,7 +187,7 @@ Estadistica de Asistencia
                 if(rol!="null"){
                     titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol +' entre las fechas'+ desde +" y "+ hasta;
                 }
-                if(mb!=""){
+                if(mb!="null"){
                     titulo = 'Mostrando todas las Asistencias del miembro seleccionado' +' entre las fechas'+ desde +" y "+ hasta;
                 }
             }
@@ -197,7 +199,7 @@ Estadistica de Asistencia
                     if(rol!="null"){
                         titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' desde el '+ desde + ' en adelante';
                     }
-                    if(mb!=""){
+                    if(mb!="null"){
                         titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' desde el '+ desde + ' en adelante';
                     }
                 }
@@ -208,7 +210,7 @@ Estadistica de Asistencia
                     if(rol!="null"){
                         titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' hasta el '+ hasta;
                     }
-                    if(mb!=""){
+                    if(mb!="null"){
                         titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' hasta el '+ hasta;
                     }
                 }

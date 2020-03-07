@@ -2392,6 +2392,7 @@ def filtros_estado_reunion(request):
 
 
         #bien ahora porcentajes
+        data = []
         if cant_total != 0:
             print('aca tenia que entrar')
             cant_mb = (cant_mb * 100) / cant_total
@@ -2441,8 +2442,6 @@ def filtros_asistencias(request):
             cant_fal= len(list(cant_fal))
             cant_total = cant_ast + cant_fal
         if rol != 'null':
-            # print('')
-            # print('entre en el rol')
             print('')
             usuarios = CustomUser.objects.filter(rol_id=int(rol))
             print('usuarios ',usuarios)
@@ -2488,13 +2487,20 @@ def filtros_asistencias(request):
                 #en este caso cargo solo el desde
                 if rn != '': #Bueno si quiere filtar las asitencias de la reunion rn desde esa fecha en adelante
                     #bueno voy a traer todos los registros de asistencias de esa rn
+                    print('entre en 1')
+                    print('desde ',desde)
+                    print('rn ',rn)
                     cant_ast = Asistencia.objects.filter(reunion_id=rn,presente=True,fecha__gte=desde)
+                    print('ast ', cant_ast)
                     cant_fal = Asistencia.objects.filter(reunion_id=rn,presente=False,fecha__gte=desde)
                     cant_ast= len(list(cant_ast))
+                    print('ast ', cant_ast)
                     cant_fal= len(list(cant_fal))
+                    print('cant_f ',cant_fal)
                     cant_total = cant_ast + cant_fal
 
                 if (not(rn != '') and mb != 'null'):
+                    print('entre en 2')
                     cant_ast = Asistencia.objects.filter(miembro_id=mb,presente=True,fecha__gte=desde)
                     cant_fal= Asistencia.objects.filter(miembro_id=mb,presente=False,fecha__gte=desde)
                     cant_ast= len(list(cant_ast))
@@ -2502,6 +2508,7 @@ def filtros_asistencias(request):
                     cant_total = cant_ast + cant_fal
                 else:
                     if rol != 'null': 
+                        print('entre en 3')
                         usuarios = CustomUser.objects.filter(rol_id=rol)
                         for usuario in usuarios:
                             miembro = usuario.miembro
