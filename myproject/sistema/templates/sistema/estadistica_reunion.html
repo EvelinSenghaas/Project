@@ -88,14 +88,16 @@ Estadistica del Estado de Reuniones
                 titulo = 'Mostrando el estado actual de todas las reuniones';
             }
             else{
+                var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+                var hh = hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
                 if(desde != "" && hasta != ""){
-                    titulo = "Mostrando el estado de todas las reuniones entre el "+ desde +" y el "+ hasta;
+                    titulo = "Mostrando el estado de todas las reuniones entre el "+ dd +" y el "+ hh;
                 }else{
                     if (desde != ""){
-                        titulo = "Mostrando el estado de todas las reuniones del "+ desde + " en adelante";
+                        titulo = "Mostrando el estado de todas las reuniones del "+ dd + " en adelante";
                     }
                     else{
-                        titulo = "Mostrando el estado de todas las reuniones hasta "+ hasta;
+                        titulo = "Mostrando el estado de todas las reuniones hasta "+ hh;
                     }
                 }
             }
@@ -106,14 +108,16 @@ Estadistica del Estado de Reuniones
                 titulo = 'Mostrando el estado actual de la reunion '+reunion;
             }
             else{
+                var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+                var hh = hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
                 if(desde != "" && hasta != ""){
-                    titulo = "Mostrando el estado de la reunion "+ reunion +" entre el "+ desde +" y el "+ hasta;
+                    titulo = "Mostrando el estado de la reunion "+ reunion +" entre el "+ dd +" y el "+ hh;
                 }else{
                     if (desde != ""){
-                        titulo = "Mostrando el estado de la reunion "+ reunion + " del "+ desde + " en adelante";
+                        titulo = "Mostrando el estado de la reunion "+ reunion + " del "+ dd + " en adelante";
                     }
                     else{
-                        titulo = "Mostrando el estado de la reunion "+ reunion + " hasta "+ hasta;
+                        titulo = "Mostrando el estado de la reunion "+ reunion + " hasta "+ hh;
                     }
                 }
             }

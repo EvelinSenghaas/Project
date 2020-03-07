@@ -180,38 +180,40 @@ Estadistica de Asistencia
             }
         }
         else{
+            var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
+            var hh = hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
             if(desde != "" && hasta != ""){
                 if(rn!="null"){ 
-                    titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn+' entre las fechas'+ desde +" y "+ hasta;
+                    titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn+' entre las fechas'+ dd +" y "+ hh;
                 }
                 if(rol!="null"){
-                    titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol +' entre las fechas'+ desde +" y "+ hasta;
+                    titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol +' entre las fechas'+ dd +" y "+ hh;
                 }
                 if(mb!="null"){
-                    titulo = 'Mostrando todas las Asistencias del miembro seleccionado' +' entre las fechas'+ desde +" y "+ hasta;
+                    titulo = 'Mostrando todas las Asistencias del miembro seleccionado' +' entre las fechas'+ dd +" y "+ hh;
                 }
             }
             else{ // si uno de los 2 no esta vacio entonces veo cual
                 if (desde != ""){
                     if(rn!="null"){ 
-                        titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn +' desde el '+ desde + ' en adelante';
+                        titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn +' desde el '+ dd + ' en adelante';
                     }
                     if(rol!="null"){
-                        titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' desde el '+ desde + ' en adelante';
+                        titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' desde el '+ dd + ' en adelante';
                     }
                     if(mb!="null"){
-                        titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' desde el '+ desde + ' en adelante';
+                        titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' desde el '+ dd + ' en adelante';
                     }
                 }
                 else{
                     if(rn!="null"){ 
-                        titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn +' hasta el '+ hasta;
+                        titulo = 'Mostrando todas las Asistencias de la Reunion '+ rn +' hasta el '+ hh;
                     }
                     if(rol!="null"){
-                        titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' hasta el '+ hasta;
+                        titulo = 'Mostrando todas las Asistencias de los miembros con el rol '+ rol  +' hasta el '+ hh;
                     }
                     if(mb!="null"){
-                        titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' hasta el '+ hasta;
+                        titulo = 'Mostrando todas las Asistencias del miembro seleccionado' + ' hasta el '+ hh;
                     }
                 }
             }
