@@ -18,21 +18,36 @@ Miembro en Estado Critico
             </div>
 
             <form method="POST" class="form-horizontal">
-
-                <div  class="col-xl-11" data-step="2" data-intro="Paso 2: Actualmente se esta mostrando los porcentajes de como estan acutalmente los usuarios">
+            
+                <div  class="col-xl-12" data-step="2" data-intro="Paso 2: Actualmente se esta mostrando los porcentajes de como estan acutalmente los usuarios">
                     <div class="row">
-                        <div class="col-lg-10 col-xl-12">
+                        <div class="col-lg-12 col-xl-12">
                             <div class="card br-0">
                                 <div align="center" class="card-body">
                                 <div class="row row-form-group" data-step="3" data-intro="Paso 3: Puedes seleccionar en un rango de fechas">
-                                    <div class="col col-md-1"><label for="text-label">Desde</label></div>
-                                    <div class="col col-md-3" data-step="4" data-intro="Paso 4: Debes colocar a partir de que fecha"><input type="date" id="desde" class="form form-control"></div>
-                                    <div class="col col-md-1"><label for="text-label">Hasta</label></div>
-                                    <div class="col col-md-3" data-step="5" data-intro="Paso 5: Y hasta que fecha quieres"><input type="date" id="hasta" class="form form-control"></div>
-                                    <button data-step="6" data-intro="Paso 6: Apreta Filtrar y observa" type="button" class="btn btn-primary" id="filtrar">Filtrar</button>
+                                    <div class="col-3" data-step="3" data-intro="Paso 3: Aqui puedes seleccionar a partir de que fecha queres ver los estados de los miembros , si ninguna fecha fue seleccionada  te mostraremos todos los estados">
+                                        <p style="margin-bottom:0;text-align: left;">Desde</p>
+                                        <input type="date" id="desde" class="form form-control">
+                                    </div>
+                                    
+                                    <div class="col-3" data-step="4" data-intro="Paso 4: Aqui seleccionas la fecha maxima">
+                                        <p style="margin-bottom:0;text-align: left;">Hasta</p>
+                                        <input type="date" id="hasta" class="form form-control">
+                                    </div>
+
+                                    <div class="col-3" data-step="5" data-intro="Paso 5: Puedes especificar un usuario, si un usuario no es especificado entonces te mostraremos todos los estados de todos las usuarios">
+                                        <p style="margin-bottom:0;text-align: left;">Usuario</p>
+                                        <select name="usuario" id="usr" class="form form-control">
+                                            <option value=""></option>
+                                            {%for usr in usuarios%}
+                                                <option value="{{usr.username}}">{{usr.username}}</option>
+                                            {%endfor%}
+                                        </select>
+                                    </div>
+                                    <button style="margin-bottom:0;text-align: left;" data-step="7" data-intro="Paso 7: Apreta Filtrar y observa" type="button" class="btn btn-primary" id="filtrar">Filtrar</button>
                                 </div>    
                                     <br>
-                                    <canvas data-step="7" data-intro="Paso 7: Aqui se encuentran los estados de los miembros entre esas fechas" id="doughnut-chart" width="800" height="450"></canvas>
+                                    <canvas data-step="8" data-intro="Paso 8: Aqui se encuentran los estados de los miembros entre esas fechas" id="doughnut-chart" width="800" height="450"></canvas>
                                 </div>
                             </div><!-- /.card -->
                         </div>
@@ -65,25 +80,43 @@ Miembro en Estado Critico
     $('#filtrar').click(function() {
         var desde = $('#desde').val();
         var hasta = $('#hasta').val();
+        var usr = $('#usr').val();
         var titulo = "";
         //cambiar el formato de las fechas para mostrar el titulo
-        if(desde == "" && hasta == "") {
-            titulo = 'Mostrando el estado actual de los miembros';
+        if(desde == "" && hasta == ""){
+            if(usr==""){
+                titulo = 'Mostrando el estado actual de los usuarios';
+            }
+            else{
+                titulo = 'Mostrando el estado actual  del usuario '+usr;
+            }
         }
         else{
             if(desde != "" && hasta != ""){
                 var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
                 var hh=hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
-                titulo = "Mostrando el estado de los miembros del "+ dd +" al "+ hh;
+                if(usr==""){
+                    titulo = "Mostrando el estado de todos los usuarios del "+ dd +" al "+ hh;
+                }else{
+                    titulo = "Mostrando el estado del usurio "+ usr +" del "+ dd +" al "+ hh;
+                }
             }
             else{ // si uno de los 2 no esta vacio entonces veo cual
                 if (desde != ""){
                     var dd = desde.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
-                    titulo = "Mostrando el estado de los miembros del "+ dd + " en adelante"
+                    if(usr==""){ 
+                        titulo = "Mostrando el estado de todos los usuarios del "+ dd + " en adelante";
+                    }else{
+                        titulo = "Mostrando el estado de "+usr +" del "+ dd + " en adelante";
+                    }
                 }
                 else{
                     var hh=hasta.replace(/^(\d{4})-(\d{2})-(\d{2})$/g,'$3/$2/$1');
-                    titulo = "Mostrando el estado de los miembros hasta el "+ hh 
+                    if(usr==""){ 
+                        titulo = "Mostrando el estado de los miembros hasta el "+ hh;
+                    }else{
+                        titulo = "Mostrando el estado de "+usr +" hasta el "+ hh;
+                    }
                 }
             }
         }
@@ -92,14 +125,15 @@ Miembro en Estado Critico
             data: {
                 'desde': desde,
                 'hasta':hasta,
+                'usr':usr,
             },
             dataType: 'json',
             success: function(data) {
-                var ctx = document.getElementById("doughnut-chart").getContext('2d');
+               var ctx = document.getElementById("doughnut-chart").getContext('2d');
                 var myChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: [ "Muy Bien", "Bien", "Maso", "Critico"],
+                        labels: [ "Muy Bien - "+data[0]+"%", "Bien - "+data[1]+"%", "Maso - "+data[2]+"%", "Critico - "+data[3]+"%"],
                         datasets: [{
                             label: "Estado de Miembros",
                             backgroundColor: ["#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
