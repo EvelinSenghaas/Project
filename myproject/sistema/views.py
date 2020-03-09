@@ -68,30 +68,9 @@ def aviso(fecha,rn):
             if registro.presente == False:
                 cant+=1
         if cant >= n:
-            print('')
-            print('tengo que enviar no mas che')
-            print('') 
             mensaje="Hola! se ah detectado que el miembro " + usr.miembro.apellido + ", " + usr.miembro.nombre + " falto " + str(cant) + " o mas veces de seguido a la reunion " + reunion.nombre + ", "
             miembros=[] #tengo que poner aca los admin
             enviarWhatsapp(mensaje,miembros)
-
-def listarUsuario(request):
-    configuracion_form = Configuracion.objects.all().last()
-    usuarios = CustomUser.objects.all()
-    context ={'usuarios':usuarios,'configuracion_form':configuracion_form,'usuarios':usuarios}
-    return render(request,'sistema/listarUsuario.html',context)
-
-def reactivarUsuario(request,id):
-    if permiso(request, 36):
-        usuario = CustomUser.objects.get(id=id)
-        est=Estado.objects.get(id=1)
-        estado = Estado_Usuario(estado=est,confirmado=True,usuario_id = usuario.id)
-        estado.changeReason = "Reactivacion"
-        estado.save()
-        usuario.is_active=True
-        usuario.changeReason = "Modificacion"
-        usuario.save()
-        return redirect('/sistema/listarUsuario')
 
 @login_required
 def Home(request):
@@ -1402,16 +1381,18 @@ def reasignar(request,dni):
                     reunion.grupo.changeReason='Elimincaion'
                     reunion.grupo.save()
             usr.is_active=False
-            estado = Estado_Usuario.objects.filter(estado_id=4,confirmado=False,usuario_id = usr.id).last()
-            estado.confirmado = True
-            usr.changeReason = "Modificacion" #se desactivo
-            estado.changeReason = "Modificacion"
+            if Estado_Usuario.objects.filter(estado_id=4,confirmado=False,usuario_id = usr.id).exists():
+                estado = Estado_Usuario.objects.filter(estado_id=4,confirmado=False,usuario_id = usr.id).last()
+                estado.confirmado = True
+                usr.changeReason = "Modificacion" #se desactivo
+                estado.changeReason = "Modificacion"
+                estado.save()
+            usr.changeReason="Modificacion"
             usr.save()
-            estado.save()
             return redirect('home')
         if 'cancelar' in request.POST:
             #dejo el estado en pendiente, hasta que el admin personalmente lo cambie
-            return redirect('sistema/listarUsuario')
+            return redirect('/sistema/listarUsuario')
     
     return render(request,'sistema/reasignar.html',{'miembro':miembro,'reuniones':reuniones})
 
@@ -1586,6 +1567,27 @@ def enviarMensaje(request):
         print('en teoria envio')
     return render(request,'sistema/enviarMensaje.html',{'reuniones':reuniones})
 
+@login_required
+def listarUsuario(request):
+    configuracion_form = Configuracion.objects.all().last()
+    usuarios = CustomUser.objects.all()
+    context ={'usuarios':usuarios,'configuracion_form':configuracion_form,'usuarios':usuarios}
+    return render(request,'sistema/listarUsuario.html',context)
+
+@login_required
+def reactivarUsuario(request,id):
+    if permiso(request, 36):
+        usuario = CustomUser.objects.get(id=id)
+        est=Estado.objects.get(id=1)
+        estado = Estado_Usuario(estado=est,confirmado=True,usuario_id = usuario.id)
+        estado.changeReason = "Reactivacion"
+        estado.save()
+        usuario.is_active=True
+        usuario.changeReason = "Modificacion"
+        usuario.save()
+        return redirect('/sistema/listarUsuario')
+
+@login_required
 def configurarUsuario(request,id):
     user=CustomUser.objects.get(id=id)
     if request.user.id == user.id:
@@ -1640,7 +1642,7 @@ def configurarUsuario(request,id):
     else:
         form = CustomUserCreationForm(instance=user)
     return render(request,'sistema/configuracion_usr.html',{'form':form,'permi':permi,'contra':contra})
-        
+ 
 @csrf_exempt
 def provinciasList(request):
     if request.method == 'GET': #uso para reuniones y miembros
@@ -1893,22 +1895,22 @@ def recomendacionTable(request):
                     for grupito in grupos_etarios:
                         en=CustomUser.objects.get(id=grupito.encargado) #en=encargado
                         mb=en.miembro
-                        if not(mb in usr_recomendados) and not(miembro in best_usr_recomendados):
+                        if not(mb in usr_recomendados) and not(mb in best_usr_recomendados):
                             usr_recomendados.append(mb)
                             nombre= mb.apellido +", "+mb.nombre
                             motivos=['Es un Usuario','Mismo Sexo que el grupo','Atiende el mismo grupo etario']
-                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
+                            dic={'dni':mb.dni,'miembro': nombre, 'motivos':motivos}
                             data.append(dic)  
                 if not(usr_recomendados) and not(mb_recomendados): #aca si que no hay nada de nada, entonces vamos a darle usr del mismo genero
                     if CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id).exists():
                         usrs=CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id)
                         for usr in usrs:
                             mb=usr.miembro
-                            if not(mb in usr_recomendados) and not(miembro in best_usr_recomendados):
+                            if not(mb in usr_recomendados) and not(mb in best_usr_recomendados):
                                 usr_recomendados.append(mb)
                                 nombre= mb.apellido +", "+mb.nombre
                                 motivos=['Es un Usuario','Mismo Sexo que el grupo']
-                                dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
+                                dic={'dni':mb.dni,'miembro': nombre, 'motivos':motivos}
                                 data.append(dic)  
                     else:
                         print('weno esto si que ya es imposible china xd')   

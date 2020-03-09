@@ -109,6 +109,31 @@
                                                                     </div>
                                                                 </div>
                                                         <!--Fin del modal-->
+                                                        {% else %}
+                                                            <td><a href="#myModal2" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target=".bs-example-modal-lg2{{usr.id}}"><i class="fa fa-trash-o"></i></a></div></td>
+                                                            <!-- inicio del modal-->
+                                                            <div class="btn-group">
+                                                                <div class="modal fade bs-example-modal-lg2{{usr.id}}" id="myModal2{{usr.id}}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h4 class="modal-title" id="myModalLabel{{usr.id}}">Confirmacion de Eliminacion</h4>
+                                                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <h4>Esta seguro de Eliminar al miembro {{usr.username}} ?</h4>
+                                                                                <br>
+                                                                                <small>(*) Luego podra reactivarlo si lo desea</small>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                                                                                <a href=" {% url 'sistema:reasignar' usr.miembro.dni %}" class="btn btn-primary" >Confirmar Eliminacion</a>
+                                                                            </div>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                        <!--Fin del modal-->
                                                         {% endif %}
                                                         <script>myFunction({{usr.id}})</script>
                                                     </tr>
