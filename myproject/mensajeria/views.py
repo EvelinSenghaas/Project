@@ -14,10 +14,16 @@ def configurarMensajes(request):
     #el tipo 1 y 7 seran dinamicos
     tipo=Tipo_Mensaje.objects.all().exclude(id=1)
     for tp in tipo:
-        if not(tp.id == 7):
-            msj= Mensaje.objects.filter(tipo=tp)
-            mensajes.append(msj[0])
+        msj= Mensaje.objects.filter(tipo=tp).last()
+        mensajes.append(msj)
+    enc= Tipo_Encuesta.objects.get(id_tipo_encuesta=4)
+    x= enc.cantidad
     if request.method == 'POST':
+        x_new=request.POST.get('x')
+        if x != x_new:
+            print('nuevita la x')
+            enc.cantidad=x_new
+            enc.save()
         for tp in tipo:
             print(tp)
             msj = request.POST.get(str(tp))
@@ -29,7 +35,7 @@ def configurarMensajes(request):
                 mensaje.save()
         return redirect('home')
     
-    return render(request,'mensajeria/configurarMensajes.html',{'mensajes':mensajes})
+    return render(request,'mensajeria/configurarMensajes.html',{'mensajes':mensajes,'x':x})
 
 def enviarMail(miembros, asunto, mensaje):
     # subject = 'Thank you for registering to our site'
@@ -50,7 +56,7 @@ def enviarMail(miembros, asunto, mensaje):
 
 def enviarWhatsapp(mensaje,miembros):
     account_sid = 'AC26e164ae31f6ebd42ef0c40c567c469b' 
-    auth_token = 'acae54e2314b668844bfebc74fb9a83a' 
+    auth_token = 'ccff833d6786f4885efcbb20a9681022' 
     client = Client(account_sid, auth_token) 
     from_whatsapp_number='whatsapp:+14155238886'
     to_whatsapp_number='whatsapp:+5493764816893'

@@ -14,10 +14,21 @@
                 </div>
                 <div class="card-body" data-step="2" data-intro="Paso 2: A continuacion puedes ver los tipos de mensajes y el texto actual que se envia, puedes cambiarlo si deseas " >
                     {% for mensaje in mensajes %}
-                        <div class="row form-group">
-                            <div class="col col-md-3"><label for="text-input" class=" form-control-label">{{mensaje.tipo}}</label></div>
-                            <div class="col-12 col-md-9"><input type="text" id="tp" name="{{mensaje.tipo}}" value="{{mensaje}}" class="form-control"></div>
-                        </div>
+                        {%if mensaje.tipo.id != 2%}
+                            <div class="row form-group">
+                                <div class="col col-md-3"><label for="text-input" class=" form-control-label">{{mensaje.tipo}}</label></div>
+                                <div class="col-12 col-md-9"><input type="text" id="tp" name="{{mensaje.tipo}}" value="{{mensaje}}" class="form-control"></div>
+                            </div>
+                        {%else%}
+`                           <div class="row form-group">
+                                <div class="col col-md-3"><label for="text-input" class=" form-control-label">{{mensaje.tipo}}</label></div>
+                                <div class="col-12 col-md-9"><input readonly type="text" id="tp" name="{{mensaje.tipo}}" value="{{mensaje}}" class="form-control"></div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3"><label for="text-input" class=" form-control-label"> Especifique cada cuantas faltas quiere que se le notifique</label></div>
+                                <div class="col-12 col-md-2"><input required type="number" min="1" id="x" name="x" value="{{x}}" class="form-control"></div>
+                            </div>
+                        {%endif%}
                     {% endfor %}
                     <div class="card">
                     <div align="right" class="card-body">

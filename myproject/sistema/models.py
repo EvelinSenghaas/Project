@@ -208,7 +208,6 @@ class Pregunta(models.Model):
 class Tipo_Encuesta(models.Model):
     id_tipo_encuesta= models.AutoField(primary_key=True)
     tipo=models.CharField("Tipo de Encuesta", max_length=50)
-    aviso =  models.IntegerField(null=True, blank = True) #este campo sera utilizado para dar aviso solamente, por ej si la persona falto 2 veces ya aviso, pero no mando encuentas ni nada
     cantidad = models.IntegerField('Cantidad de Faltas', null=True, blank = True)
     preguntas=models.ManyToManyField(Pregunta)
     def __str__(self):

@@ -49,6 +49,32 @@ def color():
     hex_number ='#'+ hex_number[2:]
     return hex_number
 
+def aviso(fecha,rn):
+    #weno la idea aca es ver cuantas faltas tiene el vago y depende de eso emito el aviso 
+    #1. traigo las inasistencias
+    reunion=Reunion.objects.get(id_reunion=rn)
+    enc = reunion.grupo.encargado
+    usr=CustomUser.objects.get(id=enc)
+    reg = Asistencia.objects.get(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha)
+    if reg.presente == False:
+        cant=0
+        tp= Tipo_Encuesta.objects.get(id_tipo_encuesta=4)
+        n=tp.cantidad
+        n-=1#el de hoy ya es 1 por eso resto
+        cant+=1
+        #bueno hoy falto, ahora tengo que ver si las n reuniones pasadas falto tmb
+        registros = Asistencia.objects.filter(miembro_id=usr.miembro.dni,reunion_id=rn,fecha__lte=fecha)[:n]
+        for registro in registros:
+            if registro.presente == False:
+                cant+=1
+        if cant >= n:
+            print('')
+            print('tengo que enviar no mas che')
+            print('') 
+            mensaje="Hola! se ah detectado que el miembro " + usr.miembro.apellido + ", " + usr.miembro.nombre + " falto " + str(cant) + " o mas veces de seguido a la reunion " + reunion.nombre + ", "
+            miembros=[] #tengo que poner aca los admin
+            enviarWhatsapp(mensaje,miembros)
+
 def listarUsuario(request):
     configuracion_form = Configuracion.objects.all().last()
     usuarios = CustomUser.objects.all()
@@ -94,6 +120,8 @@ def Home(request):
             if dias > 7: #si paso una semana y no se puso asistencia a la reunion entonces.... miembro lo defini bien arriba para ver su genero
                 ast=Asistencia(miembro=miembro,presente=False,justificado=False,reunion=reunion,fecha=hoy)
                 ast.save()
+                #pongo la falta y veo cuantas anteriores tiene para notificar
+                aviso(hoy,reunion.id_reunion)
         #ahora que le puse la falta es el momento de contar cuantas faltas CONSECUTIVAS TIENE
         consulta=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion=reunion.id_reunion).order_by('fecha')[:cant]
         cantidad = len (list(consulta)) #paso la cantidad de registros de faltas que encontro a cantidad
@@ -787,6 +815,11 @@ def agregarAsistencia(request):
                 asistencia.presente=False
                 asistencia.justificado=False
                 asistencia.save()
+            aviso(hoy,reunion.id_reunion) # mando para verificar si el encargado falto
+            # except:
+            #     print('')
+            #     print('hay problemas serios lina')
+            #     print('')
             return redirect('/sistema/verAsistencia')
         else:
             asistencia_form=AsistenciaForm()
@@ -878,7 +911,7 @@ def agregarEncuesta(request):
             return redirect('home')
         else:
             pregunta=Pregunta.objects.filter(borrado=False)
-            tipo_encuesta=Tipo_Encuesta.objects.all()
+            tipo_encuesta=Tipo_Encuesta.objects.exclude(id_tipo_encuesta=4) #el tipo 4 es utilizado para avisos
             reuniones=Reunion.objects.filter(borrado=False)
             return render(request,'sistema/agregarEncuesta.html',{'tipo_encuesta':tipo_encuesta,'pregunta':pregunta,'reuniones':reuniones})
     else:
