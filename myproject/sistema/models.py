@@ -118,7 +118,6 @@ class Miembro(models.Model):
     nombre=models.CharField('Nombre',max_length=200,blank = False, null = False)
     apellido = models.CharField('Apellido',max_length=200,blank = False, null = False)
     fecha_nacimiento = models.DateField('Fecha de Nacimiento', auto_now=False, auto_now_add=False)
-    cant_hijo = models.IntegerField('Cantidad de Hijos',null=True,validators=[MinValueValidator(0)])
     trabaja = models.BooleanField('Trabaja',default=False)
     domicilio=models.ForeignKey(Domicilio, on_delete=models.PROTECT)
     correo=models.EmailField('e-mail', max_length=100,null=True,blank=True)
@@ -131,7 +130,7 @@ class Miembro(models.Model):
 
 
     def __str__(self):
-        return self.nombre + ' ' + self.apellido
+        return self.apellido + ', ' + self.nombre
     
     def edad(self, fecha_nacimiento):
         diferencia_fechas = date.today() - fecha_nacimiento
@@ -248,7 +247,7 @@ class Configuracion(models.Model): #esto es de encuestas
     titulo= models.CharField('Titulo', max_length=255,blank=False, null= False)
     telefono = models.CharField('Telefono', max_length=255,blank=False, null= False)
     direccion = models.CharField('Direccion', max_length=255,blank=False, null= False)
-    #logo=models.BinaryField('Logo',blank=False,null=False)
+    logo=models.BinaryField('Logo',blank=True,null=True)
     history = HistoricalRecords()
 
 class Permisos(models.Model):

@@ -4,24 +4,29 @@
     Configuraciones
 {% endblock titulo %}
 {% block body %}
-        <form method="POST" class="form-horizontal">
+        <form method="POST" class="form-horizontal" enctype="multipart/form-data">
             <div class="col-lg-11">
                 {% csrf_token %}
                 <div class="card">
-                    <form method="POST" class="form-horizontal" >
+                    <form method="POST" class="form-horizontal" enctype="multipart/form-data">
                         <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenidos al tutorial para configurar reportes">
                                 <strong> Planilla de Configuracion </strong> de Reportes
                                 <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                         </div>
                         
                         <div class="card-body card-block"  data-step="2" data-intro="Paso 2: Puedes configurar el titulo, el telefono y la direccion que se muestran en tus reportes ">
-                        {% for field in configuracion_form %}
-                        <div class="row form-group">
-                            <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
-                            <div class = "col col-md-4">{{field}}</div>
-                        </div>
-                        {% endfor %}
-                        <br>
+                            {% for field in configuracion_form %}
+                            <div class="row form-group">
+                                <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}}</label></div>
+                                <div class = "col col-md-4">{{field}}</div>
+                            </div>
+                            {% endfor %}
+                            <div class="row form-group">
+                                <div class="col col-md-2"><label for="inputZip">Logo</label></div>
+                                <div class = "col col-md-4"><input required type="file" name="logo" id="logo" class="form form-control" ></div>
+                            </div>
+                            
+                        <br> 
                         
                         <div class="card-body">
                             <button  data-step="3" data-intro="Paso 3: Una vez que hayas cargado todo, puedes apretar 'configurar' " type="submit" class="btn btn-success btn-sm">Confirmar</button>
@@ -31,6 +36,6 @@
                 </div>
             </div>
         </form>
-        
+    
     <script src="{% static 'assets/js/recustom.js'%}"></script>
 {% endblock body %}

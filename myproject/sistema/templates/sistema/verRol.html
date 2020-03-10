@@ -52,7 +52,6 @@
                                 <table id="tablita" class="table table-striped table-bordered">
                                     <thead data-step="2" data-intro="Paso 2: Aqui puedes ver los roles y los permisos que actualmente existen, si quieres uno en especifo puedes buscarlo en 'Buscar'">
                                         <tr>
-                                            <th>#</th>
                                             <th data-step="3" data-intro="Paso 3: Puedes usar las flechitas de la derecha  para ordenar los registros">Nombre</th>
                                             <th>Permisos</th>
                                             <th>Estado</th>
@@ -64,7 +63,6 @@
                                         {% if roles %}
                                             {% for rol in roles %}
                                                 <tr>
-                                                    <td>{{forloop.counter}}</td>
                                                     <td>{{rol.nombre}}</td>
                                                     <td>
                                                     {% for permiso in rol.permisos.all  %}
@@ -114,11 +112,35 @@
                 </div>
             </div><!-- .animated -->
         </div><!-- .content -->
-
+        <input type="hidden" id="titulo" value= "{{configuracion_form.titulo}}" class="titulo_reporte">
+        <input type="hidden" id="telefono" value = "{{configuracion_form.telefono}}" class="telefono_reporte">
+        <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
+        <input type="hidden" id="generador" value = "{{request.user.username}}" class="generador">
+        <input type="hidden" id="imagen" value="" class="imagen">
+        
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.ajax({
+                url: '{% url "sistema:obtenerLogo" %}',
+                data: {
+                },
+                dataType: 'json',
     
+                success: function (data) {
+    
+                if (data.is_taken) {
+                    alert("Error al obtener datos del Instituto");
+                } else {
+                    logo = data.logo;
+                    document.getElementById('imagen').value = logo;
+                }
+                }
+            });
+        });
+    </script>    
 {% endblock body %}

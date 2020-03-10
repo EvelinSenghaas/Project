@@ -84,10 +84,10 @@ Agregar Encuesta
                                                                                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
                                                                             </div>
                                                                             <div class="modal-body">
-                                                                                <h4>Esta seguro de Eliminar la Pregunta: {{pregunta.descripcion}} ?</h4>
+                                                                                <h4>Esta seguro de Eliminar la Pregunta: " {{pregunta.descripcion}} "?</h4>
                                                                             </div>
                                                                             <div class="modal-footer">
-                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                                                                                 <a href=" {% url 'sistema:eliminarPregunta' pregunta.id_pregunta%}" class="btn btn-primary" >Confirmar Eliminacion</a>
                                                                             </div>
                                                                             

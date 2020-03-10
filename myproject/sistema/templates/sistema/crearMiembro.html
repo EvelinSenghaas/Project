@@ -1,6 +1,21 @@
 {% extends 'sistema/base_site.html'%}
 {% load static %}
 {% block body%}
+    <script>
+        function Numeros(string) {//Solo numeros
+            var out = '';
+            var filtro = '1234567890';//Caracteres validos
+
+            //Recorrer el texto y verificar si el caracter se encuentra en la lista de validos 
+            for (var i = 0; i < string.length; i++)
+                if (filtro.indexOf(string.charAt(i)) != -1)
+                    //Se añaden a la salida los caracteres validos
+                    out += string.charAt(i);
+
+            //Retornar valor filtrado
+            return out;
+        };
+    </script>
     <form method="POST">
         {% csrf_token %}
         <div class="col-lg-11">
@@ -59,10 +74,7 @@
                                         <div class="col-12 col-md-9" data-step="5 " data-intro="Paso 5: Aqui debe ingresar su correo, si no posee uno ponga el de algun contacto"><input  type="email" id="email-input" name="correo" placeholder="" class="form-control"><small class="form-text text-muted">Example@example.com</small></div>
                                     </div>
 
-                                    <div class="row form-group">
-                                        <div class="col col-md-3"><label for="text-input" class=" form-control-label">Nº Hijos (*)</label></div>
-                                        <div class="col-12 col-md-4" data-step="6" data-intro="Paso 6: Aqui debe ingresar la cantidad de hijos que posee, en caso de no tener hijos ingrese '0' "><input type="number" min="0" pattern="^[0-9]+" id="text-input" name="cant_hijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
-                                    </div>
+                                    
 
                                     <div class="row form-group">
                                         <div class="col col-md-3"><label class="form-control-label">Trabaja (*)</label></div>
@@ -123,9 +135,9 @@
 
                                     <div class="row form-group">
                                         <div class="col-12 col-md-3"><label for="text-input" class=" form-control-label">Codigo de Area</label></div>
-                                        <div class="col col-md-4" data-step="12" data-intro="Paso 12: Aqui debe ingresar el Codigo de Area, sin '0', '+' ni prefijos, por ejemplo si su localidad es Posadas: ingresar '3764' "><input type="number" id="prefijo" min="0" name="prefijo" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-4" data-step="12" data-intro="Paso 12: Aqui debe ingresar el Codigo de Area, sin '0', '+' ni prefijos, por ejemplo si su localidad es Posadas: ingresar '3764' "><input type="number" id="prefijo" min="0" name="prefijo" placeholder="" class="form-control"><small class="form-text text-muted">Ingrese sin 0, 15 o +</small></div>
                                         <div class="col col-md-1" ><label for="text-input" class=" form-control-label">Nº Telefono</label></div>
-                                        <div class="col col-md-4" data-step="13" data-intro="Paso 13: Ingrese solo su numero telefonico, el numero tiene 6 digitos"><input type="number" id="numero" min="0" name="numero" placeholder="" class="form-control"><small class="form-text text-muted"></small></div>
+                                        <div class="col col-md-4" data-step="13" data-intro="Paso 13: Ingrese solo su numero telefonico, el numero tiene 6 digitos"><input type="text" id="numero" name="numero"  class="form-control" maxlength="7"  minlength="5"  onkeyup="this.value=Numeros(this.value)"><small class="form-text text-muted">Por ejemplo: 888888</small></div>
                                     </div>
 
                                     <div class="row form-group">
@@ -147,11 +159,11 @@
                                     </div>
 
                                     <div class="row form-group" data-step="15" data-intro="Paso 15: Si desea puede indicar un telefono de contacto ">
-                                        <div class="col col-md-3"><label class="form-control-label">Telefono De concatco</label></div>
+                                        <div class="col col-md-3"><label class="form-control-label">Telefono de contacto</label></div>
                                         <div class="col col-md-4"><select id="select-miembro"  class="form-control">
                                             <option selected value=None> --------------</option>
                                             {% for miembroo in telefono_contacto_form %}
-                                                    <option name='miembro'value={{miembroo.dni}}>{{miembroo.nombre}}</option>
+                                                    <option name='miembro'value={{miembroo.dni}}>{{miembroo.nombre}}, {{miembroo.nombre}}</option>
                                             {% endfor %}
                                         </select>
                                         </div>
@@ -334,11 +346,7 @@
                                     <button data-step="27" data-intro="Paso 27: Una vez que haya cargado todos los datos puede presionar 'Confirmar' " type="submit" class="btn btn-success btn-sm" name= "btn-crear-miembro">Confirmar</button>
                                 </div>
                             </div>
-                            <div class="card-footer" data-step="28" data-intro="Paso 28: En caso quiera limpiar todos los campos puede presionar 'limpiar' ">
-                                <button type="reset" class="btn btn-danger btn-sm">
-                                    <i class="fa fa-ban"></i> Limpiar
-                                </button>
-                            </div>
+                            
                         </div>
         </div>´
     </form>
@@ -348,6 +356,9 @@
 
     <script>
         $(document).ready(function(){
+            $('[type="date"]').prop('max', function(){
+                return new Date().toJSON().split('T')[0];
+            });
             $("#dni").change(function () {
                 var dni = $(this).val();
                 $.ajax({

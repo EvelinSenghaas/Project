@@ -16,7 +16,7 @@ class GrupoForm(forms.ModelForm):
             'sexo': forms.Select(attrs={'class':'form-control','id':'sexo'}),
             'desde':forms.TextInput(attrs={'id':'desde','class':'form-control filtro','type':'number','min':'0'}),
             'hasta':forms.TextInput(attrs={'id':'hasta','class':'form-control filtro','type':'number','max':'100'}),
-            'capacidad': forms.TextInput(attrs={'class':'form-control', 'type':'number', 'min':'0'}),
+            'capacidad': forms.TextInput(attrs={'class':'form-control', 'type':'number', 'min':'0','max':'100000'}),
         }
         
 class Tipo_ReunionForm(forms.ModelForm):
@@ -92,13 +92,12 @@ class DomicilioForm(forms.ModelForm):
 class MiembroForm(forms.ModelForm):
     class Meta:
         model = Miembro
-        fields = ['nombre','apellido','dni','fecha_nacimiento' ,'cant_hijo','trabaja','sexo','correo','estado_civil']
+        fields = ['nombre','apellido','dni','fecha_nacimiento','trabaja','sexo','correo','estado_civil']
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'apellido':forms.TextInput(attrs={'class':'form-control'}),
             'dni':forms.TextInput(attrs={'class':'form-control','readonly':'readonly'}),
             'fecha_nacimiento':forms.DateInput(attrs={'class':'form-control f_nac'}),
-            'cant_hijo':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             'estado_civil': forms.Select(attrs={'class':'form-control'}),
             'correo':forms.EmailInput(attrs={'class':'form-control'}),
             #'horario_disponible': grrr

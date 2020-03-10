@@ -8,7 +8,7 @@
         {% csrf_token %}
         <div class="col-lg-11">
             <div class="card">
-                <div class="card-header" >
+                <div class="card-header" data-step="1" data-intro="Paso 1: Bienvenido al tutorial de configuración de Usuarios">
                     <strong>Planilla de Configuracion de </strong> Usuario 
                         <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                 </div> 
@@ -25,14 +25,14 @@
                         </ul>
                     {% endif %}    
                     <div class="card-body">
-                        <div class="row form-group">
+                        <div class="row form-group" data-step="2" data-intro="Paso 2: Si desea puede editar el nombre de usuario, tene en cuenta que no tiene que ser un nombre repetido">
                             <div class="col col-md-3"><label>Nombre de Usuario (*)</label></div>
                             <div class="col col-md-5">{{form.username}} </div>
                         </div>
                         <div hidden>
                             {{form.miembro}}
                         </div>
-                        <div class="row form-group">
+                        <div class="row form-group" data-step="3" data-intro="Paso 3: el miembro no es editable">
                             <div class="col col-md-3"><label>Miembro</label></div>
                             <div class="col col-md-5"><input disabled type="text" class="form-control" id="mb"></div>
                         </div>
@@ -43,14 +43,14 @@
                             </div>
                         {% endif %}
 
-                        <div class="row form-group">
+                        <div class="row form-group" data-step="4" data-intro="Paso 4: Este es el correo ligado al miembro, si desea puede editarlo desde la vista de editar miembro">
                             <div class="col col-md-3"><label>Correo Electronico (*)</label></div>
                             <div class="col col-md-5">{{ form.email}}</div>
                         </div>
                         {% if contra %}
-                        <div class="row form-group">
+                        <div class="row form-group" >
                             <div class="col col-md-3"><label>Contraseña</label></div>
-                            <div class="col col-md-5"><button id="b3" class="btn btn-outline-success btn-sm" type="button" data-toggle="modal" data-target=".bs-example-modal-lg6347"> Cambiar Constraseña <i class="fa fa-edit"></i></button><a href="#tema1"></a></div>
+                            <div class="col col-md-5"><button id="b3" class="btn btn-outline-success btn-sm" type="button" data-toggle="modal" data-target=".bs-example-modal-lg6347" data-step="5" data-intro="Paso 5: Si queres podes editar tu contraseña, hace click en el boton 'editar contraseña y rellena todos los campos, despues pone confirmar"> Cambiar Constraseña <i class="fa fa-edit"></i></button><a href="#tema1"></a></div>
                         </div>
                         
                         <form class="user" method="POST">
@@ -108,8 +108,8 @@
 
                         
 
-                        <div align="right" class="card-body">
-                            <button type="submit" class="btn btn-primary" name="confirmar">Confirmar</button>
+                        <div align="right" class="card-body" >
+                            <button data-step="6" data-intro="Paso 6: Cuando termines de editar podes presionar en confirmar" type="submit" class="btn btn-primary" name="confirmar">Confirmar</button>
                         </div>
                     </div>           
                 </form>

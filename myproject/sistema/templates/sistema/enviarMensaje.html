@@ -14,7 +14,7 @@
                 </div>
                 <div class="card-body" data-step="2" data-intro="Paso 2: Usted podra enviar mensajes a su reunion, por ejemplo para avisar su inasistencia o a todaas las personas para realizar una invitacion o aviso">
                     <div class="row row-form-group">
-                        <div class="col col-md-3"><label for="text">Reunion</label></div>
+                        <div class="col col-md-3"><label for="text">Reunion (*)</label></div>
                         <div class="col col-md-11" data-step="3" data-intro="Paso 3: Aqui debe indicar para quienes sera enviado el mensaje, pueden ser muchas reuniones! tenga en cuenta que si selecciona la opcion 'Todos' sera enviado a todos los miembros, incluso lo que no estan en ninguna reunion"><select required name="rn" id="rn" class="js-example-basic-multiple  form-control" multiple="multiple">
                             <option  value="Todos">Todos</option>
                             {% for reunion in reuniones %}
@@ -24,9 +24,9 @@
                     </div>
                     <br>
                     <div class="row row-form-group" data-step="4" data-intro="Paso 4: Aqui debes escribir tu mensaje">
-                        <div class="col col-md-3"><label for="text" required> Mensaje</label></div>
+                        <div class="col col-md-3"><label for="text" required> Mensaje (*)</label></div>
                         <br>
-                        <div class="col col-md-11"><input type="text" class="form-control" name="mensaje"></div>
+                        <div class="col col-md-11"><input required type="text" class="form-control" name="mensaje"></div>
                     </div>
                     
                     <br>

@@ -78,8 +78,8 @@
         <input type="hidden" id="titulo" value= "{{configuracion_form.titulo}}" class="titulo_reporte">
         <input type="hidden" id="telefono" value = "{{configuracion_form.telefono}}" class="telefono_reporte">
         <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
-        
-    
+        <input type="hidden" id="generador" value = "{{request.user.username}}" class="generador">
+        <input type="hidden" id="imagen" value="" class="imagen">    
     
     <script src="http://code.jquery.com/jquery-latest.js"></script> 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
@@ -91,6 +91,7 @@
     
     <script type="text/javascript">
         $(document).ready(function() {
+            
             $('#tablitax').DataTable({
                 "language": {
                     "lengthMenu": "Mostrando _MENU_ registros",
@@ -118,6 +119,22 @@
                     select.append('<option value="' + d + '">' + d + '</option>')
                     });
                 });
+                }
+            });
+            $.ajax({
+                url: '{% url "sistema:obtenerLogo" %}',
+                data: {
+                },
+                dataType: 'json',
+
+                success: function (data) {
+
+                if (data.is_taken) {
+                    alert("Error al obtener datos del Instituto");
+                } else {
+                    logo = data.logo;
+                    document.getElementById('imagen').value = logo;
+                }
                 }
             });
         } );

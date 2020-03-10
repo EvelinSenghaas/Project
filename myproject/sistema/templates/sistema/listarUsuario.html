@@ -15,6 +15,7 @@
             },
             dataType: 'json',
             success: function(data) {
+                console.log(data);
                 $('#cant-'+usr).html(data[0]['rn']);
                 if(data[0]['estado']=='Muy Bueno' || data[0]['estado']=='Bueno' || data[0]['estado']=='Medio'){
                     $('#estado-'+usr).attr("class","badge badge-complete");
@@ -58,15 +59,15 @@
                                 
                                     <div class="card-body">
                                         <div class="table-stats order-table ov-h">
-                                            <table id="tablita" class="table table-striped table-bordered">
+                                            <table id="tablita" class="table table-striped table-bordered"  data-step="2" data-intro="Paso 2: Aqui podras ver todos los usuarios del sistema" >
                                                 <thead>
                                                     <tr>
-                                                        <th>Nombre</th>
-                                                        <th>Rol</th>
-                                                        <th >Cantidad de Reuniones</th>
-                                                        <th>Estado</th>
-                                                        <th> Detalles </th>
-                                                        <th></th>
+                                                        <th data-step="3" data-intro="Paso 3: Este es el nombre de usuario, con este nombre el usuario ingresa al sistema">Nombre de Usuario</th>
+                                                        <th data-step="4" data-intro="Paso 4: Este es el Rol del usuario">Rol</th>
+                                                        <th data-step="5" data-intro="Paso 5: La cantidad de roles a cargo del usuario">Cantidad de Reuniones</th>
+                                                        <th data-step="6" data-intro="Paso 6: El estado acual en el que se encuentra el usuario"> Estado</th>
+                                                        <th data-step="7" data-intro="Paso 7: Si la persona registro estados en el sistema podra ver la encuesta haciendo click en el ojito"> Detalles </th>
+                                                        <th data-step="8" data-intro="Paso 8: En esta columna te podes encontrar con un tachito o con un candado, si ves el tachito significa que poder eliminar el usuario, si te encontras con el candado entonces podes reactivar el usuario"></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -156,10 +157,32 @@
         <input type="hidden" id="titulo" value= "{{configuracion_form.titulo}}" class="titulo_reporte">
         <input type="hidden" id="telefono" value = "{{configuracion_form.telefono}}" class="telefono_reporte">
         <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
+        <input type="hidden" id="generador" value = "{{request.user.username}}" class="generador">
+        <input type="hidden" id="imagen" value="" class="imagen">
+        
 <script src="{% static 'assets/js/lib/data-table/datatables.min.js'%}"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
-    
+<script>
+    $(document).ready(function(){
+        $.ajax({
+            url: '{% url "sistema:obtenerLogo" %}',
+            data: {
+            },
+            dataType: 'json',
+
+            success: function (data) {
+
+            if (data.is_taken) {
+                alert("Error al obtener datos del Instituto");
+            } else {
+                logo = data.logo;
+                document.getElementById('imagen').value = logo;
+            }
+            }
+        });
+    });
+</script>    
 {% endblock body%}

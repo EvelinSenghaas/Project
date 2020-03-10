@@ -5,8 +5,8 @@
     Agregar Asistencia
 {% endblock titulo %}
 {% block body %}
-    <form method="POST">
-    <form>
+    <form method="POST" class="myForm">
+    <form class="myForm">
         {% csrf_token %}
         <div class="col-lg-11">
         <div class="card">
@@ -14,7 +14,7 @@
                 <strong class="card-title">Listado de Reuniones</strong>
                 <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
             </div>
-            <form method="POST" class="form-horizontal">
+            <form id="myForm" method="POST" class="form-horizontal myForm">
             <div class="card-body card-block">
                 <div class="card-body">
                     {% if messages %}
@@ -37,8 +37,8 @@
 
                     <div class="row form-group" data-step="3" data-intro="Paso 3: Debe ingresar la reunion en la que quiere marcar la asistencia" >
                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion (*)</label></div>
-                        <div class="col col-md-4"><select id="reunion" name='reunion' class="form-control" required>
-                            <option selected value=None> --------------</option>
+                        <div class="col col-md-4"><select required id="reunion" name='reunion' class="form-control">
+                            <option value=None>--------------</option>
                             {% for reunion in reunion_form %}
                                 <option value='{{reunion.id_reunion}}'>{{reunion.nombre}}</option>
                             {% endfor %}
@@ -52,7 +52,7 @@
                             <div class="form-check">
                                 <div class="radio">
                                     <label for="radio1" class="form-check-label ">
-                                        <input type="radio" id="ast-e1" name="ast-encargado" value="True" class="ast-eorm-check-input">Si
+                                        <input required type="radio" id="ast-e1" name="ast-encargado" value="True" class="ast-eorm-check-input">Si
                                     </label>
                                         </div>
                                 <div class="radio">
@@ -119,6 +119,7 @@
         });
 
     </script>
+
     <script>
         $('#reunion').change(function(){
             console.log('oliii');
@@ -151,6 +152,7 @@
             })
         });
     </script>
+
     <script>
         $('#ast-e1').change(function(){
             console.log($(this).val());
@@ -165,6 +167,20 @@
             if(vino == 'False'){
                 $('#tbl').hide();
             }
+        });
+    </script>
+    <script>
+        $('.myForm').submit(function() {
+            console.log('un post lina');
+            rn = $('#reunion').val();
+            console.log('rn ' + rn);
+            if(rn=='None'){
+                alert('Selecciona Una Reunion');
+                return false;
+            }else{
+                return true;
+            }
+             // return false to cancel form action
         });
     </script>
     <script src="{% static 'assets/js/asistencias.js'%}"></script>

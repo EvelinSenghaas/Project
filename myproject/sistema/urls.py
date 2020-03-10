@@ -70,4 +70,6 @@ urlpatterns = [
     path('reactivarUsuario/<int:id>',reactivarUsuario, name='reactivarUsuario'),
     path('Calendario/',Calendario,name="Calendario"),
     path('configurarUsuario/<int:id>',configurarUsuario,name="configurarUsuario"),
+    path('mail',mail,name="mail"),
+    path('obtenerLogo',obtenerLogo,name="obtenerLogo"),
 ]

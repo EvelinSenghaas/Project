@@ -20,7 +20,6 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'miembro', 'email','rol')
-        
         widgets={
             'username': forms.TextInput(attrs={'class':'form-control'}),
             'miembro': forms.Select(attrs={'class':'form-control','id':'id_miembro'}),
