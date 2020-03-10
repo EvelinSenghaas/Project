@@ -230,10 +230,13 @@ Estadistica de Asistencia
             dataType: 'json',
             success: function(data) {
                 var ctx = document.getElementById("doughnut-chart").getContext('2d');
+                if(data.length ==0){
+                    titulo="NO HAY DATOS PARA MOSTRAR"
+                }
                 var myChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: [  "Presentes", "Ausentes"],
+                        labels: [  "Presentes - "+data[0]+"%", "Ausentes - "+data[0]+"%"],
                         datasets: [{
                             label: "Estadisticas de Asistencias",
                             backgroundColor: ["#3cba9f","#c45850"],

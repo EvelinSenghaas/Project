@@ -55,22 +55,23 @@ def aviso(fecha,rn):
     reunion=Reunion.objects.get(id_reunion=rn)
     enc = reunion.grupo.encargado
     usr=CustomUser.objects.get(id=enc)
-    reg = Asistencia.objects.get(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha)
-    if reg.presente == False:
-        cant=0
-        tp= Tipo_Encuesta.objects.get(id_tipo_encuesta=4)
-        n=tp.cantidad
-        n-=1#el de hoy ya es 1 por eso resto
-        cant+=1
-        #bueno hoy falto, ahora tengo que ver si las n reuniones pasadas falto tmb
-        registros = Asistencia.objects.filter(miembro_id=usr.miembro.dni,reunion_id=rn,fecha__lte=fecha)[:n]
-        for registro in registros:
-            if registro.presente == False:
-                cant+=1
-        if cant >= n:
-            mensaje="Hola! se ah detectado que el miembro " + usr.miembro.apellido + ", " + usr.miembro.nombre + " falto " + str(cant) + " o mas veces de seguido a la reunion " + reunion.nombre + ", "
-            miembros=[] #tengo que poner aca los admin
-            enviarWhatsapp(mensaje,miembros)
+    if Asistencia.objects.get(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha).exists():
+        reg = Asistencia.objects.get(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha)
+        if reg.presente == False:
+            cant=0
+            tp= Tipo_Encuesta.objects.get(id_tipo_encuesta=4)
+            n=tp.cantidad
+            n-=1#el de hoy ya es 1 por eso resto
+            cant+=1
+            #bueno hoy falto, ahora tengo que ver si las n reuniones pasadas falto tmb
+            registros = Asistencia.objects.filter(miembro_id=usr.miembro.dni,reunion_id=rn,fecha__lte=fecha)[:n]
+            for registro in registros:
+                if registro.presente == False:
+                    cant+=1
+            if cant >= n:
+                mensaje="Hola! se ah detectado que el miembro " + usr.miembro.apellido + ", " + usr.miembro.nombre + " falto " + str(cant) + " o mas veces de seguido a la reunion " + reunion.nombre + ", "
+                miembros=[] #tengo que poner aca los admin
+                enviarWhatsapp(mensaje,miembros)
 
 @login_required
 def Home(request):
@@ -644,7 +645,7 @@ def eliminarTipo_Reunion(request,id_tipo_reunion):
             messages.error(request, 'NO SE PUEDE ELIMINAR AL tipo de reunion porque hay una reunion de este tipo activa') 
             return redirect('/sistema/listarTipo_Reunion')    
         else:
-            tipo_reunion.borrado=False
+            tipo_reunion.borrado=True
             tipo_reunion.changeReason="Eliminacion"
             tipo_reunion.save()
         return redirect('/sistema/listarTipo_Reunion/')
@@ -2300,7 +2301,8 @@ def filtros_estado_miembro(request):
         cant_b = (cant_b * 100) / cant_total
         cant_m = (cant_m * 100) / cant_total
         cant_c = (cant_c * 100) / cant_total
-        data = [cant_mb,cant_b,cant_m,cant_c]
+        
+        data = [round(cant_mb, 2),round(cant_b, 2),round(cant_m, 2),round(cant_c, 2)]
     print("-----------------------------//-----------------------")
     print('data: ',data)
     return JSONResponse(data)
@@ -2321,11 +2323,13 @@ def filtros_estado_reunion(request):
     if rn != '': #siemre va ser distinto de vacio no le doy otra chance
         if request.GET['desde'] == '' and request.GET['hasta'] =='': #si ambos son vacios muestro los actuales
             #bueno primero tengo que ver cual fue la ultima encuesta que le mande a esa reunion
-            enc = Encuesta.objects.filter(reunion_id = rn, tipo = 2).order_by('-fecha_envio').first()
+            enc = Encuesta.objects.filter(reunion_id = rn, tipo_id = 2).last()
             #en teoria eso es orden descendente por eso obtengo el primero
             if enc != None:
                 fecha=enc.fecha_envio
+                print('fechona ',fecha)
                 encuestas = Encuesta.objects.filter(reunion_id=rn,tipo=2,fecha_envio=fecha).exclude(fecha_respuesta=None)#ahora obtengo todas las enviadas en esa fecha
+                print(encuestas)
                 cant_total=len(list(encuestas)) #cantidad de encuestas enviadas a esa rn en esa fecha
                 cant_s = Encuesta.objects.filter(reunion=rn, tipo=2,fecha_respuesta=None)
                 cant_s = len(list(cant_s))
@@ -2429,13 +2433,12 @@ def filtros_estado_reunion(request):
         #bien ahora porcentajes
         data = []
         if cant_total != 0:
-            print('aca tenia que entrar')
             cant_mb = (cant_mb * 100) / cant_total
             cant_b = (cant_b * 100) / cant_total
             cant_m = (cant_m * 100) / cant_total
             cant_c = (cant_c * 100) / cant_total
             cant_s = (cant_s * 100) / cant_total
-            data = [cant_mb,cant_b,cant_m,cant_c,cant_s]
+            data = [round(cant_mb, 2),round(cant_b, 2),round(cant_m, 2),round(cant_c, 2),round(cant_s,2)]
             print('datitos bn en teoria ', data)
         else:
             print('entre mal cabeza')
@@ -2584,7 +2587,7 @@ def filtros_asistencias(request):
     if cant_total != 0: #no tenian ninguna asitencia
         cant_ast = (cant_ast * 100) / cant_total
         cant_fal = (cant_fal * 100) / cant_total
-        data = [cant_ast,cant_fal]
+        data = [round(cant_ast,2),round(cant_fal,2)]
         
             
             #ver de poner un mensajito

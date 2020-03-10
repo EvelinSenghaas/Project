@@ -26,7 +26,7 @@ class Tipo_ReunionForm(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
             'descripcion': forms.TextInput(attrs={'class':' form-control'}),
-            'frecuencia': forms.TextInput(attrs={'class':'form-control','type':'number'})
+            'frecuencia': forms.TextInput(attrs={'class':'form-control','type':'number','min':'1'})
         }
 
 class Estado_CivilForm(forms.ModelForm):
