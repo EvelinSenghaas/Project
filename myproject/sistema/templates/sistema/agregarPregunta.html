@@ -21,7 +21,7 @@
                                 <div class="row form-group">
                                     <div class="col-md-3"><label for="text-input"> Tipo de Pregunta (*)</label></div>
                                     <div class="col-md-5">
-                                        <select id="tipo" class="form-control" name='tipo' required>
+                                        <select id="tipo" class="form-control selectecito" name='tipo' required>
                                             {% for tipo in tipos %}
                                                 <option value="{{tipo.id_tipo_pregunta}}">{{tipo.tipo}}</option>
                                             {% endfor %}
@@ -102,6 +102,7 @@
 
     <script>
     $(document).ready(function(){
+        ordenar();
         $('#oculto').hide();
         $('#oculto1').hide();
         $('#oculto2').hide();

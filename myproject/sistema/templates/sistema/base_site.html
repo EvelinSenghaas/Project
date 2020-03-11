@@ -136,14 +136,32 @@
     <script src="{% static 'assets/js/reporte.js'%}"></script>
     <script src="{% static 'assets/js/intro.min.js'%}"></script>
 
-
+    <script>
+        function ordenar(){
+            var lb = document.getElementsByClassName('selectecito');
+            //var lb = document.getElementById('reunion');
+            console.log('ln '+lb.length);
+            arrTexts = new Array();
+            for(j=0;j<lb.length; j++){
+                console.log(lb[j].length)
+                for(i=0; i<lb[j].length; i++)  {
+                    console.log('opt ' + lb[j].options[i].text );
+                    arrTexts[i] = lb[j].options[i].text;
+                }
+                arrTexts.sort();
+                for(i=0; i<lb[j].length; i++)  {
+                    lb[j].options[i].text = arrTexts[i];
+                    lb[j].options[i].value = arrTexts[i];
+                }
+            }
+        }
+    </script>
     
 
     <!--Local Stuff-->
     <script>
         jQuery(document).ready(function($) {
             "use strict";
-
             // Pie chart flotPie1
             var piedata = [
                 { label: "Desktop visits", data: [[1,32]], color: '#5c6bc0'},

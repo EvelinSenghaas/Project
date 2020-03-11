@@ -4,6 +4,11 @@
     Configuraciones
 {% endblock titulo %}
 {% block body %}
+    <script src="http://code.jquery.com/jquery-latest.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/moment.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="all" href="{% static 'assets/css/daterangepicker.css' %}" />
+    <script type="text/javascript" src="{% static 'assets/js/daterangepicker.js' %}"></script>
+
         <form method="POST" class="form-horizontal">
             <div class="col-lg-11">
                 {% csrf_token %}
@@ -18,11 +23,11 @@
                         <table id="tablita" class="table table-striped table-bordered">
                             <thead>
                                 <tr>
-                                    <th data-step="2" data-intro="Puedes Ordenar los registros utilizando las flechitas de la derecha ">Usuario</th>  
-                                    <th>Reunion</th>
-                                    <th>Movimiento</th>
-                                    <th>Fecha | Hora</th>
-                                    <th data-step="3" data-intro="Paso 3: Podras Ver detalles apretando el ojito azul"></th>                             
+                                    <th class="filtrecito" data-step="2" data-intro="Puedes Ordenar los registros utilizando las flechitas de la derecha ">Usuario</th>  
+                                    <th class="filtrecito">Reunion</th>
+                                    <th class="filtrecito">Movimiento</th>
+                                    <th class="filtro-fecha">Fecha | Hora</th>
+                                    <th class="noExport" data-step="3" data-intro="Paso 3: Podras Ver detalles apretando el ojito azul"></th>                             
                                 </tr>
                             </thead>
                             <tbody>
@@ -31,7 +36,7 @@
                                     <td>{{auditoria.history_user}}</td>
                                     <td>{{auditoria.nombre}}</td>
                                     <td>{{auditoria.history_change_reason}}</td>
-                                    <td>{{auditoria.history_date}}</td>
+                                    <td>{{auditoria.history_date|date:"d/m/Y H:i"}}</td>
                                     <td><a href="#" class="btn modal_detail btn-outline-primary btn-sm fa fa-eye" onclick="modal_detalle_reunion({{auditoria.id_reunion}},{{auditoria.history_id}})"></a></td>
                                     {% comment %} <td><button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button></td> {% endcomment %}
                                     
@@ -77,17 +82,39 @@
         <input type="hidden" id="titulo" value= "{{configuracion_form.titulo}}" class="titulo_reporte">
         <input type="hidden" id="telefono" value = "{{configuracion_form.telefono}}" class="telefono_reporte">
         <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
-        
+        <input type="hidden" id="generador" value = "{{request.user.username}}" class="generador">
+        <input type="hidden" id="imagen" value="" class="imagen">
+        <input type="hidden" id="titu" value="Auditoria de Reunion" class="titu">
+        <input type="hidden" id="sub-titu" value="" class="sub-titu">
     
     
-    <script src="http://code.jquery.com/jquery-latest.js"></script> 
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script> 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.0/b-colvis-1.6.0/b-html5-1.6.0/b-print-1.6.0/cr-1.5.2/fc-3.3.0/fh-3.1.6/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
+    <script>
+        $(function(){
+            $.ajax({
+                url: '{% url "sistema:obtenerLogo" %}',
+                data: {
+                },
+                dataType: 'json',
     
+                success: function (data) {
+                    if (data.is_taken) {
+                        alert("Error al obtener datos ");
+                    } else {
+                        logo = data.logo;
+                        document.getElementById('imagen').value = logo;
+                    }
+                }
+            });
+        });
+        
+     </script>
 
     <script>
         function modal_detalle_reunion(id,id_history) {

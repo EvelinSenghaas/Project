@@ -2,7 +2,7 @@
 {% load static %}
 {% block body %}
     <script src="http://code.jquery.com/jquery-latest.js"></script> 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>    
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>     -->
     <script>
         function modal_estado_reunion(id_reunion){
             console.log(id_reunion);
@@ -78,13 +78,13 @@
                                 <table id="tablita" class="table table-striped table-bordered" >
                                     <thead data-step="2" data-intro="Paso 2: Usted podra ordenar las filas utilizando las flechas que estan a la derecha de cada encabezado" >
                                         <tr>
-                                            <th>Nombre</th>
-                                            <th>Tipo de Reunion</th>
-                                            <th>Dia</th>
-                                            <th>Horario</th>
+                                            <th class="filtrecito">Nombre</th>
+                                            <th class="filtrecito">Tipo de Reunion</th>
+                                            <th class="filtrecito">Dia</th>
+                                            <th class="filtrecito">Horario</th>
                                             <!--<th>Direccion</th>-->
-                                            <th>Grupo </th>
-                                            <th data-step="3" data-intro="Paso 3: Podra editar y eliminar utilizando los botones de esta columna" class='noExport'> </th>
+                                            <th class="filtrecito">Grupo </th>
+                                            <th class="noExport" data-step="3" data-intro="Paso 3: Podra editar y eliminar utilizando los botones de esta columna" class='noExport'> </th>
                                             
                                         </tr>
                                     </thead>
@@ -162,6 +162,9 @@
         <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
         <input type="hidden" id="generador" value = "{{request.user.username}}" class="generador">
         <input type="hidden" id="imagen" value="" class="imagen">
+        <input type="hidden" id="titu" value="Reporte de Reuniones" class="titu">
+        <input type="hidden" id="sub-titu" value="" class="sub-titu">
+
     <script src="{% static 'assets/js/lib/data-table/datatables.min.js'%}"></script>
     <script src="{% static 'assets/js/lib/data-table/dataTables.bootstrap.min.js'%}"></script>
     <script src="{% static 'assets/js/lib/data-table/dataTables.buttons.min.js'%}"></script>

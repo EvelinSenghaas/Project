@@ -37,7 +37,7 @@
 
                     <div class="row form-group" data-step="3" data-intro="Paso 3: Debe ingresar la reunion en la que quiere marcar la asistencia" >
                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion (*)</label></div>
-                        <div class="col col-md-4"><select required id="reunion" name='reunion' class="form-control">
+                        <div class="col col-md-4"><select required id="reunion" name='reunion' class="form-control selectecito">
                             <option value=None>--------------</option>
                             {% for reunion in reunion_form %}
                                 <option value='{{reunion.id_reunion}}'>{{reunion.nombre}}</option>
@@ -101,6 +101,7 @@
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
     
+
     <script>
         $(function(){
             $('[type="date"]').prop('max', function(){
@@ -116,6 +117,7 @@
                     "search":"Buscar",
                 },
             });
+            ordenar();
         });
 
     </script>

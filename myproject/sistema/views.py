@@ -467,6 +467,7 @@ def crearMiembro(request):
 
                 barrio=Barrio.objects.get(id_barrio=barrio_form)
                 
+                estado_civil_form=request.POST.get('estado_civil')
                 estado_civil=Estado_Civil.objects.get(id_estado=estado_civil_form)
 
                 domicilio=domicilio_form.save(commit=False)

@@ -15,7 +15,7 @@ Agregar Encuesta
             <form method="POST" class="form-horizontal">
                 <div class="row form-group" data-step="2" data-intro="Paso 2: Debes seleccionar el tipo de encuesta" >
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Tipo(*)</label></div>
-                    <div class="col col-md-4" data-step="3" data-intro="Paso 2:  'Faltas': es para cuando el usuario falta una sola vez, es usada para justificar su inasistencia, 'Faltas Concecutivas' usted debe especificar cada cuantas faltas se disparara esta encuesta, es para determinar el estado del miembro, 'Estado de las Reunion' es para realizar un seguimiendo del estado de las reuniones, debe especificar cada cuanto tiempo se enviaran estas encuestas y a que reuniones"><select id="tipo" name="tipo" class="form-control" required>
+                    <div class="col col-md-4" data-step="3" data-intro="Paso 2:  'Faltas': es para cuando el usuario falta una sola vez, es usada para justificar su inasistencia, 'Faltas Concecutivas' usted debe especificar cada cuantas faltas se disparara esta encuesta, es para determinar el estado del miembro, 'Estado de las Reunion' es para realizar un seguimiendo del estado de las reuniones, debe especificar cada cuanto tiempo se enviaran estas encuestas y a que reuniones"><select id="tipo" name="tipo" class="form-control selectecito" required>
                             <option selected value='None'>--------------</option>
                             {% for tipo in tipo_encuesta %}
                                 <option value="{{tipo.id_tipo_encuesta}}">{{tipo.tipo}}</option>
@@ -26,7 +26,7 @@ Agregar Encuesta
 
                 <div class="row form-group" id="envio">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Envio(*)</label></div>
-                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control" required>
+                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control selectecito" required>
                             <option selected value='None'> --------------</option>
                             <option value="7">Semanalmente</option>
                             <option value='30'>Mensualmente</option>
@@ -35,7 +35,7 @@ Agregar Encuesta
                     </div>
                     <br>
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion(*)</label></div>
-                    <div class="col col-md-4"><select  id="select-reunion" class="js-example-basic-multiple  form-control" name="reunion[]" multiple="multiple">
+                    <div class="col col-md-4"><select  id="select-reunion" class="js-example-basic-multiple  form-control selectecito" name="reunion[]" multiple="multiple">
                             {% for reunion in reuniones %}
                                 <option value="{{reunion.id_reunion}}">{{reunion.nombre}}</option>
                             {% endfor %}
@@ -119,6 +119,7 @@ Agregar Encuesta
     <script src="{% static 'assets/js/select2.min.js'%}"></script>
     <script>
         $(document).ready(function(){
+            ordenar();
             $('#tabla-pregunta').DataTable( {
                 "language": {
                     "lengthMenu": "Mostrando _MENU_ registros",

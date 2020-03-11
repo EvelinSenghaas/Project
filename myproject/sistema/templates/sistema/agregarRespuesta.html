@@ -50,7 +50,7 @@ Responder Encuesta
 
             <form method="POST" class="form-horizontal">
                 <div class="col col-md-12" id="add"> 
-                    <select id="oculto" class="form-control" name='tipo' required>
+                    <select id="oculto" class="form-control selectecito" name='tipo' required>
                         {% for pregunta in preguntas %}
                             <option selected value="{{pregunta.id_pregunta}}">{{pregunta.id_pregunta}}</option>
                             <script>myFunction()</script>
@@ -76,6 +76,7 @@ Responder Encuesta
     </script>
     <script>
         $(document).ready(function(){
+            ordenar();
             $('#oculto').hide();
             $('#main-menu').remove(); 
             $('#left-panel').remove();
