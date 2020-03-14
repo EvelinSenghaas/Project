@@ -11,7 +11,9 @@
     <button type="submit">Sign up</button>
   </form>
 {% endblock %} {% endcomment %}
+
 <!doctype html>
+{% load static %}
 {% block body %}
 
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
@@ -19,6 +21,7 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="es-ar"> <!--<![endif]-->
 <head>
+    
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Red Admin</title>
@@ -46,7 +49,7 @@
 
 
 
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script>
 </head>
 {% comment %} <body class="bg-dark"> {% endcomment %}
 
@@ -91,7 +94,7 @@
                         </div>
                         <div class="row form-group" data-step="3" data-intro="Paso 3: El correo no vas a poder modificar desde aqui, si lo deseas podes hacerlo desde 1.listar miembro, 2.editar miembro">
                             <div class="col col-md-3"><label>Correo Electronico</label></div>
-                            <div class="col col-md-9"><input readonly type="text" name="mail" id="mail" class="form form-control"></div>
+                            <div class="col col-md-9">{{form.email}}</div>
                         </div>
                         <div class="row form-group" data-step="4" data-intro="Paso 4: Pone un contraseña sencilla, indica al usuario que esa contraseña deberia cambiarla luego, para asegurarse que solo el usuario tenga acceso al sistema">
                             <div class="col col-md-3"><label>Contraseña (*)</label></div>
@@ -122,19 +125,19 @@
         $(document).ready(function(){
             $('#id_password1').attr("class","form form-control");
             $('#id_password2').attr("class","form form-control");
-            var lb = document.getElementById('id_miembro');
-            arrTexts = new Array();
+            // var lb = document.getElementById('id_miembro');
+            // arrTexts = new Array();
 
-            for(i=0; i<lb.length; i++)  {
-                arrTexts[i] = lb.options[i].text;
-            }
+            // for(i=0; i<lb.length; i++)  {
+            //     arrTexts[i] = lb.options[i].text;
+            // }
 
-            arrTexts.sort();
+            // arrTexts.sort();
 
-            for(i=0; i<lb.length; i++)  {
-                lb.options[i].text = arrTexts[i];
-                lb.options[i].value = arrTexts[i];
-            }
+            // for(i=0; i<lb.length; i++)  {
+            //     lb.options[i].text = arrTexts[i];
+            //     lb.options[i].value = arrTexts[i];
+            // }
         });
     </script>
     <script>
@@ -166,7 +169,7 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    $('#mail').val(data)
+                    $('#id_email').val(data)
                 }
             });
         })

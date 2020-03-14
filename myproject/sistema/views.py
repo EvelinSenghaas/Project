@@ -57,7 +57,7 @@ def aviso(fecha,rn):
     enc = reunion.grupo.encargado
     usr=CustomUser.objects.get(id=enc)
     if Asistencia.objects.filter(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha).exists():
-        reg = Asistencia.objects.get(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha)
+        reg = Asistencia.objects.filter(miembro_id=usr.miembro.dni,reunion_id=rn,fecha=fecha).last()
         if reg.presente == False:
             cant=0
             tp= Tipo_Encuesta.objects.get(id_tipo_encuesta=4)
@@ -161,7 +161,8 @@ def Home(request):
 def estadistica_miembro(request):
     if permiso(request, 43):
         usuarios = CustomUser.objects.all()
-        return render(request,'sistema/estadistica_miembro.html',{'usuarios':usuarios})
+        configuracion_form = Configuracion.objects.all().last()
+        return render(request,'sistema/estadistica_miembro.html',{'usuarios':usuarios,'configuracion_form':configuracion_form})
     else:
         return redirect('home')
 
@@ -256,8 +257,6 @@ def obtenerLogo(request):
     data = {
         'logo': logo,
     }
-    
-    
     return JsonResponse(data)
 
 @login_required
@@ -266,28 +265,25 @@ def crearGrupo(request):
         miembros=Miembro.objects.all()
         usuarios=CustomUser.objects.filter(is_active=True)
         if request.method == 'POST':
-            try:
-                grupo_form = GrupoForm(request.POST)
-                grupo=grupo_form.save(commit=False)
-                capacidad = grupo.capacidad
-                if capacidad < len(request.POST.get('miembro')):
-                    messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
-                    return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
+            grupo_form = GrupoForm(request.POST)
+            grupo=grupo_form.save(commit=False)
+            capacidad = grupo.capacidad
+            if capacidad < len(request.POST.get('miembro')):
+                messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
+                return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
                     
-                grupo.encargado=request.POST.get('encargado')
-                grupo.changeReason ='Creacion'
-                grupo.save()
+            grupo.encargado=request.POST.get('encargado')
+            grupo.changeReason ='Creacion'
+            grupo.save()
                 
-                encargado = CustomUser.objects.get(id=grupo.encargado)
-                miembros=request.POST.getlist('miembro')
-                miembros.append(encargado.miembro)
-                try:
-                    grupo.miembro.set(miembros)
-                except:
-                    grupo.miembro.set(request.POST.getlist('miembro'))
-                grupo.save()
+            encargado = CustomUser.objects.get(id=grupo.encargado)
+            miembros=request.POST.getlist('lista')       
+            miembros.append(encargado.miembro)
+            try:
+                grupo.miembro.set(miembros)
             except:
-                print('algo salio mal')
+                grupo.miembro.set(request.POST.getlist('lista'))
+            grupo.save()
             if permiso(request, 17) or permiso(request, 18):
                 return redirect('/sistema/listarGrupo')
             else:

@@ -119,7 +119,7 @@ Agregar Encuesta
     <script src="{% static 'assets/js/select2.min.js'%}"></script>
     <script>
         $(document).ready(function(){
-            ordenar();
+            //ordenar();
             $('#tabla-pregunta').DataTable( {
                 "language": {
                     "lengthMenu": "Mostrando _MENU_ registros",
@@ -138,13 +138,13 @@ Agregar Encuesta
                 console.log('oliii');
                 var tipo = $(this).val();
                 console.log(tipo);
-                if (tipo==3){
+                if (tipo==1){
                     $('#cantidad').show();
                     $('#envio').hide();
                     $("#cantidadd").prop('readonly', false);
                 }
                 else{
-                    if (tipo==1){
+                    if (tipo==3){
                         console.log("oli");
                         $('#envio').hide();
                         $('#cantidad').show();

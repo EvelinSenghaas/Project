@@ -4,7 +4,7 @@
     Crear Grupo
 {% endblock titulo%}
 {% block body%}
-    <form method="POST">
+    <form class="form" method="POST">
         {% csrf_token %}
         <div class="col-lg-11">
                         <div class="card">
@@ -12,7 +12,7 @@
                                 <strong>Planilla de Registro de </strong> Grupos
                                 <a href="JavaScript:Void(0);"><i class="fa fa-question-circle" onclick="javascript:introJs().start();"></i></a>
                             </div>
-                            <form method="POST" class="form-horizontal">
+                            <form class="form" method="POST" class="form-horizontal">
                             <div class="card-body card-block">
                                 {% if messages %}
                                     <div class="col-md-12">
@@ -97,9 +97,9 @@
                                                         <td>{{miembro.apellido}}</td>
                                                         <td>{{miembro.nombre}}</td>
                                                         {% if miembro in miembros %}
-                                                            <td><input checked type="checkbox" name="miembro" value="{{miembro.dni}}" /></td>
+                                                            <td><input checked type="checkbox" name="miembro" value="{{miembro.dni}}" class="prueba"/></td>
                                                         {% else %}
-                                                            <td><input type="checkbox" name="miembro" value="{{miembro.dni}}" /></td>
+                                                            <td><input type="checkbox" name="miembro" value="{{miembro.dni}}" class="prueba"/></td>
                                                         {% endif %}
                                                     </tr>
                                                 {% endfor %}
@@ -107,7 +107,9 @@
                                         </tbody>
                                     </table>
                                     </div>
-                                    
+                                    <div id='oculto'>
+
+                                    </div>
                                 </div>
                                 <div class="card" align="right">
                                     <div class="card-body" data-step="8" data-intro="Paso 8: Una vez cargados todos los datos obligatorios puede presionar Confirmar ">
@@ -146,7 +148,6 @@
 </script>
 
 <script>
-    //tengo que mostrar la tabla cuando se hayan cargado todos los filtros, y eso no  se hacer
     $('.filtro').change(function() {
         var t = $('#tablitax').DataTable();
         var sx = $('#sexo').val();
@@ -189,19 +190,28 @@
     $('#select-all').click(function(event) {
         var t = $('#tablitax').DataTable();
         var info = t.page.info();
-        console.log('filas ' + info.pages );
+        console.log( t.column(2).data());
+        
         if(this.checked) { // Iterate each checkbox
-            for(var i = 0; i< info.pages;i++){
-                $(':checkbox').each(function() {
-                    this.checked = true;
-                });
-            }
-        }
-        else {
-            $(':checkbox').each(function() {
-                this.checked = false;
+            t.column( 2 ).data().each( function ( value, index ) {
+                t.cell(index,2).data(value.replace('input','input checked')); 
             });
         }
+        else {
+            t.column( 2 ).data().each( function ( value, index ) {
+                t.cell(index,2).data(value.replace('input checked','input')); 
+            });
+        }
+    });
+
+    $(".form").submit(function(e){
+        var t = $('#tablitax').DataTable();
+        t.column( 2 ).data().each( function ( value, index ) {
+            if(value.indexOf('checked') > 0 ){
+                value = value.replace('miembro','lista')
+                $('#oculto').append(value);
+            }
+        });
     });
 
 </script>

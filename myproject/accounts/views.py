@@ -19,7 +19,7 @@ class JSONResponse(HttpResponse):
 
 class SignUp(generic.CreateView):
     form_class = CustomUserCreationForm
-    print('formulario ',form_class)
+    print(' error ',form_class.errors)
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
 
