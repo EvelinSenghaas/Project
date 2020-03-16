@@ -25,7 +25,6 @@ urlpatterns = [
     path('eliminarMiembro/<int:dni>',eliminarMiembro, name='eliminarMiembro'),
     path("validarMiembro/", validarMiembro, name="validarMiembro"),
     path("validarGrupo/", validarGrupo, name="validarGrupo"),
-    path("provinciasList/", provinciasList, name="provinciasList"),
     path("localidadesList/", localidadesList, name="localidadesList"),
     path("barriosList/", barriosList, name="barriosList"),
     path("AsistenciaTable/", AsistenciaTable, name="AsistenciaTable"),

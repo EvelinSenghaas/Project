@@ -176,9 +176,9 @@
                                     <div class="row form-group" data-step="16" data-intro="Paso 16: Seleccione la provincia y se cargaran las localidades que pertenecen a esa provincia">
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Provincia (*)</label></div>
                                         <div class="col col-md-4"><select id="select-provincia" name='provincia' class="form-control">
-                                            <option selected> --------------</option>
+                                            <option selected value=""> --------------</option>
                                             {% for provincia in provincia_form %}
-                                                    <option value='{{provincia.provincia}}'>{{provincia.provincia}}</option>
+                                                    <option value='{{provincia.id_provincia}}'>{{provincia.provincia}}</option>
                                             {% endfor %}
                                         </select>
                                         </div>
@@ -216,10 +216,7 @@
                                         
                                         <div class="col col-md-2"><label for="text-input" class=" form-control-label">Localidad (*)</label></div>
                                         <div class="col col-md-4"><select id="select-localidad" name='localidad' class="form-control">
-                                            {% comment %}{% for localidad in localidad_form %}
-                                                    <option value='{{localidad.localidad}}'>{{localidad.localidad}}</option>
-                                            {% endfor %}
-                                            {% endcomment %}
+                                            
                                             </select>
                                         </div>
                                         <!-- Button trigger modal -->
@@ -353,7 +350,6 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
 
     <script src="{% static 'assets/js/rerecustom.js'%}"></script>
-
     <script>
         $(document).ready(function(){
             $('[type="date"]').prop('max', function(){

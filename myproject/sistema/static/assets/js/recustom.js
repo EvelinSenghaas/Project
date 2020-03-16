@@ -1,26 +1,26 @@
-$('#provincias').change(function() {
-    var pv =document.getElementById("provincias").value;
-    console.log('oliii')
+$('#id_provincia').change(function() {
+    var pv =document.getElementById("id_provincia").value;
     $.ajax({
         url: '/sistema/localidadesList',
         data: {
-            'provincias': pv,
+            'provincia': pv,
         },
         dataType: 'json',
         success: function(data) {
             var html = "";
+            html += "<option value=''>-------------------</option>";
             for (var i = 0; i < data.length; i++) {
                 html += "<option value='" + data[i].id_localidad + "'>" + data[i].localidad + "</option>";
             }
-            $('#select-localidades').html(html);
+            $('#id_localidad').html(html);
+            var html = "";
+            $('#id_barrio').html(html);
         }
     })
 });
 
-$('#select-localidades').change(function() {
-    var lc = document.getElementById("select-localidades").value;
-    console.log(lc)
-    console.log('que onda mondonga'),
+$('#id_localidad').change(function() {
+    var lc = document.getElementById("id_localidad").value;
     $.ajax({
         url: '/sistema/barriosList',
         data: {
@@ -28,12 +28,12 @@ $('#select-localidades').change(function() {
         },
         dataType: 'json',
         success: function(data) {
-            console.log(data[0]);
             var html = "";
+            
             for (var i = 0; i < data.length; i++) {
                 html += "<option value='" + data[i].id_barrio + "'>" + data[i].barrio + "</option>";
             }
-            $('#select-barrio').html(html);
+            $('#id_barrio').html(html);
         }
     })
 });

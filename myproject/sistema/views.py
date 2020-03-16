@@ -1685,35 +1685,31 @@ def mail(request):
     return JSONResponse(mail)
 
 @csrf_exempt
-def provinciasList(request):
-    if request.method == 'GET': #uso para reuniones y miembros
-        provincia = Provincia.objects.all()
-        serializer = ProvinciaSerializer(provincia, many=True)
-        result = dict()
-        result = serializer.data
-        return JSONResponse(result)
-
-@csrf_exempt
 def localidadesList(request):
     pv=request.GET.get('provincia',None) #uso para reuniones y miembros
-    prov=Provincia.objects.get(provincia=pv)
+    print('pv ',pv)
+    #prov=Provincia.objects.get(provincia=pv)
     if request.method == 'GET':
-        localidad = Localidad.objects.filter(provincia=prov).order_by('localidad')
-        serializer = LocalidadSerializer(localidad, many=True)
         result = dict()
-        result = serializer.data
+        if pv !='':
+            if Localidad.objects.filter(provincia_id=pv).order_by('localidad').exists:
+                localidad = Localidad.objects.filter(provincia_id=pv).order_by('localidad')
+                print('localidad ',localidad)
+                serializer = LocalidadSerializer(localidad, many=True)
+                result = serializer.data
         return JSONResponse(result)
+            
 
 @csrf_exempt
 def barriosList(request):
-    lc=request.GET.get('localidad',None) #uso para reuniones y miembros
-    print(request.GET)
-    localidad=Localidad.objects.get(id_localidad=lc)
+    lc=request.GET.get('localidad') #uso para reuniones y miembros
+    #localidad=Localidad.objects.get(id_localidad=lc)
     if request.method == 'GET':
-        barrio = Barrio.objects.filter(localidad=localidad).order_by('barrio')
-        serializer = BarrioSerializer(barrio, many=True)
         result = dict()
-        result = serializer.data
+        if lc!='':
+            barrio = Barrio.objects.filter(localidad_id=lc).order_by('barrio')
+            serializer = BarrioSerializer(barrio, many=True)
+            result = serializer.data
         return JSONResponse(result)
 
 @csrf_exempt
