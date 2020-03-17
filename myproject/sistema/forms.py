@@ -135,8 +135,8 @@ class Horario_DisponibleForm(forms.ModelForm):
         fields = ['dia','desde','hasta']
         widgets={
             'dia':forms.Select(attrs={'class':'form-control '}),
-            'desde': forms.TimeInput(attrs={'class':'form-control '}),
-            'hasta':forms.TimeInput(attrs={'class':'form-control '})
+            'desde' : forms.TimeInput(attrs={'type':'text','class' : 'form-control time','autocomplete':'off'}),
+            'hasta' : forms.TimeInput(attrs={'type':'text','class' : 'form-control time','autocomplete':'off'}),
         }
 
 class Tipo_PreguntaForm(forms.ModelForm):

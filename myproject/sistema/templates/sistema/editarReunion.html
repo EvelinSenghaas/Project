@@ -87,12 +87,26 @@
         </form>
         
     <script src="{% static 'assets/js/recustom.js'%}"></script>
+    <script type="text/javascript" src="{% static 'assets/js/clockpicker.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'assets/css/clockpicker.css'%}">
     
     <script>
         $(document).ready(function() {
             console.log( "Que onda por que no entras aca chipona" );
         });
     </script>
+    
+<script>
+    $('#id_horas_a_cumplir').val('');
+    $('.time').clockpicker({
+        placement: 'bottom', // clock popover placement4
+        align: 'left',       // popover arrow align5
+        donetext: 'Hecho',     // done button text6
+        autoclose: true,    // auto close when minute is selected7
+        vibrate: true        // vibrate the device when dragging clock hand8
+    });
+    console.log("PICKERRRR")
+</script>
 {% endblock body %}
 
 

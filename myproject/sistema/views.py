@@ -1699,7 +1699,6 @@ def localidadesList(request):
                 result = serializer.data
         return JSONResponse(result)
             
-
 @csrf_exempt
 def barriosList(request):
     lc=request.GET.get('localidad') #uso para reuniones y miembros
