@@ -15,6 +15,17 @@
         <img src="{% static 'images/login.png '%}">
         {% csrf_token %}
 
+            {% if form.errors %}
+                <div class="col-md-12">
+                <ul class="messages">
+                    
+                    <div class="alert alert-danger">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <p>Ups! Nombre de usuario o contraseña incorrecto, puede que estes inactivo</p>
+                    </div>
+                </ul>
+                </div>
+            {% endif %}
         <div class="logo">
         </div>
                 <div class="form-item">

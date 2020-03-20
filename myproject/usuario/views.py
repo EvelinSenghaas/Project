@@ -19,11 +19,12 @@ class Login(FormView):
     @method_decorator(never_cache)
 
     def dispatch(self,request,*args, **kwargs):
+        
         if request.user.is_authenticated:
             print("hay usuario logueado?")
             return HttpResponseRedirect(self.get_success_url())
         else:
-            print("No hay usuario logueado")
+            print("No hay usuario logueado y cant: ")
             print(request.user)
             return super(Login, self).dispatch(request,*args,**kwargs)
     def form_valid(self, form):
