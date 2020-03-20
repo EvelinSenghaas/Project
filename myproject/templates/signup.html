@@ -80,6 +80,17 @@
                         {% endfor %}
                         </ul>
                     {% endif %}  
+                    {% if form.errors %}
+                        <div class="col-md-12">
+                        <ul class="messages">
+                            
+                            <div class="alert alert-danger">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                <p>Ups! Constraseña invalida, debe contener al menos 8 caracteres, no debe contener informacion similar a la personal, intenta no poner numeros consecutivos, o repetidos</p>
+                            </div>
+                        </ul>
+                        </div>
+                    {% endif %}
                         <div class="row form-group" data-step="1" data-intro="Paso 1: Pone un nombre de usuario, esto se utiliza para ingresar al sistema, este no debe ser repetido">
                             <div class="col col-md-3"><label>Nombre de Usuario (*)</label></div>
                             <div class="col col-md-9">{{form.username}} </div>
