@@ -24,9 +24,9 @@ Agregar Encuesta
                     </div>
                 </div>
 
-                <div class="row form-group" id="envio">
+                <div class="row form-group envio" id="envio">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Envio(*)</label></div>
-                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control selectecito" required>
+                    <div class="col col-md-4"><select id="envioo" name='cantidad' class="form-control" required>
                             <option selected value='None'> --------------</option>
                             <option value="7">Semanalmente</option>
                             <option value='30'>Mensualmente</option>
@@ -34,6 +34,9 @@ Agregar Encuesta
                         </select>
                     </div>
                     <br>
+                    
+                </div>
+                <div class="row form-group envio">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Reunion(*)</label></div>
                     <div class="col col-md-4"><select  id="select-reunion" class="js-example-basic-multiple  form-control selectecito" name="reunion[]" multiple="multiple">
                             {% for reunion in reuniones %}
@@ -42,7 +45,6 @@ Agregar Encuesta
                         </select>
                     </div>
                 </div>
-
                 <div class="row form-group" id="cantidad">
                     <div class="col col-md-2"><label for="text-input" class=" form-control-label">Cada Cuantas Faltas?(*)</label></div>
                     <div class="col col-md-4"><input id="cantidadd" type="text" name="cantidadd" class="form-control"></div>
@@ -119,7 +121,6 @@ Agregar Encuesta
     <script src="{% static 'assets/js/select2.min.js'%}"></script>
     <script>
         $(document).ready(function(){
-            //ordenar();
             $('#tabla-pregunta').DataTable( {
                 "language": {
                     "lengthMenu": "Mostrando _MENU_ registros",
@@ -132,32 +133,35 @@ Agregar Encuesta
             } );
 
             $('#cantidad').hide();
-            $('#envio').hide();
-            
+            $('.envio').hide();
+            $('#select-reunion').select2();
             $('#tipo').change(function(){
                 console.log('oliii');
                 var tipo = $(this).val();
                 console.log(tipo);
                 if (tipo==1){
                     $('#cantidad').show();
-                    $('#envio').hide();
+                    $('.envio').hide();
                     $("#cantidadd").prop('readonly', false);
                 }
                 else{
                     if (tipo==3){
                         console.log("oli");
-                        $('#envio').hide();
+                        $('.envio').hide();
                         $('#cantidad').show();
                         $('#cantidadd').val('1');
                         $("#cantidadd").prop('readonly', true);
                     }
                     else{
-                        $('#envio').show();
+                        $('.envio').show();
+                        $('.select2').attr('style','width: 300px;')
                         $('#cantidad').hide();
                     }
                 }
             });
+            ordenar();
         });
+        
     </script>
 
 {% endblock body %}

@@ -5,6 +5,7 @@
     Agregar Asistencia
 {% endblock titulo %}
 {% block body %}
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
     <form method="POST" class="myForm">
     <form class="myForm">
         {% csrf_token %}
@@ -79,12 +80,16 @@
                                         <td></td>
                                         <td>{{miembro.nombre}}</td>
                                         <td>{{miembro.apellido}}</td>
-                                        <td><input type="checkbox" name="check[]" value="{{miembro.dni}}" /></td>
+                                        <td><input id="c" type="checkbox" name="check[]" value="{{miembro.dni}}" class="check" onClick="alert('¡Has hecho clic!')"/></td>
+                                    
                                     </tr>
                                 {% endfor %} {% endcomment %}
                                 
                             </tbody>
                         </table>
+                    </div>
+                    <div id='oculto'>
+
                     </div>
                     <div align="right" class="card-body" data-step="7" data-intro="Paso 7: Una vez cargados todos los datos  puede presionar Confirmar ">
                         <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
@@ -97,7 +102,7 @@
 
 
     </form>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
     
@@ -117,7 +122,7 @@
                     "search":"Buscar",
                 },
             });
-            //ordenar();
+            ordenar();
         });
 
     </script>
@@ -146,7 +151,7 @@
                         t.row.add( [
                                 data[0]['miembro'][i].apellido,
                                 data[0]['miembro'][i].nombre,
-                                "<input type='checkbox' name='check[]' value="+ data[0]['miembro'][i].dni + ">",
+                                "<input type='checkbox' name='check[]' class='check' value="+ data[0]['miembro'][i].dni + ">",
                         ] ).draw( false );
                     }
                     //$('#mi-tabla').html(html);
@@ -171,6 +176,30 @@
             }
         });
     </script>
+
+    <script>
+        $('input.check').on('change', function () {
+            console.log('weno'); // it is never shown
+            cb = $(this).prop('checked');
+            console.log(cb)
+        });
+          
+        $('#tabla-miembros').on('change', 'tbody input.check', function () {
+            //console.log('weno deberia ponerse el checked o quitarse depende'); // it is never shown
+            cb = $(this).prop('checked');
+            console.log(cb);
+            if(cb==true){
+                $( this ).attr( 'name', 'checked' );
+                console.log($(this)['context']['outerHTML']);
+                console.log('is true!!!');
+            }else{
+                $( this ).attr( 'checked', false );
+                console.log('is Falsito!!!');
+            }
+        });
+        //$(".check").click(function(){alert("hola")});
+    </script>
+
     <script>
         $('.myForm').submit(function() {
             console.log('un post lina');
@@ -180,7 +209,25 @@
                 alert('Selecciona Una Reunion');
                 return false;
             }else{
-                return true;
+                var t = $('#tabla-miembros').DataTable();
+                $('#oculto').remove();
+                t.column( 2 ).data().each( function ( value, index ) {
+                    
+                    if(value.indexOf('checked') > 0 ){
+                        console.log('entre');
+                        console.log('el check es ');
+                        console.log(value);
+                        if(value.indexOf('check[]') > 0 ){
+                            console.log('encontre check[]');
+                            value = value.replace('check[]','lista');
+                        }else{
+                            console.log('encontre checked');
+                            value = value.replace('checked','lista');
+                        }
+                        $('#oculto').append(value);
+                    }
+                });
+                return false;
             }
              // return false to cancel form action
         });

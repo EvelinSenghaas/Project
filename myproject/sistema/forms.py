@@ -48,8 +48,8 @@ class ReunionForm(forms.ModelForm):
         fields=['nombre','tipo_reunion','grupo']
         widgets = {
             'nombre': forms.TextInput(attrs={'class':'form-control'}),
-            'tipo_reunion':  forms.Select(attrs={'class':'form-control'}),
-            'grupo': forms.Select(attrs={'class':'form-control'}),
+            'tipo_reunion':  forms.Select(attrs={'class':'form-control selectecito'}),
+            'grupo': forms.Select(attrs={'class':'form-control selectecito'}),
         }
 
 class BarrioForm(forms.ModelForm):

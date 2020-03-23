@@ -60,7 +60,7 @@
                                     
                                     <div class="row form-group" data-step="4 " data-intro="Paso 4: Aqui debes seleccionar su estado civil">
                                         <div class="col col-md-3"><label for="text-input" class=" form-control-label">Estado_Civil (*)</label></div>
-                                        <div class="col col-md-4"><select name="estado_civil" id="estado_civil" class="form-control">
+                                        <div class="col col-md-4"><select name="estado_civil" id="estado_civil" class="form-control selectecito">
                                             {% for estado in estado_civil_form %}
                                                 <option value={{estado.id_estado}}>{{estado.estado}}</option>
                                             {% endfor %}
@@ -122,7 +122,7 @@
                                             </div>
                                         <div class ="col col-md-1"><label for="select" class="form-control-label">Empresa</label></div>
                                             <div class="col-12 col-md-4" data-step="11" data-intro="Paso 11: Aqui debe ingresar la empresa a la que pertenece el telefono, en caso ser fijo seleccione 'Otro'" >
-                                                <select id="select" name='empresa' class="form-control">
+                                                <select id="select" name='empresa' class="form-control ">
                                                     <option value="Claro">Claro</option>
                                                     <option value="Personal">Personal</option>
                                                     <option value="Movistar">Movistar</option>
@@ -344,7 +344,9 @@
                         </div>
         </div>´
     </form>
+    
     <script src="http://code.jquery.com/jquery-latest.js"></script>
+    
     <script type="text/javascript" src="{% static 'assets/js/clockpicker.js'%}"></script>
     <link rel="stylesheet" href="{% static 'assets/css/clockpicker.css'%}">
     <script src="{% static 'assets/js/rerecustom.js'%}"></script>
@@ -371,17 +373,17 @@
         });
     </script>
 
-<script>
-    $('#id_horas_a_cumplir').val('');
-    $('.time').clockpicker({
-        placement: 'bottom', // clock popover placement4
-        align: 'left',       // popover arrow align5
-        donetext: 'Hecho',     // done button text6
-        autoclose: true,    // auto close when minute is selected7
-        vibrate: true        // vibrate the device when dragging clock hand8
-    });
-    console.log("PICKERRRR")
-</script>
+    <script>
+        
+        $('.time').clockpicker({
+            placement: 'bottom', // clock popover placement4
+            align: 'left',       // popover arrow align5
+            donetext: 'Hecho',     // done button text6
+            autoclose: true,    // auto close when minute is selected7
+            vibrate: true        // vibrate the device when dragging clock hand8
+        });
+        console.log("PICKERRRR")
+    </script>
 
     <script>
         $(document).ready(function(){
@@ -400,6 +402,7 @@
                     $("#fecha").val('')
                 }
             });
+            ordenar();
             
         });
     </script>

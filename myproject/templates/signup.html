@@ -136,19 +136,47 @@
         $(document).ready(function(){
             $('#id_password1').attr("class","form form-control");
             $('#id_password2').attr("class","form form-control");
-            // var lb = document.getElementById('id_miembro');
-            // arrTexts = new Array();
+            var lb = document.getElementById('id_miembro');
 
-            // for(i=0; i<lb.length; i++)  {
-            //     arrTexts[i] = lb.options[i].text;
-            // }
+            function getObjectKeyIndex(obj, keyToFind) {
+                var i = 0, key;
+                for (key in obj) {
+                    if (obj[key]['key'] == keyToFind) {
+                        return i;
+                    }
 
-            // arrTexts.sort();
+                    i++;
+                }
+                return null;
+            }
 
-            // for(i=0; i<lb.length; i++)  {
-            //     lb.options[i].text = arrTexts[i];
-            //     lb.options[i].value = arrTexts[i];
-            // }
+            dic=[];
+            console.log('entre')
+            for(i=1; i<lb.length; i++)  {
+                clave = lb.options[i].text;
+                valor=lb.options[i].value;
+                dic.push({
+                    key:clave,
+                    value:valor,
+                });
+            }
+            console.log('dic ');
+            console.log(dic);
+            //ESTO SOLO FUNCIONA PARA NOMBRES DISTINTOS!!
+            var claves =[]
+            for(i=0;i<dic.length;i++){
+                claves.push(dic[i].key);
+            }
+            //esto me retorna un array de nombres, entonces ordeno
+            claves.sort(); //ordeno
+            for(i=0; i<claves.length; i++)  {
+                lb.options[i+1].text = claves[i]; //text = al nombre
+                indice = getObjectKeyIndex(dic, claves[i])
+                lb.options[i+1].value = dic[indice]['value']; //el valor es el valor del directorio en la posicion que esta la clave,espero
+            }
+            
+            
+            
         });
     </script>
     <script>

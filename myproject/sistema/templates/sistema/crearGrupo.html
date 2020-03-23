@@ -35,7 +35,7 @@
                                 <div class="row form-group" data-step="3" data-intro="Paso 3: Debe seleccionar que usuario es el encargado del grupo">
                                     <div class="col-md-3"><label for="text-input">Encargado(*)</label></div>
                                     <div class="col-md-5">
-                                        <select required id="encargado" class="form-control" name="encargado">
+                                        <select required id="encargado" class="form-control selectecito" name="encargado">
                                             <option value="null"> ------------</option>
                                             {% for usuario  in usuarios %}
                                                 {% if usuario.id == encargado %}
@@ -268,6 +268,7 @@
                 }
             });
         });
+        ordenar();
     });
 </script>
 

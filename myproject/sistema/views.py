@@ -160,7 +160,7 @@ def Home(request):
 @login_required
 def estadistica_miembro(request):
     if permiso(request, 43):
-        usuarios = CustomUser.objects.all()
+        usuarios = CustomUser.objects.all().order_by('username')
         configuracion_form = Configuracion.objects.all().last()
         return render(request,'sistema/estadistica_miembro.html',{'usuarios':usuarios,'configuracion_form':configuracion_form})
     else:
@@ -170,9 +170,9 @@ def estadistica_miembro(request):
 def estadistica_reunion(request):
     if permiso(request, 43):
         if permiso(request, 10):
-            reuniones=Reunion.objects.all()
+            reuniones=Reunion.objects.all().order_by('nombre')
         else:
-            reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
+            reuniones=Reunion.objects.filter(grupo__encargado=request.user.id).order_by('nombre')
         #reuniones = Reunion.objects.all()
         return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones})
     else:
@@ -182,12 +182,12 @@ def estadistica_reunion(request):
 def estadistica_asistencias(request):
     if permiso(request, 43):
         if permiso(request, 10):
-            reuniones=Reunion.objects.all()
+            reuniones=Reunion.objects.all().order_by('nombre')
         else:
             reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
         #reuniones = Reunion.objects.all()
-        miembros = Miembro.objects.all()
-        roles = Rol.objects.filter(borrado=False)
+        miembros = Miembro.objects.all().order_by('apellido')
+        roles = Rol.objects.filter(borrado=False).order_by('nombre')
         return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
     else:
         return redirect('home')
@@ -263,7 +263,7 @@ def obtenerLogo(request):
 def crearGrupo(request):
     if permiso(request, 14):
         miembros=Miembro.objects.all()
-        usuarios=CustomUser.objects.filter(is_active=True)
+        usuarios=CustomUser.objects.filter(is_active=True).order_by('username')
         if request.method == 'POST':
             grupo_form = GrupoForm(request.POST)
             grupo=grupo_form.save(commit=False)
@@ -277,6 +277,7 @@ def crearGrupo(request):
             grupo.save()
                 
             encargado = CustomUser.objects.get(id=grupo.encargado)
+            miembros=[]
             miembros=request.POST.getlist('lista')       
             miembros.append(encargado.miembro)
             try:
@@ -352,10 +353,16 @@ def editarGrupo(request,id_grupo):
             if grupo_form.is_valid():
                 grupo=grupo_form.save(commit=False)
                 capacidad = grupo.capacidad
-                if capacidad < len(request.POST.get('miembro')):
+                if capacidad < len(request.POST.get('lista')):
                     messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
                     return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
-                grupo.miembro.set(request.POST.getlist('miembro'))
+                encargado = CustomUser.objects.get(id=grupo.encargado)
+                miembros=request.POST.getlist('lista')       
+                miembros.append(encargado.miembro)
+                try:
+                    grupo.miembro.set(miembros)
+                except:
+                    grupo.miembro.set(request.POST.getlist('lista'))
                 grupo.changeReason='Modificacion'
                 grupo.save()
             if permiso(request, 17) or permiso(request, 18):
@@ -1966,7 +1973,7 @@ def miembrosList(request):
     print(rn)
     if request.method =='GET':
         reunion=Reunion.objects.get(nombre=rn)
-        miembros=reunion.grupo.miembro.all()
+        miembros=reunion.grupo.miembro.all().order_by('apellido')
         print(miembros)
         serializer=MiembroSerializer(miembros,many=True)
         result=dict()
@@ -1980,7 +1987,6 @@ def rolList(request):
     if request.method =='GET':
         rol=Rol.objects.get(id_rol=rol)
         miembros=CustomUser.objects.filter(rol_id=rol)
-        print(miembros)
         serializer=UsuarioSerializer(miembros,many=True)
         result=dict()
         result = serializer.data

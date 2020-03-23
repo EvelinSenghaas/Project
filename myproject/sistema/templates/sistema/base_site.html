@@ -137,21 +137,49 @@
     <script src="{% static 'assets/js/intro.min.js'%}"></script>
 
     <script>
-        function ordenarr(){
+        function getObjectKeyIndex(obj, keyToFind) {
+            var i = 0, key;
+            for (key in obj) {
+                console.log(keyToFind);
+                if (obj[key]['key'] == keyToFind) {
+                    console.log('encontre en '+i)
+                    return i;
+                }
+                i++;
+            }
+            return null;
+        }
+        function ordenar(){
             var lb = document.getElementsByClassName('selectecito');
             //var lb = document.getElementById('reunion');
             console.log('ln '+lb.length);
             arrTexts = new Array();
+            arrValues = new Array();
+            dic=[];
+            console.log('voy a ordenar');
             for(j=0;j<lb.length; j++){
                 console.log(lb[j].length)
                 for(i=0; i<lb[j].length; i++)  {
-                    console.log('opt ' + lb[j].options[i].text );
-                    arrTexts[i] = lb[j].options[i].text;
+                    clave= lb[j].options[i].text;
+                    valor= lb[j].options[i].value;
+                    dic.push({
+                        key:clave,
+                        value:valor,
+                    });
                 }
-                arrTexts.sort();
-                for(i=0; i<lb[j].length; i++)  {
-                    lb[j].options[i].text = arrTexts[i];
-                    lb[j].options[i].value = arrTexts[i];
+                console.log('dic');
+                console.log(dic)
+                var claves =[]
+                for(i=0;i<dic.length;i++){
+                    claves.push(dic[i].key);
+                }
+                claves.sort();
+                console.log('claves ordenadas');
+                console.log(claves);
+                for(i=0; i<claves.length; i++)  {
+                    lb[j].options[i].text = claves[i];
+                    indice = getObjectKeyIndex(dic, claves[i])
+                    lb[j].options[i].value = dic[indice]['value'];
                 }
             }
         }
