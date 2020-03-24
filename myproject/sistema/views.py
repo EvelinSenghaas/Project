@@ -223,6 +223,16 @@ def auditoriaAsistencia(request):
         return redirect('home')
 
 @login_required
+def auditoriaUsuario(request):
+    if permiso(request, 42):
+        auditoria_usuario = CustomUser.history.all()
+        configuracion_form = Configuracion.objects.all().last()
+        context = {'auditoria_usuario': auditoria_usuario,'configuracion_form':configuracion_form}
+        return render(request, 'sistema/auditoriaUsuario.html', context)
+    else:
+        return redirect('home')
+
+@login_required
 def configuracion(request):
     if permiso(request, 24):
         conf=Configuracion.objects.all()
@@ -1571,6 +1581,27 @@ def auditoria_detalles_reunion(request,id,id_auditoria):
 def auditoria_detalles_asistencia(request,id_asistencia,id_auditoria):
     auditoria_historial = Asistencia.history.filter(id_asistencia=id_asistencia)
     historial = Asistencia.history.filter(id_asistencia=id_asistencia)
+    if len(auditoria_historial) > 1:
+        for i in range(len(historial)): 
+            if historial[i].history_id == id_auditoria:  
+                audit_regsolo = historial[i]    
+                delta = audit_regsolo.diff_against(auditoria_historial[i+1])
+                data = []            
+                for change in delta.changes:
+                    dic = {'change': change.field, 'old':change.old, 'new':change.new}
+                    data.append(dic)
+                break
+            else:
+                data = []
+    else:
+        data=[{'change':False}]
+    return JSONResponse(data)    
+
+
+@login_required
+def auditoria_detalles_usuario(request,id_usuario,id_auditoria):
+    auditoria_historial = CustomUser.history.filter(id=id_usuario)
+    historial = CustomUser.history.filter(id=id_usuario)
     if len(auditoria_historial) > 1:
         for i in range(len(historial)): 
             if historial[i].history_id == id_auditoria:  

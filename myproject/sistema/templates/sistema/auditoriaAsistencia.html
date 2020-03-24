@@ -25,8 +25,8 @@
                                     <th class="filtrecito" data-step="2" data-intro="Puedes Ordenar los registros utilizando las flechitas de la derecha ">Usuario</th>
                                     <th class="filtrecito">Miembro</th>  
                                     <th class="filtrecito">Reunion</th>
-                                    <th class="filtrecito">Movimiento</th>
                                     <th class="filtro-fecha">Fecha | Hora</th>
+                                    <th class="filtrecito">Movimiento</th>
                                     <th class="noExport" data-step="3" data-intro="Paso 3: Podras Ver detalles apretando el ojito azul"></th>                             
                                 </tr>
                             </thead>
@@ -36,8 +36,8 @@
                                     <td>{{auditoria.history_user}}</td>
                                     <td>{{auditoria.miembro}}</td>
                                     <td>{{auditoria.reunion}}</td>
-                                    <td>{{auditoria.history_change_reason}}</td>
                                     <td>{{auditoria.history_date|date:"d/m/Y H:i"}}</td>
+                                    <td>{{auditoria.history_change_reason}}</td>
                                     <td><a href="#" class="btn modal_detail btn-outline-primary btn-sm fa fa-eye" onclick="modal_detalle_auditoria({{auditoria.id_asistencia}},{{auditoria.history_id}})"></a></td>
                                     {% comment %} <td><button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button></td> {% endcomment %}
                                     
