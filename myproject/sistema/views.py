@@ -1909,22 +1909,25 @@ def recomendacionTable(request):
                                             best_usr_recomendados.append(miembro) #el mejor
                                             nombre= miembro.apellido +", "+miembro.nombre
                                             motivos=['Es un Usuario','Cuenta con Horario Disponible','Mismo Barrio','Mismo Sexo que el grupo']
-                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
+                                            cant='4/4'
+                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos,'cant':cant}
                                             data.append(dic)
                                     else:
                                         if not(miembro in usr_recomendados) and not(miembro in best_usr_recomendados):
                                             usr_recomendados.append(miembro) #no es tan weno
                                             nombre= miembro.apellido +", "+miembro.nombre
+                                            cant='3/4'
                                             motivos=['Es un Usuario','Cuenta con Horario Disponible','Mismo Sexo que el grupo']
-                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
+                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos,'cant':cant}
                                             data.append(dic)
                         else: #aca no hay ningun user, entonces... vamos por miembros del mismo genero
                                 if miembro.sexo == reunion.grupo.sexo or reunion.grupo.sexo=="Ambos":
                                     if not(miembro in usr_recomendados) and not(miembro in best_usr_recomendados):
                                         mb_recomendados.append(miembro)
                                         nombre= miembro.apellido +", "+miembro.nombre
+                                        cant='2/4'
                                         motivos=['Cuenta con Horario Disponible','Mismo Sexo que el grupo']
-                                        dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
+                                        dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos, 'cant':cant}
                                         data.append(dic) 
                 
                 else: #osea si ningun MIEMBRO tiene hs disponibles
@@ -1932,11 +1935,11 @@ def recomendacionTable(request):
                     dm_rn= reunion.domicilio
                     domicilios=Domicilio.objects.filter(barrio=dm_rn.barrio) #obtengo todos los domicilios que tiene ese barrio
                     for domicilio in domicilios: 
-                        if Miembro.objects.filter(domicilio__barrio= domicilio.barrio).exclude(dni = request.user.miembro.dni).exists(): #veo si algun mb esta en el barrio
-                            miembros=Miembro.objects.filter(domicilio__barrio= domicilio.barrio).exclude(dni = request.user.miembro.dni)
+                        if Miembro.objects.filter(domicilio__barrio= domicilio.barrio).exclude(dni=mb_encargado.dni).exists(): #veo si algun mb esta en el barrio
+                            miembros=Miembro.objects.filter(domicilio__barrio= domicilio.barrio).exclude(dni=mb_encargado.dni)
                             for miembro in miembros: #los miembros que tienen el mismo barrio y a hora veo si hay algun usr
-                                if CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro).exists(): #veo si alguno de esos miembros es un usr
-                                    usrs=CustomUser.objects.filter(miembro=miembro.dni).exclude(miembro = request.user.miembro)
+                                if CustomUser.objects.filter(miembro=miembro.dni).exclude(id = usr_encargado.id).exists(): #veo si alguno de esos miembros es un usr
+                                    usrs=CustomUser.objects.filter(miembro=miembro.dni).exclude(id = usr_encargado.id)
                                     for usr in usrs: #por cada usuario que tenga asosiado un miembro con el domicilio en ese barrio
                                         miembro = usr.miembro
                                         # si concide el sexo del mb con el del grupo o si grupo admite ambos,funciona para femenino o masculino
@@ -1945,7 +1948,8 @@ def recomendacionTable(request):
                                                 usr_recomendados.append(miembro)
                                                 nombre= miembro.apellido +", "+miembro.nombre
                                                 motivos=['Es un Usuario','Mismo Barrio','Mismo Sexo que el grupo']
-                                                dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos}
+                                                cant='3 / 4'
+                                                dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos, 'cant':cant}
                                                 data.append(dic)  
                                             #aca no pregunto por el domicilio porque ya tamos en el domicilio XD osea no es best porque no tiene hs disponible
                                 else: #aca hay cura, no tienen hs disponible, no hay usr, pero hay miembros en ese barrio
@@ -1953,8 +1957,9 @@ def recomendacionTable(request):
                                         if not(miembro in mb_recomendados):
                                             mb_recomendados.append(miembro) #esto ya es para la ultima opcion
                                             nombre= miembro.apellido +", "+miembro.nombre
+                                            cant='2 / 4'
                                             motivos=['Mismo Barrio','Mismo Sexo que el grupo']
-                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos} 
+                                            dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos,'cant':cant} 
                                             data.append(dic) 
                                         
                         else: #aca no tienen ni hs ni domicilio nadie de nadie osea fritos #pero no es el ultimo ciclo lina
@@ -1972,19 +1977,21 @@ def recomendacionTable(request):
                         if not(mb in usr_recomendados) and not(mb in best_usr_recomendados):
                             usr_recomendados.append(mb)
                             nombre= mb.apellido +", "+mb.nombre
+                            cant='3 / 4'
                             motivos=['Es un Usuario','Mismo Sexo que el grupo','Atiende el mismo grupo etario']
-                            dic={'dni':mb.dni,'miembro': nombre, 'motivos':motivos}
+                            dic={'dni':mb.dni,'miembro': nombre, 'motivos':motivos, 'cant':cant}
                             data.append(dic)  
                 if not(usr_recomendados) and not(mb_recomendados): #aca si que no hay nada de nada, entonces vamos a darle usr del mismo genero
-                    if CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id).exists():
-                        usrs=CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=request.user.id)
+                    if CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=usr_encargado.id).exists():
+                        usrs=CustomUser.objects.filter(miembro__sexo=reunion.grupo.sexo).exclude(id=usr_encargado.id)
                         for usr in usrs:
                             mb=usr.miembro
                             if not(mb in usr_recomendados) and not(mb in best_usr_recomendados):
                                 usr_recomendados.append(mb)
                                 nombre= mb.apellido +", "+mb.nombre
+                                cant='2 / 4'
                                 motivos=['Es un Usuario','Mismo Sexo que el grupo']
-                                dic={'dni':mb.dni,'miembro': nombre, 'motivos':motivos}
+                                dic={'dni':mb.dni,'miembro': nombre, 'motivos':motivos, 'cant':cant}
                                 data.append(dic)  
                     else:
                         print('weno esto si que ya es imposible china xd')   

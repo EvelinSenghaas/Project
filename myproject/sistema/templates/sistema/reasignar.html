@@ -18,10 +18,17 @@ Miembro en Estado Critico
             dataType: 'json',
             success: function(data) {
                 var html = "";
+                padding="padding:5%;";
                 for (var i = 0; i < data.length; i++) {
                     html += "<tr>";
                     html += "<td>" + data[i]['miembro'] + "</td>";
-                    html += "<td>"+data[i]['motivos']+"</td>"
+                    html += "<td>"+data[i]['motivos']+"</td>";
+                    if(data[i]['cant']=='4 / 4'|| data[i]['cant']=='3 / 4'){
+                        html += "<td class=' text-center'> <span class='badge badge-success' style='padding:5%;' >Muy Recomendable - "+data[i]['cant']+"<span></td>"
+                    }
+                    if(data[i]['cant']=='2 / 4'|| data[i]['cant']=='1 / 4'){
+                        html += "<td class=' text-center'> <span class='badge badge-warning' style='padding:5%;' >Poco Recomendable - "+data[i]['cant']+" <span></td>"
+                    }
                     html += "<td>" + "<input type='radio' name='"+ rn + "-encargado' value="+data[i].dni+ ">"+"</td>";
                     html += "</tr>";
                 }
@@ -57,18 +64,17 @@ Miembro en Estado Critico
                 else{
                     for (var i = 0; i < data.length; i++) {
                         html += "<tr>";
-                        html += "<td>"+data[i]['nombre']+"</td>";
+                        html += "<td rowspan='"+data[i]['reunion'].length+"'>"+data[i]['nombre']+"</td>";
                         if(data[i]['reunion'].length > 1){
                             console.log('candi a select');
                             for(var j =0;j<data[i]['reunion'].length;j++){
                                 if(j!=0){
                                     html += "<tr>";
-                                    html+= "<td></td>";
                                 }
                                 html += "<td>" + data[i]['reunion'][j]+ "</td>";
                                 html += "<td>" + data[i]['motivos'][j]+ "</td>";
                                 html += "<td>" + "<input type='radio' name='reunion-encargado "+ data[i]['nombre']+ "' value="+data[i]['id_reunion'][j]+"-"+data[i]['id_miembro']+ ">"+"</td>";
-                                html += "<tr>";
+                                html += "</tr>";
                             }
                         }else{
                             html += "<td>" + data[i]['reunion'] + "</td>";
@@ -123,17 +129,17 @@ Miembro en Estado Critico
                         
                         {% for reunion in reuniones %}
                             <div class="card-header ">
-                                <strong>Reunion</strong><span id="rn">{{reunion.nombre}}</span>
+                                <strong>Reunion </strong><span id="rn">{{reunion.nombre}}</span>
                             </div>
 
                             <div  id="tbl">
                                 <table class="table table-striped table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Miembro</th>
-                                            <th>Reunion Recomenda</th>
-                                            <th>Motivos de Recomendacion</th>
-                                            <th>Confirmar</label></th>
+                                            <th class="text-center">Miembro</th>
+                                            <th class="text-center">Reunion Recomendada</th>
+                                            <th class="text-center">Motivos de Recomendacion</th>
+                                            <th class="text-center">Confirmar</label></th>
                                         </tr>
                                     </thead>
                                     <tbody id="rn-rn">
@@ -160,9 +166,10 @@ Miembro en Estado Critico
                                     <table class="table table-striped table-bordered">
                                         <thead>
                                             <tr>
-                                                <th>Miembro</th>
-                                                <th>Motivo de Recomendacion</th>
-                                                <th>Confirmar</th>
+                                                <th class="text-center">Miembro</th>
+                                                <th class="text-center">Motivo de Recomendacion</th>
+                                                <th class="text-center">Condiciones que cumple</th>
+                                                <th class="text-center">Confirmar</th>
                                             </tr>
                                         </thead>
                                         <tbody id="mi-reunion">
