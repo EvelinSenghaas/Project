@@ -66,13 +66,18 @@ Estadistica de Asistencia
                                         </select>
                                     </div>
                                     <div class="col-1"> 
-                                    <br>
-                                    <button  data-step="8" data-intro="Paso 8: Finalmente presiona 'filtrar' y observa!" id="filtrar" type="button" class="btn btn-primary">filtrar</button>
+                                        <br>
+                                        <button  data-step="8" data-intro="Paso 8: Finalmente presiona 'filtrar' y observa!" id="filtrar" type="button" class="btn btn-primary">filtrar</button>
                                     </div> 
+                                    <div class="col-1">
+                                        <br>
+                                        <button style="margin-bottom:0;text-align: left;" data-step="9" data-intro="Paso 9: Ademas podes imprimir, presionando en PDF" type="button" class="btn btn-primary" id="print-chart-btn">PDF</button>
+                                    </div>
+
                                 </div>  
                                 
                                     <br>
-                                    <canvas data-step="9" data-intro="Paso 9: Aqui te mostraremos los porcentajes de asistencias e inasistencias" id="doughnut-chart" width="800" height="450"></canvas>
+                                    <canvas data-step="10" data-intro="Paso 10: Aqui te mostraremos los porcentajes de asistencias e inasistencias" id="doughnut-chart" width="800" height="450"></canvas>
                                 </div>
                             </div><!-- /.card -->
                         </div>
@@ -83,6 +88,14 @@ Estadistica de Asistencia
     </div>
 </form>
 
+        <input type="hidden" id="titulo" value= "{{configuracion_form.titulo}}" class="titulo_reporte">
+        <input type="hidden" id="telefono" value = "{{configuracion_form.telefono}}" class="telefono_reporte">
+        <input type="hidden" id="direccion" value = "{{configuracion_form.direccion}}" class="direccion_reporte">
+        <input type="hidden" id="generador" value = "{{request.user.username}}" class="generador">
+        <input type="hidden" id="imagen" value="" class="imagen">
+        <input type="hidden" id="titu" value="Estadistica de Estado de Miembros" class="titu">
+        
+<script src="https://cdn.jsdelivr.net/npm/jspdf@1.5.3/dist/jspdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 
@@ -218,6 +231,7 @@ Estadistica de Asistencia
                 }
             }
         }
+
         $.ajax({
             url: '/sistema/filtros_asistencias/',
             data: {
@@ -254,6 +268,82 @@ Estadistica de Asistencia
             }
         });
     });    
+    $.ajax({
+        url: '{% url "sistema:obtenerLogo" %}',
+        data: {
+        },
+        dataType: 'json',
+        success: function (data) {
+            if (data.is_taken) {
+                alert("Error al obtener datos");
+            } else {
+                logo = data.logo;
+                document.getElementById('imagen').value = logo;
+            }
+        }
+    });   
+    $('#print-chart-btn').on('click', function() {
+        var canvas = document.querySelector("#doughnut-chart");
+
+        //Escoje la calidad de la imagen segun el navegador supuestamente, la verdad no veo diferencia xd
+        var v = 0
+        var url = canvas.toDataURL('image/jpeg')
+        for(var i = 0; i < 100; i++ ){
+
+            v += 0.01;
+            x = parseFloat((v).toFixed(2))
+            var test = canvas.toDataURL('image/jpeg', x);
+
+            if(test == url){
+                console.log('The default value is: ' + x);
+            }
+        }
+        var canvasImg = canvas.toDataURL("image/png", x); //JPEG will not match background color
+        //creates PDF from img
+        var doc = new jsPDF('portrait');
+        
+        //Seccion Titulo/Encabezado
+        
+        doc.addImage(logo, 'PNG', 10, 10, 30, 15)                                                                                                                                                                                                                                                               
+        doc.setFont('helvetica')
+        doc.setFontType('bold')
+        doc.setFontSize(14);        
+        doc.text(60, 28, "Estadistica de Estado de Miembros");
+        doc.setFontType('normal')
+        doc.setFontSize(8);
+        var generado_por = $('#generador').val()
+        var fecha_hoy = moment(moment.now()).format('DD/MM/YYYY');
+        var filtro_user= $('#filter_user').val()
+        var filtro_fecha = $('#daterangepicker').val()
+        var pk_user_actual = $('#pk_user_actual').val()
+        console.log(pk_user_actual, filtro_user)
+        if(pk_user_actual == filtro_user){
+            filtro_user = generado_por;
+        }else{
+            filtro_user= $('#filter_user option:selected').text()
+        }
+        if(filtro_fecha == ''){
+            filtro_fecha = '-'
+        }
+        doc.text(160, 10, "Generado por: " + generado_por);
+        
+        doc.setFontType('bold')
+        //doc.text(145, 15, "Filtros");
+        doc.setFontType('normal')
+        doc.text(20, 40, "Filtros: " + titulo);
+        doc.text(160, 15, "Generado el " + fecha_hoy);
+        
+        //FOOTER
+        doc.text(20, 285, "Generado el " + fecha_hoy);
+        doc.text(155, 285, "Página 1 de 1");
+        
+        doc.setLineWidth(0.2)
+        doc.line(10, 30, 200, 30)
+        
+        //Seccion Chart
+        doc.addImage(canvasImg, 'PNG', 30, 50, 135, 90 );
+        doc.save('canvas.pdf');
+    }); 
 </script>
 
 {% endblock body %}
