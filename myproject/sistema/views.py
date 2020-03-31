@@ -409,7 +409,7 @@ def listarMiembro(request):
                     miembros.append(mb)
 
     if permiso(request, 5): #tiene permiso para ver todos los miembros
-        miembros = Miembro.objects.filter(borrado=False).exclude(dni=request.user.miembro.dni)
+        miembros = Miembro.objects.exclude(dni=request.user.miembro.dni)
     
     if not(permiso(request, 5) or permiso(request, 4)):
         return redirect('home')
@@ -637,6 +637,14 @@ def validarMiembro(request):
     print(data)
     return JsonResponse(data)
 
+@login_required
+def reactivarMiembro(request,dni):
+    miembro = Miembro.objects.get(dni=dni)
+    miembro.borrado=False
+    miembro.changeReason="Modificacion"
+    miembro.save()
+    return redirect('/sistema/listarMiembro')
+    
 @login_required
 def crearTipo_Reunion(request):
     if permiso(request, 11):
@@ -1406,7 +1414,7 @@ def reasignar(request,dni):
                                 mensaje = msj.mensaje + 'Fuiste añadido a la reunion ' + rn.nombre + ' habla con ' + mb_new.nombre +' para mas informacion'
                                 enviarMail(miembros,asunto,mensaje)
                     
-            for reunion in reuniones:
+            for reunion in reuniones: #recorro 1 vez para ver si se puede reasignar a un grupo
                 if request.POST.get(reunion.nombre+'-encargado') != None :
                     encargado=request.POST.get(reunion.nombre+'-encargado')
                     print('encargado: ',encargado)
@@ -1418,16 +1426,19 @@ def reasignar(request,dni):
                     else:
                         print('hay un encargado pero no es un usr ', encargado)
                         #Weno aca no se que hacer
-                else: #si no tienen un nuevo encargado bye bye
+            for reunion in reuniones: #recorro 2 veces para eliminar las que quedo como encargado
+                if not(request.POST.get(reunion.nombre+'-encargado') != None): #si no tienen un nuevo encargado bye bye
+                    if reunion.grupo.encargado == usr.id: #borro solo si es el encargado, sino no porque por ahi lo voy a cambiar
+                        reunion.grupo.borrado= True
+                        #vacio tmb el grupo, porque si quiere reactivar la reunion tendra miembros nuevos
+                        #dejo el encargado?
+                        #reunion.grupo.miembro.clear() #tengo miedo
+                        reunion.grupo.changeReason='Elimincaion'
+                        reunion.grupo.save()
                     reunion.borrado = True
                     reunion.changeReason='Eliminacion'
                     reunion.save()
-                    reunion.grupo.borrado= True
-                    #vacio tmb el grupo, porque si quiere reactivar la reunion tendra miembros nuevos
-                    #dejo el encargado?
-                    reunion.grupo.miembro.clear() #tengo miedo
-                    reunion.grupo.changeReason='Elimincaion'
-                    reunion.grupo.save()
+                        
             usr.is_active=False
             if Estado_Usuario.objects.filter(estado_id=4,confirmado=False,usuario_id = usr.id).exists():
                 estado = Estado_Usuario.objects.filter(estado_id=4,confirmado=False,usuario_id = usr.id).last()

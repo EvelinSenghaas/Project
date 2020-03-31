@@ -4,6 +4,7 @@
         <script src="http://code.jquery.com/jquery-latest.js"></script> 
         <script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/moment.min.js"></script>
         <link rel="stylesheet" type="text/css" media="all" href="{% static 'assets/css/daterangepicker.css' %}" />
+        <script src="https://kit.fontawesome.com/3a65763355.js" crossorigin="anonymous"></script>
         <script type="text/javascript" src="{% static 'assets/js/daterangepicker.js' %}"></script>
 
         <div class="breadcrumbs">
@@ -65,6 +66,7 @@
                                             <th class="filtrecito">Domicilio</th>
                                             <th class="filtrecito">Edad</th>
                                             <th class="filtrecito">Sexo</th>
+                                            <th class="filtrecito">Estado</th>
                                             
                                             <th class='noExport' data-step="3" data-intro="Paso 3: Usted podra editar miembros y eliminarlos en caso ese miembro no pertenezca a un grupo, en caso que pertenezca a un grupo y desee eliminarlo, debera quitarlo primero de ese grupo"> </th>
                                         </tr>
@@ -79,6 +81,12 @@
                                                     <td>{{miembro.domicilio}}</td>
                                                     <td>{{miembro.fecha_nacimiento}} años</td>
                                                     <td>{{miembro.sexo}}</td>
+                                                    {%if miembro.borrado%}
+                                                        <td class="text-center badge badge-danger">   Borrado  </td>
+                                                        <td><a href="/sistema/reactivarMiembro/{{miembro.dni}}" class="btn btn-outline-success btn-sm" ><i class="fas fa-trash-restore"></i></a></td>
+
+                                                    {%else%}
+                                                        <td class="text-center badge badge-success">  Activo  </td>
                                                     
                                                     <td> 
                                                         {% comment %} <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i></button>                                                         {% endcomment %}
@@ -114,6 +122,7 @@
                                                                 </div>
                                                         <!--Fin del modal-->
                                                     </td>
+                                                    {%endif%}
                                                 </tr>
                                             {% endfor %}
                                         {% endif %}
