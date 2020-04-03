@@ -29,6 +29,7 @@ urlpatterns = [
     path("barriosList/", barriosList, name="barriosList"),
     path("AsistenciaTable/", AsistenciaTable, name="AsistenciaTable"),
     path("GrupoTable/", GrupoTable, name="GrupoTable"),
+    path("validarGrupo/", validarGrupo, name="validarGrupo"),
     path("miembroTable/", miembroTable, name="miembroTable"),
     path("sexoList/", sexoList, name="sexoList"),
     path("configuracion/", configuracion, name="configuracion"),

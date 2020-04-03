@@ -84,7 +84,14 @@ def Home(request):
         sexo="Femenino"
     else:
         sexo="Masculino"
-    context ={'usuario':usuario,'sexo':sexo}
+
+    reuniones=[]
+    if permiso(request, 9):
+        reuniones = Reunion.objects.filter(borrado=False,grupo__encargado=request.user.id)
+    if permiso(request, 10):
+        reuniones = Reunion.objects.filter(borrado=False)
+        
+    context ={'usuario':usuario,'sexo':sexo,'reuniones':reuniones}
     
     #tengo que ver si el usr tiene una falta que no ingreso para eso
     #obtengo todas sus reuniones
@@ -644,7 +651,7 @@ def reactivarMiembro(request,dni):
     miembro.changeReason="Modificacion"
     miembro.save()
     return redirect('/sistema/listarMiembro')
-    
+
 @login_required
 def crearTipo_Reunion(request):
     if permiso(request, 11):
@@ -2699,7 +2706,15 @@ def filtros_asistencias(request):
 def Calendario(request):
     #Weno la idea es recuperar las asistencias de todas las reuniones, todas todas
     #lo primero es traer las reuniones
-    reuniones = Reunion.objects.all()
+    rns = request.GET.getlist('rn[]')
+    print('')
+    print('rns: ', rns)
+    print('request: ',request.GET)
+    print('')
+    reuniones=[]
+    for rn in rns:
+        reunion=Reunion.objects.get(id_reunion=rn)
+        reuniones.append(reunion)
     #por cada reunion voy a ver las asistencias
     data=[]
     for reunion in reuniones:
