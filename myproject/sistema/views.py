@@ -824,12 +824,11 @@ def agregarAsistencia(request):
             #Weno voy a ver si ya pusieron asistencias ese dia capa, le mando un error
             print('fecharda: ',fecha)
             if Asistencia.objects.filter(fecha=fecha,reunion=reunion).exists():
-                print('ni un cargo tu if')
                 messages.error(request, 'Esta Reunion ya registro sus asistencias el dia '+ fecha)
                 return redirect('/sistema/agregarAsistencia')
 
             if request.POST.get('ast-encargado') == "True":
-                if request.POST.getlist('check[]'):
+                if request.POST.getlist('lista[]'):
                     miembros = Miembro.objects.filter(grupo=grupo)
                     for miembro in miembros:
                         asistencia=Asistencia()
@@ -840,7 +839,7 @@ def agregarAsistencia(request):
                         justificado=False
                         asistencia.changeReason="Creacion"
                         asistencia.save()
-                    for check in request.POST.getlist('check[]'):
+                    for check in request.POST.getlist('lista[]'):
                         print('dni: ',check)
                         miembro=Miembro.objects.get(dni=check)
                         asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha,reunion=reunion)
@@ -1892,6 +1891,27 @@ def respuestaList(request):
         print(result)
         return JSONResponse(result)
 
+def ordenar(request,data):
+    print('')
+    print('COMIENZA EL PRINT:  '+str(len(data)))
+    print('')
+    aux1=[]
+    aux2=[]
+    for dic in data:
+        if  dic['cant'] == '3 / 4':
+            aux1.append(dic)
+        if  dic['cant'] == '2 / 4':
+            aux2.append(dic)
+    data=[]
+    for a in aux1:
+        data.append(a)
+    for a in aux2:
+        data.append(a)
+    print('')
+    print('FIN DEL PRINT   ' +str(len(data)))
+    print('')
+    return data
+
 @csrf_exempt
 def recomendacionTable(request):
     rn=request.GET.get('rn')
@@ -1927,14 +1947,14 @@ def recomendacionTable(request):
                                             best_usr_recomendados.append(miembro) #el mejor
                                             nombre= miembro.apellido +", "+miembro.nombre
                                             motivos=['Es un Usuario','Cuenta con Horario Disponible','Mismo Barrio','Mismo Sexo que el grupo']
-                                            cant='4/4'
+                                            cant=' 4 / 4'
                                             dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos,'cant':cant}
                                             data.append(dic)
                                     else:
                                         if not(miembro in usr_recomendados) and not(miembro in best_usr_recomendados):
                                             usr_recomendados.append(miembro) #no es tan weno
                                             nombre= miembro.apellido +", "+miembro.nombre
-                                            cant='3/4'
+                                            cant='3 / 4'
                                             motivos=['Es un Usuario','Cuenta con Horario Disponible','Mismo Sexo que el grupo']
                                             dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos,'cant':cant}
                                             data.append(dic)
@@ -1943,7 +1963,7 @@ def recomendacionTable(request):
                                     if not(miembro in usr_recomendados) and not(miembro in best_usr_recomendados):
                                         mb_recomendados.append(miembro)
                                         nombre= miembro.apellido +", "+miembro.nombre
-                                        cant='2/4'
+                                        cant='2 / 4'
                                         motivos=['Cuenta con Horario Disponible','Mismo Sexo que el grupo']
                                         dic={'dni':miembro.dni,'miembro': nombre, 'motivos':motivos, 'cant':cant}
                                         data.append(dic) 
@@ -1986,8 +2006,8 @@ def recomendacionTable(request):
             if not(usr_recomendados):
                 #en este punto tengo todavia: reunion(que es la base siempre),usr_encargado,mb_encargado y las listas
                 #puedo ver el rango etario xd, pero tiene que ser del mismo sexo y tipo si o si
-                if Grupo.objects.filter(desde__gte=reunion.grupo.desde,hasta__lte=reunion.grupo.hasta,sexo=reunion.grupo.sexo).exclude(id_grupo=reunion.grupo.id_grupo).exists():
-                    grupos_etarios = Grupo.objects.filter(desde__gte=reunion.grupo.desde,hasta__lte=reunion.grupo.hasta,sexo=reunion.grupo.sexo).exclude(id_grupo=reunion.grupo.id_grupo) 
+                if Grupo.objects.filter(desde__gte=reunion.grupo.desde,hasta__lte=reunion.grupo.hasta,sexo=reunion.grupo.sexo).exclude(encargado= usr_encargado.id).exists():
+                    grupos_etarios = Grupo.objects.filter(desde__gte=reunion.grupo.desde,hasta__lte=reunion.grupo.hasta,sexo=reunion.grupo.sexo).exclude(encargado= usr_encargado.id) 
                     #excluyo el grupo actual porque es el que necesita ser reubicado
                     for grupito in grupos_etarios:
                         en=CustomUser.objects.get(id=grupito.encargado) #en=encargado
@@ -2013,14 +2033,26 @@ def recomendacionTable(request):
                                 data.append(dic)  
                     else:
                         print('weno esto si que ya es imposible china xd')   
-        # if best_usr_recomendados:
-        #     serializer=MiembroSerializer(best_usr_recomendados,many=True)
-        # if (not(best_usr_recomendados) and usr_recomendados):
-        #     serializer=MiembroSerializer(usr_recomendados,many=True)
-        # if  (not(best_usr_recomendados and usr_recomendados) and mb_recomendados):
-        #     serializer=MiembroSerializer(mb_recomendados,many=True)
         
-        #print('data: ',data)
+        aux1=[]
+        aux2=[]
+        aux3=[]
+        for dic in data:
+            if  dic['cant'] == '4 / 4':
+                aux1.append(dic)
+            if  dic['cant'] == '3 / 4':
+                aux2.append(dic)
+            if  dic['cant'] == '2 / 4':
+                aux3.append(dic)
+            
+        data=[]
+        for a in aux1:
+            data.append(a)
+        for a in aux2:
+            data.append(a)
+        for a in aux3:
+            data.append(a)
+        
         return JSONResponse(data)
 
 @csrf_exempt
@@ -2106,9 +2138,6 @@ def reunionList(request):
         rn_base=Reunion.objects.get(nombre=rn) #no se si me va a dejar
         #vemos si hay una reunion posible para recomendar, osea aca ya entran las del mismo tipo
         encargado=rn_base.grupo.encargado
-        print("")
-        print('encargadito: ',encargado)
-        print("")
         dic=[]
         data=[]
         motivos=[]

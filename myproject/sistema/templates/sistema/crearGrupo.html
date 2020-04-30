@@ -205,7 +205,6 @@
 
     $(".form").on('submit',function(e){
         var t = $('#tablitax').DataTable();
-        alert('entre en el submit')
         //var rowsel = t.$('input[type="checkbox"]');
         var i = 0;
         t.$('input[type="checkbox"]').each(function(){
@@ -228,7 +227,6 @@
          
       });
       console.log('i = '+i);
-         alert('stap')
         t.column( 2 ).data().each( function ( value, index ) {
             if(value.indexOf('checked') > 0 ){
                 value = value.replace('miembro','lista')
@@ -265,7 +263,7 @@
                 dataType: 'json',
                 success: function (data) {
                     if (data.is_taken) {
-                        $("#nombre").val('')
+                        $("#nombre").val('');
                         alert(data);
                     }
                 }
