@@ -912,7 +912,9 @@ def verAsistencia(request):
         asistencia = Asistencia.objects.all()
     if not(permiso(request, 23) or permiso(request, 22)):
         return redirect('home')
-    return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia,'reunion':reunion})
+    configuracion_form = Configuracion.objects.all().last()
+
+    return render(request,'sistema/verAsistencia.html',{'asistencia':asistencia,'reunion':reunion,'configuracion_form':configuracion_form})
 
 @login_required
 def agregarEncuesta(request):
