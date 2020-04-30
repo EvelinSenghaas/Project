@@ -4,6 +4,13 @@
     Crear Grupo
 {% endblock titulo%}
 {% block body%}
+    <script>
+        function editar(){
+            var enc = $('#enc').val();
+            console.log('entre '+ enc);
+            $("#encargado option[value="+ enc +"]").attr("selected",true);
+        }
+    </script>
     <form class="form" method="POST">
         {% csrf_token %}
         <div class="col-lg-11">
@@ -35,17 +42,15 @@
                                 <div class="row form-group" data-step="3" data-intro="Paso 3: Debe seleccionar que usuario es el encargado del grupo">
                                     <div class="col-md-3"><label for="text-input">Encargado(*)</label></div>
                                     <div class="col-md-5">
-                                        <select required id="encargado" class="form-control selectecito" name="encargado">
+                                        <input hidden id="enc" type="text" value="{{encargado}}">
+                                        <select required id="encargado" class="form-control" name="encargado">
                                             <option value="null"> ------------</option>
                                             {% for usuario  in usuarios %}
-                                                {% if usuario.id == encargado %}
-                                                    <option selected value='{{usuario.id}}'>{{usuario.miembro}}</option>
-                                                {% else %}
-                                                    <option value='{{usuario.id}}'>{{usuario.miembro}}</option>
-                                                {% endif %}
+                                                <option  value='{{usuario.id}}'>{{usuario.miembro}}</option>
                                             {% endfor %}
-                                            
                                         </select>
+                                        <script>editar()</script>
+                                        
                                     </div>
                                 </div>
                                 
@@ -97,9 +102,9 @@
                                                         <td>{{miembro.apellido}}</td>
                                                         <td>{{miembro.nombre}}</td>
                                                         {% if miembro in miembros %}
-                                                            <td><input checked type="checkbox" name="miembro" value="{{miembro.dni}}" class="prueba"/></td>
+                                                            <td><input checked type="checkbox" name="miembro" value="{{miembro.dni}}" /></td>
                                                         {% else %}
-                                                            <td><input type="checkbox" name="miembro" value="{{miembro.dni}}" class="prueba"/></td>
+                                                            <td><input type="checkbox" name="miembro" value="{{miembro.dni}}" /></td>
                                                         {% endif %}
                                                     </tr>
                                                 {% endfor %}
@@ -108,7 +113,15 @@
                                     </table>
                                     </div>
                                     <div id='oculto'>
-
+                                        <select name="lista" id="lista" multiple="multiple">
+                                            {% if grupo_form.miembro %}
+                                                {% for miembro in todos%}
+                                                    {% if miembro in miembros %}
+                                                        <option selected name='lista[]' value="{{miembro.dni}}"> {{miembro.dni}} </option>;
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="card" align="right">
@@ -164,20 +177,13 @@
                 },
                 dataType: 'json',
                 success: function(data) {
-                    var html = "";
-                    $('#select-miembro').html("");
+                    $('#lista').empty();
                     t.clear().draw();
-                    for (var i = 0; i < data.length; i++) {
-                            /*html += "<tr>"   
-                            html += "<td>" + data[i].apellido + "</td>";
-                            html += "<td>" + data[i].nombre + "</td>";
-                            html += "<td>" + 12 + "añitos </td>";
-                            html += "<td>" + "<input type='checkbox' name='check[]' value="+data[i].dni + ">"+"</td>";
-                            html += "</tr>"*/
+                    for (var i = 0; i < data.length; i++) {  
                             t.row.add( [
                                 data[i].apellido,
                                 data[i].nombre,
-                                "<input type='checkbox' name='miembro' value="+data[i].dni + ">",
+                                "<input type='checkbox' class='check' name='miembro' value="+data[i].dni + ">",
                             ] ).draw( false );
                         }
                         //$('#mi-tabla').html(html);
@@ -185,56 +191,101 @@
             })
         }
     });
+    
+        $('input.check').on('change', function () {
+            console.log('weno'); // it is never shown
+            cb = $(this).prop('checked');
+            console.log(cb)
+        });
+          
+        $('#tablitax').on('change', 'tbody input.check', function () {
+            //console.log('weno deberia ponerse el checked o quitarse depende'); // it is never shown
+            cb = $(this).prop('checked');
+            var value= $(this)['context']['defaultValue'];
+            console.log('value ' + value);
+            if(cb==true){
+                console.log('is true');
+                var html = "";
+                html += "<option selected name='lista[]' value=" + value + ">" + value + "</option>";
+                $('#lista').append(html);
+            }else{
+                console.log('is false');
+                $('#lista').find('option[value="'+ value +'"]').remove();
+            }
+        });
 
     $('#select-all').click(function(event) {
         var t = $('#tablitax').DataTable();
         var info = t.page.info();
         console.log( t.column(2).data());
-        
         if(this.checked) { // Iterate each checkbox
-            t.column( 2 ).data().each( function ( value, index ) {
-                t.cell(index,2).data(value.replace('input','input checked')); 
-            });
+            var t = $('#tablitax').DataTable();
+            var sx = $('#sexo').val();
+            var desde = $('#desde').val();
+            var hasta = $('#hasta').val();
+            $('#tablitax').hide();
+            if( sx!='' && desde !='' && hasta !=''){
+                $('#tablitax').show();
+                $.ajax({
+                    url: '/sistema/miembroTable',
+                    data: {
+                        'sx':sx,
+                        'desde':desde,
+                        'hasta':hasta,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        t.clear().draw();
+                        $('#lista').empty();
+                        for (var i = 0; i < data.length; i++) {  
+                            t.row.add( [
+                                data[i].apellido,
+                                data[i].nombre,
+                                "<input checked type='checkbox' class='check' name='miembro' value="+data[i].dni + ">",
+                            ] ).draw( false );
+                            var html = "";
+                            html += "<option selected name='lista[]' value=" + data[i].dni + ">" + data[i].dni + "</option>";
+                            $('#lista').append(html);
+                        }
+                    }
+                    
+                })
+            }
         }
         else {
-            t.column( 2 ).data().each( function ( value, index ) {
-                t.cell(index,2).data(value.replace('input checked','input')); 
-            });
+            var t = $('#tablitax').DataTable();
+            var sx = $('#sexo').val();
+            var desde = $('#desde').val();
+            var hasta = $('#hasta').val();
+            $('#tablitax').hide();
+            if( sx!='' && desde !='' && hasta !=''){
+                $('#tablitax').show();
+                $.ajax({
+                    url: '/sistema/miembroTable',
+                    data: {
+                        'sx':sx,
+                        'desde':desde,
+                        'hasta':hasta,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var html = "";
+                        t.clear().draw();
+                        for (var i = 0; i < data.length; i++) {  
+                            t.row.add( [
+                                data[i].apellido,
+                                data[i].nombre,
+                                "<input type='checkbox' class='check' name='miembro' value="+data[i].dni + ">",
+                            ] ).draw( false );
+                        }
+                    }
+                    
+                })
+            }
+            $('#lista').empty();
         }
     });
 
-    $(".form").on('submit',function(e){
-        var t = $('#tablitax').DataTable();
-        //var rowsel = t.$('input[type="checkbox"]');
-        var i = 0;
-        t.$('input[type="checkbox"]').each(function(){
-         // If checkbox doesn't exist in DOM
-         
-         if(!$.contains(document, this)){
-            // If checkbox is checked
-            if(this.checked){
-                i++;
-               // Create a hidden element 
-               
-               /*$(form).append(
-                  $('<input>')
-                     .attr('type', 'hidden')
-                     .attr('name', this.name)
-                     .val(this.value)
-               );*/
-            }
-         } 
-         
-      });
-      console.log('i = '+i);
-        t.column( 2 ).data().each( function ( value, index ) {
-            if(value.indexOf('checked') > 0 ){
-                value = value.replace('miembro','lista')
-                $('#oculto').append(value);
-            }
-        });
-        
-    });
 
 </script>
 
@@ -250,7 +301,11 @@
                     "infoFiltered": "(Filtrado de _MAX_ registros en Total)",
                     "search":"Buscar",
                 },
+                "aoColumnDefs": [
+                    { 'bSortable': false, 'aTargets': [ 2 ] }
+                ]
         });
+        $('#oculto').hide()
         // $('#tablitax').hide();
         $("#nombre").change(function () {
             var nombre = $(this).val();

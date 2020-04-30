@@ -295,12 +295,12 @@ def crearGrupo(request):
                 
             encargado = CustomUser.objects.get(id=grupo.encargado)
             miembros=[]
-            miembros=request.POST.getlist('lista')       
+            miembros=request.POST.getlist('lista[]')       
             miembros.append(encargado.miembro)
             try:
                 grupo.miembro.set(miembros)
             except:
-                grupo.miembro.set(request.POST.getlist('lista'))
+                grupo.miembro.set(request.POST.getlist('lista[]'))
             grupo.save()
             if permiso(request, 17) or permiso(request, 18):
                 return redirect('/sistema/listarGrupo')
