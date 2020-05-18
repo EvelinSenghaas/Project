@@ -56,7 +56,7 @@ def enviarMail(miembros, asunto, mensaje):
 
 def enviarWhatsapp(mensaje,miembros):
     account_sid = 'AC26e164ae31f6ebd42ef0c40c567c469b' 
-    auth_token = 'c0cb9d1ba280b8718f6e99961c36d7a3' 
+    auth_token = 'ad42678b84d1adf4a10d32192acc80b6' 
     client = Client(account_sid, auth_token) 
     from_whatsapp_number='whatsapp:+14155238886'
     to_whatsapp_number='whatsapp:+5493764816893'

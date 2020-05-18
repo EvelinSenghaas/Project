@@ -1,4 +1,3 @@
-
 {% extends 'sistema/base_site.html' %}
 {% load static %}
 {% block titulo %}
@@ -75,15 +74,6 @@
                                 </tr>
                             </thead>
                             <tbody id="mi-tabla"> 
-                                {% comment %} {% for miembro in miembro_form %}
-                                    <tr>
-                                        <td></td>
-                                        <td>{{miembro.nombre}}</td>
-                                        <td>{{miembro.apellido}}</td>
-                                        <td><input id="c" type="checkbox" name="check[]" value="{{miembro.dni}}" class="check" onClick="alert('¡Has hecho clic!')"/></td>
-                                    
-                                    </tr>
-                                {% endfor %} {% endcomment %}
                                 
                             </tbody>
                         </table>
@@ -127,6 +117,8 @@
             ordenar();
             $('#oculto').hide()
         });
+        
+
 
     </script>
 
@@ -147,18 +139,12 @@
                     $('#lista').empty();
                     t.clear().draw();
                     for (var i = 0; i < data[0]['miembro'].length; i++) {
-                        /*html += "<tr>"    
-                        html += "<td>" + data[0]['miembro'][i].nombre + "</td>";
-                        html += "<td>" + data[0]['miembro'][i].apellido + "</td>";
-                        html += "<td>" + "<input type='checkbox' name='check[]' value="+data[0]['miembro'][i].dni + ">"+"</td>";
-                        html += "</tr>"*/
                         t.row.add( [
                                 data[0]['miembro'][i].apellido,
                                 data[0]['miembro'][i].nombre,
                                 "<input type='checkbox' name='check[]' class='check' value="+ data[0]['miembro'][i].dni + ">",
                         ] ).draw( false );
                     }
-                    //$('#mi-tabla').html(html);
                 }
             })
         });
@@ -194,10 +180,12 @@
             var value= $(this)['context']['defaultValue'];
             if(cb==true){
                 var html = "";
-                html += "<option selected name='lista[]' value=" + value + ">" + value + "</option>";
+                html += "<option selected name='op' value=" + value + ">" + value + "</option>";
+                console.log('true, value ',value);
                 $('#lista').append(html);
             }else{
                 $('#lista').find('option[value="'+ value +'"]').remove();
+                console.log('false, value ',value);
             }
         });
     </script>

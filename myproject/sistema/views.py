@@ -828,7 +828,7 @@ def agregarAsistencia(request):
                 return redirect('/sistema/agregarAsistencia')
 
             if request.POST.get('ast-encargado') == "True":
-                if request.POST.getlist('lista[]'):
+                if request.POST.getlist('lista'):
                     miembros = Miembro.objects.filter(grupo=grupo)
                     for miembro in miembros:
                         asistencia=Asistencia()
@@ -839,7 +839,7 @@ def agregarAsistencia(request):
                         justificado=False
                         asistencia.changeReason="Creacion"
                         asistencia.save()
-                    for check in request.POST.getlist('lista[]'):
+                    for check in request.POST.getlist('lista'):
                         print('dni: ',check)
                         miembro=Miembro.objects.get(dni=check)
                         asistencia = Asistencia.objects.get(miembro_id = check,fecha=fecha,reunion=reunion)
@@ -848,6 +848,7 @@ def agregarAsistencia(request):
                         asistencia.changeReason="Creacion"
                         asistencia.save()
                 else:
+                    print('listona ', request.POST.getlist('lista'))
                     messages.error(request, 'Tenes que seleccionar los miembros que asistieron')
                     return redirect('/sistema/agregarAsistencia')
             else:

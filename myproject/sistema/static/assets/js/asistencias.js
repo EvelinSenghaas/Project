@@ -11,7 +11,7 @@ $(document).ready(function() {
                 $('#oculto').append(aux);
                 var val = $('#id'+index).val();
                 var html = "";
-                html += "<option selected name='lista[]' value=" + val + ">" + val + "</option>";
+                html += "<option selected name='op' value=" + val + ">" + val + "</option>";
                 $('#lista').append(html);
                 $('#id'+index).remove();
             });
