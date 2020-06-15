@@ -74,4 +74,5 @@ urlpatterns = [
     path('configurarUsuario/<int:id>',configurarUsuario,name="configurarUsuario"),
     path('mail',mail,name="mail"),
     path('obtenerLogo',obtenerLogo,name="obtenerLogo"),
+    path('cantEncuestas',cantEncuestas,name="cantEncuestas"),
 ]

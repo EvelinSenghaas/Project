@@ -3,7 +3,7 @@ from .forms import *
 from .models import *
 from mensajeria.models import *
 from mensajeria.views import *
-from datetime import date
+from datetime import date, timedelta
 import datetime
 from usuario.models import *
 from django.db.models import Avg
@@ -95,21 +95,27 @@ def Home(request):
     
     #tengo que ver si el usr tiene una falta que no ingreso para eso
     #obtengo todas sus reuniones
-    tipo= Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
+    tipo= Tipo_Encuesta.objects.get(id_tipo_encuesta=1)
     cant=tipo.cantidad #obtendo la cantidad de faltas consecutivas actuales admisibles
-    reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
+    reuniones=Reunion.objects.filter(grupo__encargado=request.user.id,borrado=False)
     for reunion in reuniones: #ahora por cada reunion comparo las fechas de los ultimos registros con hoy
-        if Asistencia.objects.filter(reunion=reunion.id_reunion).exists():
-            asistencia=Asistencia.objects.filter(reunion=reunion.id_reunion).last()
-            fecha_rn=asistencia.fecha
-            hoy=date.today()
-            print(days_between(hoy, fecha_rn))
-            dias=days_between(hoy, fecha_rn)
-            if dias > 7: #si paso una semana y no se puso asistencia a la reunion entonces.... miembro lo defini bien arriba para ver su genero
-                ast=Asistencia(miembro=miembro,presente=False,justificado=False,reunion=reunion,fecha=hoy)
-                ast.save()
-                #pongo la falta y veo cuantas anteriores tiene para notificar
-                aviso(hoy,reunion.id_reunion)
+        dias = 7 #para que entre en el primer while
+        while(dias >= 7):
+            dias = 0
+            if Asistencia.objects.filter(reunion=reunion.id_reunion).exists():
+                asistencia=Asistencia.objects.filter(reunion=reunion.id_reunion).last()
+                fecha_rn=asistencia.fecha
+                hoy=date.today()
+                print(days_between(hoy, fecha_rn))
+                dias=days_between(hoy, fecha_rn)
+                if dias >= 7: #si paso una semana y no se puso asistencia a la reunion entonces.... miembro lo defini bien arriba para ver su genero
+                    d = timedelta(days=7)
+                    fecha = fecha_rn + d
+                    ast=Asistencia(miembro=miembro,presente=False,justificado=False,reunion=reunion,fecha=fecha)
+                    ast.changeReason="Creacion"
+                    ast.save()
+                    #pongo la falta y veo cuantas anteriores tiene para notificar
+                    aviso(hoy,reunion.id_reunion)
         #ahora que le puse la falta es el momento de contar cuantas faltas CONSECUTIVAS TIENE
         consulta=Asistencia.objects.filter(miembro=miembro,justificado=False,reunion=reunion.id_reunion).order_by('fecha')[:cant]
         cantidad = len (list(consulta)) #paso la cantidad de registros de faltas que encontro a cantidad
@@ -128,20 +134,22 @@ def Home(request):
         #aca tengo que contar cuantas faltas tiene por ahora es cada 1 y poner la reunion jiji
         faltas=Asistencia.objects.filter(miembro=miembro,justificado=False)
         for falta in faltas:
-            if not(Encuesta.objects.filter(tipo_id=1,miembro_id=miembro.dni,fecha_envio=falta.fecha,reunion=falta.reunion).exists()):
-                encuesta= Encuesta()
-                encuesta.borrado=False #ver si realmente puedo borrar una encuesta xd creeria que no se debe
-                encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=1)
-                encuesta.miembro=miembro
-                encuesta.respondio=False
-                encuesta.fecha_envio = falta.fecha
-                encuesta.reunion=falta.reunion
-                encuesta.save() #Esto quiere decir que tenia una falta no mas
-                mensaje= "Hola "+miembro.nombre+"! tienes una encuesta pendiente por la falta en la reunion "+falta.reunion.nombre+" el dia "+ str(falta.fecha) +" por favor ingresa al sistema y dirigete a 'encuestas pendientes'"
-                miembros=[] #porque no le voy a mandar realmente jiji
-                enviarWhatsapp(mensaje,miembros)
-                asunto = "Encuesta Pendiente"
-                enviarMail(miembros,asunto,mensaje)
+            if (falta.reunion.borrado==False):
+                if not(Encuesta.objects.filter(tipo_id=3,miembro_id=miembro.dni,fecha_envio=falta.fecha,reunion=falta.reunion).exists()):
+                    encuesta= Encuesta()
+                    encuesta.borrado=False #ver si realmente puedo borrar una encuesta xd creeria que no se debe
+                    encuesta.tipo=Tipo_Encuesta.objects.get(id_tipo_encuesta=3)
+                    encuesta.miembro=miembro
+                    encuesta.respondio=False
+                    encuesta.fecha_envio = falta.fecha
+                    encuesta.reunion=falta.reunion
+                    encuesta.save() #Esto quiere decir que tenia una falta no mas
+                    mensaje= "Hola "+miembro.nombre+"! tienes una encuesta pendiente por la falta en la reunion "+falta.reunion.nombre+" el dia "+ str(falta.fecha.strftime('%d/%m/%Y')) +" por favor ingresa al sistema y dirigete a 'encuestas pendientes'"
+                    print(mensaje)
+                    miembros=[] #porque no le voy a mandar realmente jiji
+                    enviarWhatsapp(mensaje,miembros)
+                    asunto = "Encuesta Pendiente"
+                    enviarMail(miembros,asunto,mensaje)
 
     #Bueno esto no es lo mejor pero la idea es ver cuando fue la ultima vez que envie la encuesta tipo 2 osea estado de las reuniones
     #Para eso obtengo el ultimo registro de encuesta.tipo==2 veo cuantos dias pasaron y si pasa a la cantidad especificada
@@ -181,7 +189,8 @@ def estadistica_reunion(request):
         else:
             reuniones=Reunion.objects.filter(grupo__encargado=request.user.id).order_by('nombre')
         #reuniones = Reunion.objects.all()
-        return render(request,'sistema/estadistica_reunion.html',{'reuniones':reuniones})
+        configuracion_form = Configuracion.objects.all().last()
+        return render(request,'sistema/estadistica_reunion.html',{'configuracion_form':configuracion_form,'reuniones':reuniones})
     else:
         return redirect('home')
 
@@ -194,8 +203,9 @@ def estadistica_asistencias(request):
             reuniones=Reunion.objects.filter(grupo__encargado=request.user.id)
         #reuniones = Reunion.objects.all()
         miembros = Miembro.objects.all().order_by('apellido')
+        configuracion_form = Configuracion.objects.all().last()
         roles = Rol.objects.filter(borrado=False).order_by('nombre')
-        return render(request,'sistema/estadistica_asistencias.html',{'reuniones':reuniones,'miembros':miembros,'roles':roles})
+        return render(request,'sistema/estadistica_asistencias.html',{'configuracion_form':configuracion_form,'reuniones':reuniones,'miembros':miembros,'roles':roles})
     else:
         return redirect('home')
 
@@ -282,10 +292,12 @@ def crearGrupo(request):
         miembros=Miembro.objects.all()
         usuarios=CustomUser.objects.filter(is_active=True).order_by('username')
         if request.method == 'POST':
+            print('lista ', request.POST.getlist('lista') )
+            print('lista[] ', request.POST.getlist('lista[]') )
             grupo_form = GrupoForm(request.POST)
             grupo=grupo_form.save(commit=False)
             capacidad = grupo.capacidad
-            if capacidad < len(request.POST.get('miembro')):
+            if capacidad < len(request.POST.getlist('lista')):
                 messages.error(request, 'La cantidad de miembros excede la capacidad maxima del grupo')
                 return render(request,'sistema/crearGrupo.html',{'grupo_form':grupo_form, 'usuarios':usuarios})
                     
@@ -295,12 +307,12 @@ def crearGrupo(request):
                 
             encargado = CustomUser.objects.get(id=grupo.encargado)
             miembros=[]
-            miembros=request.POST.getlist('lista[]')       
+            miembros=request.POST.getlist('lista')       
             miembros.append(encargado.miembro)
             try:
                 grupo.miembro.set(miembros)
             except:
-                grupo.miembro.set(request.POST.getlist('lista[]'))
+                grupo.miembro.set(request.POST.getlist('lista'))
             grupo.save()
             if permiso(request, 17) or permiso(request, 18):
                 return redirect('/sistema/listarGrupo')
@@ -1047,7 +1059,7 @@ def agregarRespuesta(request):
         return redirect('home')
 
     if request.method == 'POST':
-        if encuesta.tipo.id_tipo_encuesta ==1:
+        if encuesta.tipo.id_tipo_encuesta ==3:
             puntos=0
             for pregunta in preguntas: 
                 opcion=request.POST.get(str(pregunta.id_pregunta))
@@ -1076,7 +1088,7 @@ def agregarRespuesta(request):
             for ast in asistencias:    
                 ast.justificado=True
                 ast.save()
-        if encuesta.tipo.id_tipo_encuesta==3:
+        if encuesta.tipo.id_tipo_encuesta==1:
             puntos=0
             for pregunta in preguntas: 
                 opcion=request.POST.get(str(pregunta.id_pregunta))
@@ -1369,7 +1381,7 @@ def reasignar(request,dni):
     grupos = Grupo.objects.filter(encargado = usr.id).exclude(borrado=True)
     print('Grupos: ', grupos)
     for grupo in grupos:
-        rns = Reunion.objects.filter(grupo_id=grupo.id_grupo)
+        rns = Reunion.objects.filter(grupo_id=grupo.id_grupo,borrado=False)
         print('rns: ', rns)
         for rn in rns:
             if not(rn in reuniones):
@@ -1400,7 +1412,9 @@ def reasignar(request,dni):
                                 print('ya ta')
                             else:
                                 rn.grupo.miembro.add(mb)
-                                rn.grupo.changeReason='Modificacion' 
+                                rn.changeReason='Modificacion'
+                                rn.grupo.changeReason='Modificacion'
+                                rn.save() 
                                 rn.grupo.save()
                                 #es hora de avisar!
                                 msj=Mensaje.objects.get(tipo_id=5)
@@ -1426,15 +1440,21 @@ def reasignar(request,dni):
             for reunion in reuniones: #recorro 1 vez para ver si se puede reasignar a un grupo
                 if request.POST.get(reunion.nombre+'-encargado') != None :
                     encargado=request.POST.get(reunion.nombre+'-encargado')
-                    print('encargado: ',encargado)
                     if CustomUser.objects.filter(miembro_id=encargado).exists():
-                        print('entre al if china')
                         enc=CustomUser.objects.get(miembro__dni=encargado)
                         reunion.grupo.encargado=enc.id
                         reunion.grupo.save()
+                        rn.changeReason='Modificacion'
+                        rn.save()
+                        msj=Mensaje.objects.get(tipo_id=5)
+                        asunto = msj.tipo
+                        mensaje="Hola! te queremos avisar que sos el nuevo encargado de la reunion "+reunion.nombre+" ingresa al sistema para ver mas informacion"
+                        miembros=[]
+                        enviarWhatsapp(mensaje,miembros)
+                        enviarMail(miembros,asunto,mensaje)
                     else:
                         print('hay un encargado pero no es un usr ', encargado)
-                        #Weno aca no se que hacer
+                    
             for reunion in reuniones: #recorro 2 veces para eliminar las que quedo como encargado
                 if not(request.POST.get(reunion.nombre+'-encargado') != None): #si no tienen un nuevo encargado bye bye
                     if reunion.grupo.encargado == usr.id: #borro solo si es el encargado, sino no porque por ahi lo voy a cambiar
@@ -1616,7 +1636,6 @@ def auditoria_detalles_asistencia(request,id_asistencia,id_auditoria):
     else:
         data=[{'change':False}]
     return JSONResponse(data)    
-
 
 @login_required
 def auditoria_detalles_usuario(request,id_usuario,id_auditoria):
@@ -2734,6 +2753,13 @@ def filtros_asistencias(request):
     print("-----------------------------//-----------------------")
     print('data: ',data)
     return JSONResponse(data)
+
+def cantEncuestas(request):
+    encuestas= Encuesta.objects.filter(tipo_id=3, respondio=False,miembro=request.user.miembro.dni)
+    print(encuestas)
+    print(len(encuestas))
+    dic={'valor':len(encuestas)}
+    return JSONResponse(dic)
 
 def Calendario(request):
     #Weno la idea es recuperar las asistencias de todas las reuniones, todas todas

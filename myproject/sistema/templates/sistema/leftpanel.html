@@ -12,6 +12,23 @@
     function myFunction(id){
         $('#'+id).show();
     };
+
+    function pendiente(){
+        $.ajax({
+        url: '{% url "sistema:cantEncuestas" %}',
+        data: {
+        },
+        dataType: 'json',
+        success: function (data) {
+            if (data.valor==0) {
+                $('#pendiente').hide();
+            } else {
+                console.log(data.valor.toString());
+                $('#pendiente').text(''+data.valor);
+            }
+        },
+    });    
+    }
 </script>
     <aside id="left-panel" class="left-panel">
         <nav class="navbar navbar-expand-sm navbar-default">
@@ -69,12 +86,13 @@
                         </ul>
                     </li>
 
-                    <li class="menu-title">Encuestas Pendientes</li><!-- /.menu-title -->
+                    <li class="menu-title">Encuestas <span id="pendiente" class="badge badge-danger"><script>pendiente()</script></span></li><!-- /.menu-title -->
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-th"></i>Encuestas Pendientes</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-plus-square-o"></i><a href="/sistema/agregarRespuesta">Responder Encuesta</a></li>
                         </ul>
+                        
                     </li>
 
                     <li class="menu-title">Configuracion</li><!-- /.menu-title -->
@@ -119,6 +137,7 @@
                         </ul>
                     </li>
                     <script>inicial()</script>
+                    
                     {% for pr in user.rol.permisos.all %}
                         <script> myFunction("{{pr.id_permiso}}") </script>
                     {% endfor %}
@@ -232,4 +251,10 @@
                 </div>
             </div>
         </header>
+        
         <!-- /#header -->
+    <!-- <script>
+        $(document).ready(function(){
+            pendiente();
+        })
+    </script> -->

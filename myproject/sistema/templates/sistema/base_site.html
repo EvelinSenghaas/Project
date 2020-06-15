@@ -136,14 +136,14 @@
         function ordenar(){
             var lb = document.getElementsByClassName('selectecito');
             //var lb = document.getElementById('reunion');
-            console.log('ln '+lb.length);
+            //console.log('ln '+lb.length);
             arrTexts = new Array();
             arrValues = new Array();
-            dic=[];
-            console.log('voy a ordenar');
+            //console.log('voy a ordenar');
             for(j=0;j<lb.length; j++){
-                console.log(lb[j].length)
-                for(i=0; i<lb[j].length; i++)  {
+                dic=[];
+                //console.log(lb[j].length)
+                for(i=0; i<lb[j].options.length; i++)  {
                     clave= lb[j].options[i].text;
                     valor= lb[j].options[i].value;
                     dic.push({
@@ -152,14 +152,15 @@
                     });
                 }
                 console.log('dic');
-                console.log(dic)
-                var claves =[]
+                console.log(dic);
+                var claves=[];
                 for(i=0;i<dic.length;i++){
                     claves.push(dic[i].key);
                 }
                 claves.sort();
+                var arr= claves.sort()
                 console.log('claves ordenadas');
-                console.log(claves);
+                console.log(arr);
                 for(i=0; i<claves.length; i++)  {
                     lb[j].options[i].text = claves[i];
                     indice = getObjectKeyIndex(dic, claves[i])
