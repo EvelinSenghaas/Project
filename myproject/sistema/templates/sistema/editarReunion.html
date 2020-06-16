@@ -25,7 +25,11 @@
                         <div data-step="2" data-intro="Paso 2: Escriba el nombre de la reunion, seleccione el tipo de reunion y el grupo que pertenecera a la reunion">
                             {% for field in reunion_form %}
                                 <div class="row form-group">
-                                    <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}} (*)</label></div>
+                                    {% if field.html_name == 'tipo_reunion'%}
+                                        <div class="col col-md-2"><label for="{{field.id_for_label}}">Tipo de Reunion (*)</label></div>
+                                    {%else%}
+                                        <div class="col col-md-2"><label for="{{field.id_for_label}}">{{field.html_name}} (*)</label></div>
+                                    {%endif%}
                                     <div class = "col col-md-4">{{field}}</div>
                                 </div>
                             {% endfor %}
